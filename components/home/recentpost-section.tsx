@@ -88,7 +88,7 @@ export default function RecentPostSection() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
         >
-          {posts.map((post, index) => (
+          {posts.map((post) => (
             <motion.div
               key={post.id}
               className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100"

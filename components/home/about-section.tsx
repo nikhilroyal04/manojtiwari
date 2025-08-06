@@ -212,7 +212,7 @@ export default function AboutSection() {
                 variants={itemVariants}
               >
                 Delhi BJP leaders and workers accorded a grand welcome to MP Shri Manoj Tiwari on his appointment as the President of BJP Delhi Pradesh. 
-                He is also the captain of "Bhojpuri Dabangs" in CCL.
+                He is also the captain of &quot;Bhojpuri Dabangs&quot; in CCL.
               </motion.p>
             </motion.div>
 
