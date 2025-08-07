@@ -21,7 +21,7 @@ export default function Header() {
           {/* Navigation Links */}
           <nav className="flex items-center space-x-1">
             <Link 
-              href="/manoj-tiwari"
+              href="/mp-manoj-tiwari"
               className="px-4 py-2 text-md font-medium transform skew-x-12 transition-colors hover:bg-gray-100"
               style={{ color: 'var(--primary)' }}
             >
@@ -29,7 +29,7 @@ export default function Header() {
             </Link>
             
             <Link 
-              href="/janata-darbar"
+              href="/janta-darbar"
               className="px-4 py-2 text-md font-medium transform skew-x-12 transition-colors hover:bg-gray-100"
               style={{ color: 'var(--accent)' }}
             >
