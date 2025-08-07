@@ -10,7 +10,7 @@ const heroSlides = [
     title: "सांसद मनोज तिवारी",
     subtitle: "दिल्ली के जनप्रतिनिधि",
     description: "जनता की सेवा हमारा धर्म है। दिल्ली के लोगों की आवाज को संसद तक पहुंचाने के लिए समर्पित।",
-    image: "/hero/slide1.jpg",
+    image: "/images/hero1.jpg",
     stats: [
       { icon: Users, value: "50+", label: "जनता दरबार" },
       { icon: Award, value: "25+", label: "वर्षों का अनुभव" },
@@ -24,7 +24,7 @@ const heroSlides = [
     title: "जनता दरबार",
     subtitle: "आपकी समस्याओं का समाधान",
     description: "हर सप्ताह जनता दरबार में आपकी समस्याओं को सुनते हैं और तुरंत कार्यवाही करते हैं।",
-    image: "/hero/slide2.jpg",
+    image: "/images/hero2.jpeg",
     stats: [
       { icon: Users, value: "1000+", label: "समस्याएं हल" },
       { icon: Award, value: "52", label: "सप्ताहिक दरबार" },
@@ -38,7 +38,7 @@ const heroSlides = [
     title: "चुनावी रैलियां",
     subtitle: "जनता के बीच",
     description: "दिल्ली के हर कोने में जाकर जनता से मिलते हैं और उनकी आकांक्षाओं को समझते हैं।",
-    image: "/hero/slide3.jpg",
+    image: "/images/hero3.avif",
     stats: [
       { icon: Users, value: "10L+", label: "लोगों से संपर्क" },
       { icon: Award, value: "200+", label: "रैलियां" },
