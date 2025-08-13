@@ -67,81 +67,96 @@ export default function HeroSection() {
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
     setIsAutoPlaying(false);
+    
+    // Resume autoplay after 10 seconds of inactivity
+    setTimeout(() => {
+      setIsAutoPlaying(true);
+    }, 10000);
   };
 
   return (
-    <section className="relative h-screen overflow-hidden">
+    <section className="relative h-screen w-full overflow-hidden bg-black">
       {/* Carousel */}
-      <div className="relative h-full">
-        {heroSlides.map((slide, index) => (
-          <div
-            key={slide.id}
-            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-              index === currentSlide ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full'
-            }`}
-          >
-            {/* Background Image */}
-            <div className="absolute inset-0">
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent z-10"></div>
-              <Image
-                src={slide.image}
-                alt={slide.title}
-                fill
-                className="object-cover"
-                priority={index === 0}
-              />
-            </div>
+      <div className="absolute inset-0 w-full h-full">
+        {heroSlides.map((slide, index) => {
+          // Calculate position for each slide
+          let position = 'translate-x-full opacity-0';
+          
+          if (index === currentSlide) {
+            position = 'translate-x-0 opacity-100 z-10';
+          } else if (index === (currentSlide - 1 + heroSlides.length) % heroSlides.length) {
+            position = '-translate-x-full opacity-0';
+          }
+          
+          return (
+            <div
+              key={slide.id}
+              className={`absolute inset-0 w-full h-full transition-all duration-1000 ease-in-out ${position}`}
+            >
+              {/* Background Image */}
+              <div className="absolute inset-0 w-full h-full">
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40 z-10"></div>
+                <Image
+                  src={slide.image}
+                  alt={slide.title}
+                  fill
+                  className="object-cover"
+                  priority={index === 0}
+                  sizes="100vw"
+                />
+              </div>
 
-            {/* Content */}
-            <div className="relative z-20 h-full flex items-center">
-              <div className="container mx-auto px-4">
-                <div className="max-w-4xl">
-                  {/* Badge */}
-                  <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm font-medium mb-6">
-                    <Play className="w-4 h-4 mr-2" />
-                    लाइव अपडेट्स
-                  </div>
+              {/* Content */}
+              <div className="relative z-20 h-full flex items-center">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="max-w-4xl">
+                    {/* Badge */}
+                    <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm font-medium mb-6 animate-fadeIn">
+                      <Play className="w-4 h-4 mr-2" />
+                      लाइव अपडेट्स
+                    </div>
 
-                  {/* Title */}
-                  <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 leading-tight">
-                    {slide.title}
-                  </h1>
+                    {/* Title */}
+                    <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 leading-tight animate-slideUp">
+                      {slide.title}
+                    </h1>
 
-                  {/* Subtitle */}
-                  <h2 className="text-2xl md:text-3xl font-semibold text-white/90 mb-6">
-                    {slide.subtitle}
-                  </h2>
+                    {/* Subtitle */}
+                    <h2 className="text-2xl md:text-3xl font-semibold text-white/90 mb-6 animate-slideUp animation-delay-200">
+                      {slide.subtitle}
+                    </h2>
 
-                  {/* Description */}
-                  <p className="text-lg md:text-xl text-white/80 mb-8 max-w-2xl leading-relaxed">
-                    {slide.description}
-                  </p>
+                    {/* Description */}
+                    <p className="text-lg md:text-xl text-white/80 mb-8 max-w-2xl leading-relaxed animate-slideUp animation-delay-300">
+                      {slide.description}
+                    </p>
 
-                  {/* Stats */}
-                  <div className="flex flex-wrap gap-8 mb-8">
-                    {slide.stats.map((stat, statIndex) => (
-                      <div key={statIndex} className="flex items-center text-white">
-                        <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mr-3">
-                          <stat.icon className="w-6 h-6" />
+                    {/* Stats */}
+                    <div className="flex flex-wrap gap-8 mb-8">
+                      {slide.stats.map((stat, statIndex) => (
+                        <div key={statIndex} className="flex items-center text-white animate-fadeIn" style={{ animationDelay: `${400 + statIndex * 100}ms` }}>
+                          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mr-3">
+                            <stat.icon className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <div className="text-2xl font-bold">{stat.value}</div>
+                            <div className="text-sm opacity-80">{stat.label}</div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="text-2xl font-bold">{stat.value}</div>
-                          <div className="text-sm opacity-80">{stat.label}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
 
-                  {/* CTA Button */}
-                  <button className="inline-flex items-center px-8 py-4 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                    {slide.cta}
-                    <ChevronRight className="w-5 h-5 ml-2" />
-                  </button>
+                    {/* CTA Button */}
+                    <button className="inline-flex items-center px-8 py-4 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg animate-fadeIn animation-delay-600">
+                      {slide.cta}
+                      <ChevronRight className="w-5 h-5 ml-2" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Dots Indicator */}
@@ -153,6 +168,7 @@ export default function HeroSection() {
             className={`w-3 h-3 rounded-full transition-all duration-300 ${
               index === currentSlide ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75'
             }`}
+            aria-label={`Go to slide ${index + 1}`}
           />
         ))}
       </div>
@@ -166,6 +182,39 @@ export default function HeroSection() {
           }}
         />
       </div>
+      
+      {/* Add custom animations */}
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 0.8s forwards;
+        }
+        
+        .animate-slideUp {
+          animation: slideUp 0.8s forwards;
+        }
+        
+        .animation-delay-200 {
+          animation-delay: 200ms;
+        }
+        
+        .animation-delay-300 {
+          animation-delay: 300ms;
+        }
+        
+        .animation-delay-600 {
+          animation-delay: 600ms;
+        }
+      `}</style>
     </section>
   );
 }
