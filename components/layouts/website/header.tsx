@@ -15,7 +15,7 @@ export default function Header() {
           {/* Logo and Title Section */}
           <div className="flex items-center space-x-3">
             {/* Logo */}
-            <div className="relative h-12 w-60 cursor-pointer" onClick={() => router.push("/")}>
+            <div className="relative h-12 w-60 cursor-pointer" onClick={() => router.push("/")} style={{ cursor: 'pointer' }}>
               {/* Lotus flower outline */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <Image src="/logo.png" alt="Lotus" width={300} height={12} />

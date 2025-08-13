@@ -3,8 +3,9 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Phone, Mail, MapPin, Search, Briefcase, UserPlus, Users, X } from 'lucide-react';
+import { Phone, Mail, MapPin, Briefcase, UserPlus, Users, X } from 'lucide-react';
 import Link from 'next/link';
+import CTA from '@/components/all/cta-section';
 
 export default function SamparkAdhikari() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -117,42 +118,13 @@ export default function SamparkAdhikari() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-orange-600 to-red-600 py-20">
-        <div className="absolute inset-0 bg-black/30"></div>
-        <div className="absolute inset-0 overflow-hidden">
-          <Image 
-            src="/images/sampark-adhikari-bg.jpg" 
-            alt="संपर्क अधिकारी" 
-            fill 
-            className="object-cover opacity-40"
-            priority
-          />
-        </div>
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center text-white">
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <h1 className="text-4xl md:text-6xl font-bold mb-4">संपर्क अधिकारी</h1>
-              <p className="text-xl text-white/90 max-w-2xl mx-auto mb-8">
-                मनोज तिवारी जी के कार्यालय के संपर्क अधिकारियों की सूची
-              </p>
-              <div className="relative max-w-2xl mx-auto">
-                <input
-                  type="text"
-                  placeholder="अधिकारी या विभाग खोजें..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full py-4 px-6 pl-14 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary shadow-lg"
-                />
-                <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-500" />
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      <CTA 
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        title="संपर्क अधिकारी"
+        description="मनोज तिवारी जी के कार्यालय के संपर्क अधिकारियों की सूची"
+        placeholder="अधिकारी या विभाग खोजें..."
+      />
 
       {/* Filter Section */}
       <section className="py-6 bg-white shadow-md sticky top-0 z-30">
