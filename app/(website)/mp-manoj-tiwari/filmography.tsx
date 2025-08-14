@@ -179,17 +179,7 @@ export default function Filmography() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-100">
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-r from-orange-600 to-red-600 overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute inset-0 bg-black/50"></div>
-          <Image 
-            src="/images/filmography-bg.jpg" 
-            alt="Manoj Tiwari Filmography" 
-            fill 
-            className="object-cover"
-            priority
-          />
-        </div>
+      <section className="relative py-20 overflow-hidden">
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center text-white">
@@ -199,13 +189,11 @@ export default function Filmography() {
               transition={{ duration: 0.8 }}
             >
               <Link href="/mp-manoj-tiwari" className="inline-flex items-center text-white/80 hover:text-white mb-4">
-                <span className="mr-2">मनोज तिवारी</span>
-                <span className="mx-2">›</span>
                 <span>फिल्मोग्राफी</span>
               </Link>
               
-              <h1 className="text-4xl md:text-6xl font-bold mb-4">फिल्मोग्राफी</h1>
-              <p className="text-xl text-white/90 max-w-2xl mx-auto">
+              <h1 className="text-4xl md:text-6xl font-bold mb-4 text-secondary">फिल्मोग्राफी</h1>
+              <p className="text-xl text-primary max-w-2xl mx-auto">
                 भोजपुरी सिनेमा के सुपरस्टार मनोज तिवारी की फिल्मों, टीवी शो और संगीत एल्बम की सम्पूर्ण सूची
               </p>
             </motion.div>

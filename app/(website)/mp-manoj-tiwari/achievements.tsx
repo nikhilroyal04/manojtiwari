@@ -2,9 +2,8 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Award, Users, Star, ChevronRight, Trophy } from 'lucide-react';
+import { Award, Users, Star, ChevronRight, Trophy, Globe, Music, Film, Mic, Heart, Zap, Target } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 const highlights = [
     "He won the North East Delhi (Lok Sabha constituency) in the 2014 Indian general elections from BJP",
@@ -64,184 +63,367 @@ export default function Achievements() {
     };
 
     const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
+        hidden: { opacity: 0, y: 30 },
         visible: {
             opacity: 1,
             y: 0,
-            transition: { duration: 0.5 }
+            transition: { duration: 0.6 }
+        }
+    };
+
+    const fadeInUp = {
+        hidden: { opacity: 0, y: 60 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.8 }
+        }
+    };
+
+    const scaleIn = {
+        hidden: { opacity: 0, scale: 0.8 },
+        visible: {
+            opacity: 1,
+            scale: 1,
+            transition: { duration: 0.6 }
         }
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-white to-gray-100">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-red-50">
             {/* Language Toggle */}
-            <div className="fixed top-4 right-4 z-50">
-                <button 
+            <div className="fixed top-6 right-6 z-50">
+                <motion.button 
                     onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')}
-                    className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-shadow"
+                    className="flex items-center gap-3 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 border border-orange-200"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="2" y1="12" x2="22" y2="12"></line>
-                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                    </svg>
-                    <span className="font-medium">{language === 'en' ? 'हिंदी' : 'English'}</span>
-                </button>
+                    <Globe className="w-5 h-5 text-orange-600" />
+                    <span className="font-semibold text-gray-800">{language === 'en' ? 'हिंदी' : 'English'}</span>
+                </motion.button>
             </div>
 
-            {/* Hero Section */}
-            <section className="relative py-20 bg-gradient-to-r from-orange-600 to-red-600 overflow-hidden">
-                <div className="absolute inset-0 overflow-hidden">
-                    <div className="absolute inset-0 bg-black/50"></div>
-                    <Image 
-                        src="/images/achievements-bg.jpg" 
-                        alt="Manoj Tiwari Achievements" 
-                        fill 
-                        className="object-cover"
-                        priority
-                    />
-                </div>
-                
-                <div className="container mx-auto px-4 relative z-10">
-                    <div className="max-w-4xl mx-auto text-center text-white">
-                        <motion.div
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8 }}
-                        >
-                            <Link href="/mp-manoj-tiwari" className="inline-flex items-center text-white/80 hover:text-white mb-4">
-                                <span className="mr-2">मनोज तिवारी</span>
-                                <span className="mx-2">›</span>
-                                <span>उपलब्धियां</span>
-                            </Link>
-                            
-                            <h1 className="text-4xl md:text-6xl font-bold mb-4">
-                                {language === 'en' ? 'Achievements & Honors' : 'उपलब्धियां और सम्मान'}
-                            </h1>
-                            <p className="text-xl text-white/90 max-w-2xl mx-auto">
-                                {language === 'en' ? 
-                                    'Notable achievements and honors in Manoj Tiwari\'s remarkable career' : 
-                                    'मनोज तिवारी जी के शानदार करियर की प्रमुख उपलब्धियां और सम्मान'}
-                            </p>
-                        </motion.div>
-                    </div>
-                </div>
-            </section>
-
             {/* Highlights Section */}
-            <section className="py-16 bg-gray-50">
-                <div className="container mx-auto px-4">
+            <section className="py-20 bg-white">
+                <div className="container mx-auto px-6">
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
+                        variants={fadeInUp}
+                        initial="hidden"
+                        whileInView="visible"
                         viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
+                        className="text-center mb-16"
                     >
-                        <h2 className="text-3xl font-bold mb-12 text-center">
+                        <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                             {language === 'en' ? 'Highlights & Achievements' : 'मुख्य आकर्षण और उपलब्धियां'}
                         </h2>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {(language === 'en' ? highlights : hindiHighlights).map((highlight, index) => (
-                                <motion.div
-                                    key={index}
-                                    className="bg-white p-6 rounded-lg shadow-md"
-                                    initial={{ opacity: 0, y: 30 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ duration: 0.5, delay: index * 0.05 }}
-                                    whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                                >
-                                    <div className="flex">
-                                        <div className="mr-4 flex-shrink-0">
-                                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                                <Star className="w-4 h-4 text-primary" />
-                                            </div>
-                                        </div>
-                                        <p className="text-gray-700">{highlight}</p>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
+                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                            {language === 'en' ? 
+                                'A journey of excellence across entertainment, politics, and cultural preservation' : 
+                                'मनोरंजन, राजनीति और सांस्कृतिक संरक्षण में उत्कृष्टता की यात्रा'}
+                        </p>
                     </motion.div>
-                </div>
-            </section>
 
-            {/* Political Career Section */}
-            <section className="py-16 bg-white">
-                <div className="container mx-auto px-4">
-                    <motion.div
-                        className="max-w-4xl mx-auto"
+                    <motion.div 
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                         variants={containerVariants}
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
                     >
-                        <motion.h2
-                            className="text-3xl font-bold mb-8 text-center"
-                            variants={itemVariants}
-                        >
-                            {language === 'en' ? 'Political Career' : 'राजनीतिक करियर'}
-                        </motion.h2>
+                        {(language === 'en' ? highlights : hindiHighlights).map((highlight, index) => {
+                            // Different card styles based on index
+                            const cardStyle = index % 4;
+                            const icons = [Star, Award, Trophy, Heart, Zap, Target, Music, Film, Mic, Globe];
+                            const IconComponent = icons[index % icons.length];
+                            
+                            if (cardStyle === 0) {
+                                // Style 1: Horizontal card with left icon
+                                return (
+                                    <motion.div
+                                        key={index}
+                                        className="group relative bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border-l-4 border-orange-500"
+                                        variants={itemVariants}
+                                        whileHover={{ 
+                                            y: -6, 
+                                            scale: 1.02,
+                                            transition: { duration: 0.3 }
+                                        }}
+                                    >
+                                        <div className="flex items-start gap-4">
+                                            <div className="flex-shrink-0">
+                                                <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center shadow-lg">
+                                                    <IconComponent className="w-6 h-6 text-white" />
+                                                </div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-gray-700 leading-relaxed">{highlight}</p>
+                                            </div>
+                                        </div>
+                                        <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-orange-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    </motion.div>
+                                );
+                            } else if (cardStyle === 1) {
+                                // Style 2: Vertical card with top icon
+                                return (
+                                    <motion.div
+                                        key={index}
+                                        className="group relative bg-gradient-to-br from-orange-50 to-red-50 p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-orange-200"
+                                        variants={itemVariants}
+                                        whileHover={{ 
+                                            y: -6, 
+                                            rotateY: 2,
+                                            transition: { duration: 0.3 }
+                                        }}
+                                    >
+                                        <div className="text-center mb-4">
+                                            <div className="w-16 h-16 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center shadow-lg mx-auto">
+                                                <IconComponent className="w-8 h-8 text-white" />
+                                            </div>
+                                        </div>
+                                        <p className="text-gray-700 leading-relaxed text-center">{highlight}</p>
+                                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-red-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+                                    </motion.div>
+                                );
+                            } else if (cardStyle === 2) {
+                                // Style 3: Diagonal card with corner icon
+                                return (
+                                    <motion.div
+                                        key={index}
+                                        className="group relative bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden"
+                                        variants={itemVariants}
+                                        whileHover={{ 
+                                            y: -6, 
+                                            scale: 1.02,
+                                            transition: { duration: 0.3 }
+                                        }}
+                                    >
+                                        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 transform rotate-45 translate-x-8 -translate-y-8 opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
+                                        <div className="absolute top-2 right-2">
+                                            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center shadow-lg">
+                                                <IconComponent className="w-4 h-4 text-white" />
+                                            </div>
+                                        </div>
+                                        <p className="text-gray-700 leading-relaxed relative z-10">{highlight}</p>
+                                        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-red-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+                                    </motion.div>
+                                );
+                            } else {
+                                // Style 4: Hexagonal inspired card
+                                return (
+                                    <motion.div
+                                        key={index}
+                                        className="group relative bg-gradient-to-br from-white to-orange-50 p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-orange-100"
+                                        variants={itemVariants}
+                                        whileHover={{ 
+                                            y: -6, 
+                                            rotateZ: 1,
+                                            transition: { duration: 0.3 }
+                                        }}
+                                    >
+                                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-orange-500/5 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        <div className="relative z-10">
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center shadow-lg">
+                                                    <IconComponent className="w-5 h-5 text-white" />
+                                                </div>
+                                                <div className="flex-1 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></div>
+                                            </div>
+                                            <p className="text-gray-700 leading-relaxed">{highlight}</p>
+                                        </div>
+                                    </motion.div>
+                                );
+                            }
+                        })}
+                    </motion.div>
+                </div>
+            </section>
 
+            {/* Political Career Section */}
+            <section className="py-20 bg-white">
+                <div className="container mx-auto px-6">
+                    <motion.div
+                        variants={fadeInUp}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        className="text-center mb-16"
+                    >
+                        <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                            {language === 'en' ? 'Political Journey' : 'राजनीतिक यात्रा'}
+                        </h2>
+                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                            {language === 'en' ? 
+                                'From entertainment to politics - a transformative journey of leadership and service' : 
+                                'मनोरंजन से राजनीति तक - नेतृत्व और सेवा की परिवर्तनकारी यात्रा'}
+                        </p>
+                    </motion.div>
+
+                    <motion.div
+                        className="max-w-5xl mx-auto"
+                        variants={containerVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                    >
                         {language === 'en' ? (
-                            <motion.div
-                                className="space-y-6 text-gray-700 leading-relaxed"
-                                variants={itemVariants}
-                            >
-                                <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-primary">
-                                    <p>
-                                        In 2009, Tiwari contested elections for the 15th Lok Sabha as a candidate for the Samajwadi Party in the Gorakhpur constituency. He had been offered a choice of three constituencies and Zeenews reported him as saying that he was not &quot;a political person but was concerned for the development of Poorvanchal region of Uttar Pradesh.&quot; His interest was in developing that region and he had &quot;submitted my development proposals to industrialist Anil Ambani.&quot; He lost to Adityanath Yogi.
-                                    </p>
-                                </div>
+                            <div className="grid md:grid-cols-3 gap-8">
+                                {[
+                                    {
+                                        year: "2009",
+                                        title: "First Political Venture",
+                                        description: "Contested elections for the 15th Lok Sabha as a Samajwadi Party candidate in Gorakhpur constituency.",
+                                        icon: Target,
+                                        status: "attempt",
+                                        color: "from-yellow-500 to-orange-500"
+                                    },
+                                    {
+                                        year: "2011",
+                                        title: "Anti-Corruption Movement",
+                                        description: "Actively participated in Ramdev's hunger strike and Anna Hazare's anti-corruption movement.",
+                                        icon: Heart,
+                                        status: "movement",
+                                        color: "from-blue-500 to-purple-500"
+                                    },
+                                    {
+                                        year: "2014",
+                                        title: "Historic Victory",
+                                        description: "Won the North East Delhi Lok Sabha constituency from BJP, marking successful transition to politics.",
+                                        icon: Trophy,
+                                        status: "victory",
+                                        color: "from-green-500 to-emerald-500"
+                                    }
+                                ].map((milestone, index) => (
+                                    <motion.div
+                                        key={index}
+                                        className="group relative"
+                                        variants={itemVariants}
+                                        whileHover={{ 
+                                            y: -8,
+                                            scale: 1.02,
+                                            transition: { duration: 0.3 }
+                                        }}
+                                    >
+                                        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden group-hover:shadow-2xl transition-all duration-300">
+                                            {/* Header with gradient */}
+                                            <div className={`bg-gradient-to-r ${milestone.color} p-6 relative overflow-hidden`}>
+                                                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-2 translate-x-2"></div>
+                                                <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-2 -translate-x-2"></div>
+                                                
+                                                <div className="relative z-10 flex items-center justify-between">
+                                                    <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                                        <milestone.icon className="w-6 h-6 text-white" />
+                                                    </div>
+                                                    <span className="text-2xl font-bold text-white">{milestone.year}</span>
+                                                </div>
+                                            </div>
 
-                                <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-primary">
-                                    <p>
-                                        His house in Mumbai was allegedly attacked in November 2009 by a group of people angry with remarks that they claimed he had made about Shiv Sena. Tiwari denied having made any comment on the matter, which revolved around a dispute between the Shiv Sena leader, Bal Thackeray, and the Indian cricketer Sachin Tendulkar.
-                                    </p>
-                                </div>
+                                            {/* Content */}
+                                            <div className="p-6">
+                                                <h3 className="text-xl font-bold text-gray-800 mb-3">{milestone.title}</h3>
+                                                <p className="text-gray-600 leading-relaxed mb-4">{milestone.description}</p>
+                                                
+                                                {/* Status badge */}
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`w-3 h-3 rounded-full ${
+                                                        milestone.status === 'victory' ? 'bg-green-500' : 
+                                                        milestone.status === 'movement' ? 'bg-blue-500' : 'bg-yellow-500'
+                                                    }`}></div>
+                                                    <span className={`text-sm font-medium px-3 py-1 rounded-full ${
+                                                        milestone.status === 'victory' ? 'bg-green-100 text-green-700' : 
+                                                        milestone.status === 'movement' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'
+                                                    }`}>
+                                                        {milestone.status === 'victory' ? 'Success' : 
+                                                         milestone.status === 'movement' ? 'Movement' : 'Attempt'}
+                                                    </span>
+                                                </div>
+                                            </div>
 
-                                <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-primary">
-                                    <p>
-                                        In January 2011 Mid-Day reported that the BJP might invite him to join their party and that the association with him would assist their electoral efforts among North Indians. Tiwari dismissed the story as being hypothetical, although he would consider his options should an invitation emerge. He had been seen with BJP leaders at an event and had expressed admiration for Shatrughan Sinha, the BJP MP for Patna.
-                                    </p>
-                                </div>
-
-                                <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-primary">
-                                    <p>
-                                        Tiwari was among the first celebrities to make an appearance in support of Ramdev&apos;s hunger strike at the Ramlila Ground protests on 4 June 2011. He sang various patriotic songs to the gathered protestors and claimed that he had ceased filming for a month in order to join the protest. In August of that year he was involved in protests surrounding the arrest of Anna Hazare, of whose popular anti-corruption movement he approved.
-                                    </p>
-                                </div>
-
-                                <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-secondary">
-                                    <p className="font-semibold">
-                                        He won the North East Delhi (Lok Sabha constituency) in the 2014 Indian general elections from BJP.
-                                    </p>
-                                </div>
-                            </motion.div>
+                                            {/* Hover effect overlay */}
+                                            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-orange-500/5 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
                         ) : (
-                            <motion.div
-                                className="space-y-6 text-gray-700 leading-relaxed"
-                                variants={itemVariants}
-                            >
-                                <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-primary">
-                                    <p>
-                                        सन २००९ में मनोज तिवारी ने गोरखपुर लोक सभा निर्वाचन क्षेत्र से १५वीं लोकसभा चुनाव में बतौर समाजवादी पार्टी उम्मीदवार हिस्सा लिया किन्तु भारतीय जनता पार्टी के उम्मीदवार योगी आदित्यनाथ से चुनाव हार गए।
-                                    </p>
-                                </div>
+                            <div className="grid md:grid-cols-3 gap-8">
+                                {[
+                                    {
+                                        year: "२००९",
+                                        title: "पहला राजनीतिक प्रयास",
+                                        description: "गोरखपुर लोक सभा निर्वाचन क्षेत्र से समाजवादी पार्टी के उम्मीदवार के रूप में १५वीं लोकसभा चुनाव में हिस्सा लिया।",
+                                        icon: Target,
+                                        status: "attempt",
+                                        color: "from-yellow-500 to-orange-500"
+                                    },
+                                    {
+                                        year: "२०११",
+                                        title: "भ्रष्टाचार विरोधी आंदोलन",
+                                        description: "रामलीला मैदान में रामदेव के अनशन और अन्ना हज़ारे के भ्रष्टाचार विरोधी आंदोलन में सक्रिय भागीदारी।",
+                                        icon: Heart,
+                                        status: "movement",
+                                        color: "from-blue-500 to-purple-500"
+                                    },
+                                    {
+                                        year: "२०१४",
+                                        title: "ऐतिहासिक जीत",
+                                        description: "भारतीय आम चुनावों में बीजेपी से उत्तर पूर्वी दिल्ली लोक सभा निर्वाचन क्षेत्र जीता।",
+                                        icon: Trophy,
+                                        status: "victory",
+                                        color: "from-green-500 to-emerald-500"
+                                    }
+                                ].map((milestone, index) => (
+                                    <motion.div
+                                        key={index}
+                                        className="group relative"
+                                        variants={itemVariants}
+                                        whileHover={{ 
+                                            y: -8,
+                                            scale: 1.02,
+                                            transition: { duration: 0.3 }
+                                        }}
+                                    >
+                                        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden group-hover:shadow-2xl transition-all duration-300">
+                                            {/* Header with gradient */}
+                                            <div className={`bg-gradient-to-r ${milestone.color} p-6 relative overflow-hidden`}>
+                                                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-2 translate-x-2"></div>
+                                                <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-2 -translate-x-2"></div>
+                                                
+                                                <div className="relative z-10 flex items-center justify-between">
+                                                    <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                                        <milestone.icon className="w-6 h-6 text-white" />
+                                                    </div>
+                                                    <span className="text-2xl font-bold text-white">{milestone.year}</span>
+                                                </div>
+                                            </div>
 
-                                <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-primary">
-                                    <p>
-                                        मनोज तिवारी अगस्त महीने में अन्ना हज़ारे द्वारा शुरू किए गए भ्रष्टाचार विरोधी अभियान में भी सक्रिय रहे।
-                                    </p>
-                                </div>
+                                            {/* Content */}
+                                            <div className="p-6">
+                                                <h3 className="text-xl font-bold text-gray-800 mb-3">{milestone.title}</h3>
+                                                <p className="text-gray-600 leading-relaxed mb-4">{milestone.description}</p>
+                                                
+                                                {/* Status badge */}
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`w-3 h-3 rounded-full ${
+                                                        milestone.status === 'victory' ? 'bg-green-500' : 
+                                                        milestone.status === 'movement' ? 'bg-blue-500' : 'bg-yellow-500'
+                                                    }`}></div>
+                                                    <span className={`text-sm font-medium px-3 py-1 rounded-full ${
+                                                        milestone.status === 'victory' ? 'bg-green-100 text-green-700' : 
+                                                        milestone.status === 'movement' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'
+                                                    }`}>
+                                                        {milestone.status === 'victory' ? 'सफलता' : 
+                                                         milestone.status === 'movement' ? 'आंदोलन' : 'प्रयास'}
+                                                    </span>
+                                                </div>
+                                            </div>
 
-                                <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-secondary">
-                                    <p className="font-semibold">
-                                        सन २०१४ के आम चुनावों में मनोज तिवारी उत्तर पूर्वी दिल्ली लोक सभा निर्वाचन क्षेत्र से भारतीय जनता पार्टी के उम्मीदवार घोषित किए गए और चुनाव जीत गए।
-                                    </p>
-                                </div>
-                            </motion.div>
+                                            {/* Hover effect overlay */}
+                                            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-orange-500/5 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
                         )}
                     </motion.div>
                 </div>
@@ -401,129 +583,195 @@ export default function Achievements() {
             </section>
 
             {/* Stats Section */}
-            <section className="py-10 bg-gradient-to-r from-orange-500 to-red-600 text-white relative">
-                {/* Decorative elements */}
-                <div className="absolute inset-0 overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4"></div>
-                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/4"></div>
+            <section className="py-20 bg-gradient-to-br from-orange-500 via-red-500 to-orange-600 text-white relative overflow-hidden">
+                {/* Animated background elements */}
+                <div className="absolute inset-0">
+                    <div className="absolute top-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+                    <div className="absolute bottom-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white/5 rounded-full blur-2xl animate-pulse" style={{animationDelay: '2s'}}></div>
                 </div>
 
-                <div className="container mx-auto px-4 relative z-10">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                        <motion.div
-                            className="p-6"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: 0.1 }}
-                        >
-                            <div className="text-4xl md:text-5xl font-bold mb-2">75+</div>
-                            <div className="text-white/80">भोजपुरी फिल्में</div>
-                        </motion.div>
-                        <motion.div
-                            className="p-6"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
-                        >
-                            <div className="text-4xl md:text-5xl font-bold mb-2">10+</div>
-                            <div className="text-white/80">टेलीविज़न शो</div>
-                        </motion.div>
-                        <motion.div
-                            className="p-6"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: 0.3 }}
-                        >
-                            <div className="text-4xl md:text-5xl font-bold mb-2">20+</div>
-                            <div className="text-white/80">संगीत एल्बम</div>
-                        </motion.div>
-                        <motion.div
-                            className="p-6"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: 0.4 }}
-                        >
-                            <div className="text-4xl md:text-5xl font-bold mb-2">1500+</div>
-                            <div className="text-white/80">स्टेज शो</div>
-                        </motion.div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Main Achievements Section */}
-            <section className="py-16">
-                <div className="container mx-auto px-4">
-                    <motion.h2
-                        className="text-3xl font-bold mb-12 text-center"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                    >
-                        प्रमुख उपलब्धियां
-                    </motion.h2>
-
+                <div className="container mx-auto px-6 relative z-10">
                     <motion.div
-                        className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto"
+                        variants={fadeInUp}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        className="text-center mb-16"
+                    >
+                        <h2 className="text-4xl md:text-5xl font-bold mb-6">
+                            {language === 'en' ? 'Career Milestones' : 'करियर के पड़ाव'}
+                        </h2>
+                        <p className="text-xl text-white/90 max-w-3xl mx-auto">
+                            {language === 'en' ? 
+                                'Numbers that tell the story of dedication and success' : 
+                                'संख्याएं जो समर्पण और सफलता की कहानी बताती हैं'}
+                        </p>
+                    </motion.div>
+
+                    <motion.div 
+                        className="grid grid-cols-2 md:grid-cols-4 gap-8"
                         variants={containerVariants}
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
                     >
-                        <motion.div
-                            className="bg-white rounded-xl shadow-lg overflow-hidden"
-                            variants={itemVariants}
-                        >
-                            <div className="bg-gradient-to-r from-orange-500 to-red-600 p-4">
-                                <Award className="w-8 h-8 text-white" />
-                            </div>
-                            <div className="p-6">
-                                <h3 className="text-xl font-bold mb-3">भोजपुरी सिनेमा का सुपरस्टार</h3>
-                                <p className="text-gray-700">भोजपुरी दुनिया में &quot;द डिकेड 2000-10&quot; के सबसे बड़े सुपरस्टार सहित कई पुरस्कार प्राप्त किए हैं।</p>
-                            </div>
-                        </motion.div>
+                        {[
+                            { number: "75+", label: language === 'en' ? 'Bhojpuri Films' : 'भोजपुरी फिल्में', icon: Film },
+                            { number: "10+", label: language === 'en' ? 'TV Shows' : 'टेलीविज़न शो', icon: Mic },
+                            { number: "20+", label: language === 'en' ? 'Music Albums' : 'संगीत एल्बम', icon: Music },
+                            { number: "1500+", label: language === 'en' ? 'Stage Shows' : 'स्टेज शो', icon: Star }
+                        ].map((stat, index) => (
+                            <motion.div
+                                key={index}
+                                className="text-center group"
+                                variants={itemVariants}
+                                whileHover={{ 
+                                    scale: 1.05,
+                                    rotateY: 5,
+                                    transition: { duration: 0.3 }
+                                }}
+                            >
+                                <div className="relative bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 group-hover:bg-white/20 transition-all duration-300 overflow-hidden">
+                                    {/* Animated background elements */}
+                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                    <div className="absolute bottom-0 right-0 w-full h-1 bg-gradient-to-r from-transparent via-white/30 to-transparent transform translate-x-full group-hover:-translate-x-full transition-transform duration-1000" style={{transitionDelay: '0.2s'}}></div>
+                                    
+                                    {/* Icon */}
+                                    <div className="mb-4">
+                                        <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto group-hover:bg-white/30 transition-all duration-300">
+                                            <stat.icon className="w-8 h-8 text-white" />
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Number */}
+                                    <div className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white to-orange-200 bg-clip-text text-transparent group-hover:scale-110 transition-transform duration-300">
+                                        {stat.number}
+                                    </div>
+                                    
+                                    {/* Label */}
+                                    <div className="text-white/90 text-lg font-medium group-hover:text-white transition-colors duration-300">
+                                        {stat.label}
+                                    </div>
+                                    
+                                    {/* Corner decoration */}
+                                    <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-white/30 rounded-tr-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-white/30 rounded-bl-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                </div>
+            </section>
 
-                        <motion.div
-                            className="bg-white rounded-xl shadow-lg overflow-hidden"
-                            variants={itemVariants}
-                        >
-                            <div className="bg-gradient-to-r from-orange-500 to-red-600 p-4">
-                                <Award className="w-8 h-8 text-white" />
-                            </div>
-                            <div className="p-6">
-                                <h3 className="text-xl font-bold mb-3">भारतीय सिनेमा के 100 साल</h3>
-                                <p className="text-gray-700">भारतीय सिनेमा के 100 साल के अवसर पर भारत के माननीय राष्ट्रपति द्वारा सम्मानित किया गया।</p>
-                            </div>
-                        </motion.div>
+            {/* Main Achievements Section */}
+            <section className="py-20 bg-gradient-to-br from-slate-50 to-orange-50">
+                <div className="container mx-auto px-6">
+                    <motion.div
+                        variants={fadeInUp}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        className="text-center mb-16"
+                    >
+                        <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                            {language === 'en' ? 'Major Achievements' : 'प्रमुख उपलब्धियां'}
+                        </h2>
+                        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                            {language === 'en' ? 
+                                'Landmark accomplishments that define a legacy of excellence' : 
+                                'उत्कृष्टता की विरासत को परिभाषित करने वाली महत्वपूर्ण उपलब्धियां'}
+                        </p>
+                    </motion.div>
 
-                        <motion.div
-                            className="bg-white rounded-xl shadow-lg overflow-hidden"
-                            variants={itemVariants}
-                        >
-                            <div className="bg-gradient-to-r from-orange-500 to-red-600 p-4">
-                                <Award className="w-8 h-8 text-white" />
-                            </div>
-                            <div className="p-6">
-                                <h3 className="text-xl font-bold mb-3">इंडिया टुडे की प्रभावशाली व्यक्तित्व सूची</h3>
-                                <p className="text-gray-700">फिल्म और संगीत उद्योग से अमिताभ बच्चन, एआर रहमान की पसंद और अन्य लोगों के साथ 100 शक्तिशाली और प्रभावशाली व्यक्तित्व के इंडिया टुडे पत्रिका की सूची में शामिल।</p>
-                            </div>
-                        </motion.div>
+                    <motion.div
+                        className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto"
+                        variants={containerVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                    >
+                        {[
+                            {
+                                title: language === 'en' ? 'Bhojpuri Cinema Superstar' : 'भोजपुरी सिनेमा का सुपरस्टार',
+                                description: language === 'en' ? 
+                                    'Received numerous awards including "Biggest Superstar of the Decade 2000-10" in the Bhojpuri world.' : 
+                                    'भोजपुरी दुनिया में "द डिकेड 2000-10" के सबसे बड़े सुपरस्टार सहित कई पुरस्कार प्राप्त किए हैं।',
+                                icon: Award,
+                                style: 'left'
+                            },
+                            {
+                                title: language === 'en' ? '100 Years of Indian Cinema' : 'भारतीय सिनेमा के 100 साल',
+                                description: language === 'en' ? 
+                                    'Honored by the Honorable President of India on the occasion of 100 years of Indian Cinema.' : 
+                                    'भारतीय सिनेमा के 100 साल के अवसर पर भारत के माननीय राष्ट्रपति द्वारा सम्मानित किया गया।',
+                                icon: Trophy,
+                                style: 'center'
+                            },
+                            {
+                                title: language === 'en' ? 'India Today Influential List' : 'इंडिया टुडे की प्रभावशाली सूची',
+                                description: language === 'en' ? 
+                                    'Featured in India Today Magazine\'s list of 100 powerful and influential personalities alongside Amitabh Bachchan, A R Rahman and others.' : 
+                                    'फिल्म और संगीत उद्योग से अमिताभ बच्चन, एआर रहमान की पसंद और अन्य लोगों के साथ 100 शक्तिशाली और प्रभावशाली व्यक्तित्व के इंडिया टुडे पत्रिका की सूची में शामिल।',
+                                icon: Star,
+                                style: 'right'
+                            },
+                            {
+                                title: language === 'en' ? 'Netherlands Postal Stamp' : 'नीदरलैंड में डाक टिकट',
+                                description: language === 'en' ? 
+                                    'The Netherlands government issued a postal stamp featuring Manoj Tiwari - the only Bhojpuri artist to receive this honor.' : 
+                                    'नीदरलैंड ने मनोज तिवारी जी की तस्वीर स्टाम्प टिकट पर प्रकाशित किया - वे एकमात्र भोजपुरी कलाकार हैं जिन्हें यह सम्मान मिला है।',
+                                icon: Globe,
+                                style: 'diagonal'
+                            }
+                        ].map((achievement, index) => (
+                            <motion.div
+                                key={index}
+                                className="group relative bg-white rounded-3xl shadow-xl overflow-hidden border border-orange-100"
+                                variants={itemVariants}
+                                whileHover={{ 
+                                    y: -8, 
+                                    scale: 1.02,
+                                    transition: { duration: 0.3 }
+                                }}
+                            >
+                                {/* Background pattern based on style */}
+                                {achievement.style === 'left' && (
+                                    <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-full -translate-x-16 -translate-y-16"></div>
+                                )}
+                                {achievement.style === 'center' && (
+                                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-full"></div>
+                                )}
+                                {achievement.style === 'right' && (
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-full translate-x-16 -translate-y-16"></div>
+                                )}
+                                {achievement.style === 'diagonal' && (
+                                    <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-orange-500/10 to-red-500/10 transform rotate-45 translate-x-8 -translate-y-8"></div>
+                                )}
 
-                        <motion.div
-                            className="bg-white rounded-xl shadow-lg overflow-hidden"
-                            variants={itemVariants}
-                        >
-                            <div className="bg-gradient-to-r from-orange-500 to-red-600 p-4">
-                                <Award className="w-8 h-8 text-white" />
-                            </div>
-                            <div className="p-6">
-                                <h3 className="text-xl font-bold mb-3">नीदरलैंड में डाक टिकट</h3>
-                                <p className="text-gray-700">नीदरलैंड ने मनोज तिवारी जी की तस्वीर स्टाम्प टिकट पर प्रकाशित किया - वे एकमात्र भोजपुरी कलाकार हैं जिन्हें यह सम्मान मिला है।</p>
-                            </div>
-                        </motion.div>
+                                <div className="bg-gradient-to-r from-orange-500 to-red-500 p-6 relative z-10">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                            <achievement.icon className="w-6 h-6 text-white" />
+                                        </div>
+                                        <h3 className="text-2xl font-bold text-white">
+                                            {achievement.title}
+                                        </h3>
+                                    </div>
+                                </div>
+                                <div className="p-8 relative z-10">
+                                    <p className="text-gray-700 leading-relaxed text-lg">
+                                        {achievement.description}
+                                    </p>
+                                </div>
+                                
+                                {/* Hover effects */}
+                                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-orange-500/5 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                
+                                {/* Animated border */}
+                                <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-orange-500/20 transition-all duration-300"></div>
+                            </motion.div>
+                        ))}
                     </motion.div>
                 </div>
             </section>
