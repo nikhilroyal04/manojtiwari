@@ -1,0 +1,710 @@
+"use client";
+
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  Search, 
+  Plus, 
+  Edit, 
+  Eye, 
+  Phone, 
+  User,
+  CheckCircle,
+  Clock,
+  XCircle,
+  AlertCircle,
+  Trash2,
+} from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from '@/components/ui/dialog';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+
+interface Lead {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+  subject: string;
+  message: string;
+  status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost';
+  priority: 'low' | 'medium' | 'high';
+  source: string;
+  createdAt: string;
+  lastContacted?: string;
+  reason?: string;
+  notes?: string;
+}
+
+export default function Leads() {
+  const [leads, setLeads] = useState<Lead[]>([
+    {
+      id: "1",
+      name: "Rahul Kumar",
+      email: "rahul.kumar@email.com",
+      phone: "+91 98765 43210",
+      location: "Delhi, India",
+      subject: "Political Support Request",
+      message: "Looking for support in upcoming elections. Need guidance on campaign strategies.",
+      status: "new",
+      priority: "high",
+      source: "Website Contact",
+      createdAt: "2024-01-15",
+      notes: "Interested in local politics"
+    },
+    {
+      id: "2",
+      name: "Priya Sharma",
+      email: "priya.sharma@email.com",
+      phone: "+91 87654 32109",
+      location: "Mumbai, India",
+      subject: "Event Participation",
+      message: "Would like to participate in upcoming political events and rallies.",
+      status: "contacted",
+      priority: "medium",
+      source: "Social Media",
+      createdAt: "2024-01-14",
+      lastContacted: "2024-01-16",
+      reason: "Follow up required"
+    },
+    {
+      id: "3",
+      name: "Amit Patel",
+      email: "amit.patel@email.com",
+      phone: "+91 76543 21098",
+      location: "Ahmedabad, India",
+      subject: "Volunteer Opportunity",
+      message: "Want to volunteer for the campaign. Have experience in social work.",
+      status: "qualified",
+      priority: "high",
+      source: "Referral",
+      createdAt: "2024-01-13",
+      lastContacted: "2024-01-15",
+      reason: "Good potential volunteer"
+    },
+    {
+      id: "4",
+      name: "Sneha Reddy",
+      email: "sneha.reddy@email.com",
+      phone: "+91 65432 10987",
+      location: "Hyderabad, India",
+      subject: "Donation Inquiry",
+      message: "Interested in making a donation to support the campaign.",
+      status: "converted",
+      priority: "high",
+      source: "Email Campaign",
+      createdAt: "2024-01-12",
+      lastContacted: "2024-01-14",
+      reason: "Donation received"
+    },
+    {
+      id: "5",
+      name: "Vikram Singh",
+      email: "vikram.singh@email.com",
+      phone: "+91 54321 09876",
+      location: "Punjab, India",
+      subject: "General Inquiry",
+      message: "General questions about political policies and future plans.",
+      status: "lost",
+      priority: "low",
+      source: "Website Contact",
+      createdAt: "2024-01-11",
+      lastContacted: "2024-01-13",
+      reason: "Not interested in active participation"
+    }
+  ]);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newLead, setNewLead] = useState<Partial<Lead>>({
+    name: '',
+    email: '',
+    phone: '',
+    location: '',
+    subject: '',
+    message: '',
+    status: 'new',
+    priority: 'medium',
+    source: 'Website Contact'
+  });
+
+  const statusColors = {
+    new: 'bg-blue-100 text-blue-800 border-blue-200',
+    contacted: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    qualified: 'bg-purple-100 text-purple-800 border-purple-200',
+    converted: 'bg-green-100 text-green-800 border-green-200',
+    lost: 'bg-red-100 text-red-800 border-red-200'
+  };
+
+  const priorityColors = {
+    low: 'bg-gray-100 text-gray-800 border-gray-200',
+    medium: 'bg-orange-100 text-orange-800 border-orange-200',
+    high: 'bg-red-100 text-red-800 border-red-200'
+  };
+
+  const statusIcons = {
+    new: Clock,
+    contacted: AlertCircle,
+    qualified: CheckCircle,
+    converted: CheckCircle,
+    lost: XCircle
+  };
+
+  const filteredLeads = leads.filter(lead => {
+    const matchesSearch = 
+      lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.subject.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'all' || lead.status === statusFilter;
+    const matchesPriority = priorityFilter === 'all' || lead.priority === priorityFilter;
+
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
+
+  const handleAddLead = () => {
+    const lead: Lead = {
+      id: Date.now().toString(),
+      name: newLead.name || '',
+      email: newLead.email || '',
+      phone: newLead.phone || '',
+      location: newLead.location || '',
+      subject: newLead.subject || '',
+      message: newLead.message || '',
+      status: newLead.status || 'new',
+      priority: newLead.priority || 'medium',
+      source: newLead.source || 'Website Contact',
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+    
+    setLeads(prev => [lead, ...prev]);
+    setNewLead({
+      name: '',
+      email: '',
+      phone: '',
+      location: '',
+      subject: '',
+      message: '',
+      status: 'new',
+      priority: 'medium',
+      source: 'Website Contact'
+    });
+    setIsAddModalOpen(false);
+  };
+
+  const handleDeleteLead = (leadId: string) => {
+    setLeads(prev => prev.filter(lead => lead.id !== leadId));
+    setIsDeleteModalOpen(false);
+    setSelectedLead(null);
+  };
+
+  const getStatusCount = (status: string) => {
+    return leads.filter(lead => status === 'all' ? true : lead.status === status).length;
+  };
+
+  return (
+    <div className="min-h-screen">
+      <div className="mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Leads Management</h1>
+          <p className="text-gray-600">Manage and track all your leads</p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8">
+          {[
+            { label: 'Total Leads', count: leads.length, color: 'bg-blue-500' },
+            { label: 'New', count: getStatusCount('new'), color: 'bg-blue-500' },
+            { label: 'Contacted', count: getStatusCount('contacted'), color: 'bg-yellow-500' },
+            { label: 'Qualified', count: getStatusCount('qualified'), color: 'bg-purple-500' },
+            { label: 'Converted', count: getStatusCount('converted'), color: 'bg-green-500' },
+            { label: 'Lost', count: getStatusCount('lost'), color: 'bg-red-500' }
+          ].map((stat, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white rounded-lg shadow-sm border border-gray-200 p-4"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+                  <p className="text-2xl font-bold text-gray-900">{stat.count}</p>
+                </div>
+                <div className={`w-8 h-8 rounded-full ${stat.color} opacity-20`}></div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Filters and Search */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Search */}
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Input
+                  type="text"
+                  placeholder="Search leads by name, email, or subject..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            {/* Status Filter */}
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="new">New</SelectItem>
+                <SelectItem value="contacted">Contacted</SelectItem>
+                <SelectItem value="qualified">Qualified</SelectItem>
+                <SelectItem value="converted">Converted</SelectItem>
+                <SelectItem value="lost">Lost</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Priority Filter */}
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="All Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Priority</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Add Lead Button */}
+            <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-orange-500 hover:bg-orange-600">
+                  <Plus className="w-4 h-4" />
+                  Add Lead
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Add New Lead</DialogTitle>
+                  <DialogDescription>
+                    Enter the details for the new lead.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Name</label>
+                    <Input
+                      value={newLead.name}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Enter name"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Email</label>
+                    <Input
+                      type="email"
+                      value={newLead.email}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="Enter email"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Phone</label>
+                    <Input
+                      value={newLead.phone}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="Enter phone"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Location</label>
+                    <Input
+                      value={newLead.location}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, location: e.target.value }))}
+                      placeholder="Enter location"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Subject</label>
+                    <Input
+                      value={newLead.subject}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, subject: e.target.value }))}
+                      placeholder="Enter subject"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Message</label>
+                    <textarea
+                      value={newLead.message}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, message: e.target.value }))}
+                      placeholder="Enter message"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      rows={3}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">Status</label>
+                      <Select value={newLead.status} onValueChange={(value) => setNewLead(prev => ({ ...prev, status: value as Lead['status'] }))}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="new">New</SelectItem>
+                          <SelectItem value="contacted">Contacted</SelectItem>
+                          <SelectItem value="qualified">Qualified</SelectItem>
+                          <SelectItem value="converted">Converted</SelectItem>
+                          <SelectItem value="lost">Lost</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Priority</label>
+                      <Select value={newLead.priority} onValueChange={(value) => setNewLead(prev => ({ ...prev, priority: value as Lead['priority'] }))}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsAddModalOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleAddLead} className="bg-orange-500 hover:bg-orange-600">
+                    Add Lead
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        {/* Leads Table */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lead</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredLeads.map((lead, index) => (
+                  <motion.tr
+                    key={lead.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="hover:bg-gray-50"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                          <User className="w-5 h-5 text-orange-600" />
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">{lead.name}</div>
+                          <div className="text-sm text-gray-500">{lead.location}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{lead.email}</div>
+                      <div className="text-sm text-gray-500 flex items-center gap-1">
+                        <Phone className="w-3 h-3" />
+                        {lead.phone}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900 max-w-xs truncate">{lead.subject}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Badge className={statusColors[lead.status]}>
+                        {React.createElement(statusIcons[lead.status], { className: "w-3 h-3" })}
+                        {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Badge className={priorityColors[lead.priority]}>
+                        {lead.priority.charAt(0).toUpperCase() + lead.priority.slice(1)}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {lead.source}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(lead.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center gap-2">
+                        {/* View Lead */}
+                        <Dialog open={isViewModalOpen && selectedLead?.id === lead.id} onOpenChange={(open) => {
+                          setIsViewModalOpen(open);
+                          if (open) setSelectedLead(lead);
+                          else setSelectedLead(null);
+                        }}>
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>Lead Details</DialogTitle>
+                              <DialogDescription>
+                                Complete information about {lead.name}
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-6">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Name</label>
+                                  <p className="text-sm text-gray-900">{lead.name}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Email</label>
+                                  <p className="text-sm text-gray-900">{lead.email}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Phone</label>
+                                  <p className="text-sm text-gray-900">{lead.phone}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Location</label>
+                                  <p className="text-sm text-gray-900">{lead.location}</p>
+                                </div>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Subject</label>
+                                <p className="text-sm text-gray-900">{lead.subject}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Message</label>
+                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">{lead.message}</p>
+                              </div>
+                              <div className="grid grid-cols-3 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Status</label>
+                                  <Badge className={statusColors[lead.status]}>
+                                    {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
+                                  </Badge>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Priority</label>
+                                  <Badge className={priorityColors[lead.priority]}>
+                                    {lead.priority.charAt(0).toUpperCase() + lead.priority.slice(1)}
+                                  </Badge>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Source</label>
+                                  <p className="text-sm text-gray-900">{lead.source}</p>
+                                </div>
+                              </div>
+                              {lead.reason && (
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Reason/Notes</label>
+                                  <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">{lead.reason}</p>
+                                </div>
+                              )}
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Created</label>
+                                  <p className="text-sm text-gray-900">{new Date(lead.createdAt).toLocaleDateString()}</p>
+                                </div>
+                                {lead.lastContacted && (
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-500">Last Contacted</label>
+                                    <p className="text-sm text-gray-900">{new Date(lead.lastContacted).toLocaleDateString()}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <DialogFooter>
+                              <Button variant="outline" onClick={() => setIsViewModalOpen(false)}>
+                                Close
+                              </Button>
+                              <Button 
+                                onClick={() => {
+                                  setIsViewModalOpen(false);
+                                  setSelectedLead(lead);
+                                  setIsEditModalOpen(true);
+                                }}
+                                className="bg-primary hover:bg-primary/90"
+                              >
+                                Edit Lead
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+
+                        {/* Edit Lead */}
+                        <Dialog open={isEditModalOpen && selectedLead?.id === lead.id} onOpenChange={(open) => {
+                          setIsEditModalOpen(open);
+                          if (open) setSelectedLead(lead);
+                          else setSelectedLead(null);
+                        }}>
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-md">
+                            <DialogHeader>
+                              <DialogTitle>Update Lead Status</DialogTitle>
+                              <DialogDescription>
+                                Update the status and add notes for {lead.name}
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <label className="text-sm font-medium">Current Status</label>
+                                <Badge className={statusColors[lead.status]}>
+                                  {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
+                                </Badge>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">New Status</label>
+                                <Select 
+                                  value={lead.status} 
+                                  onValueChange={(value) => {
+                                    setLeads(prev => prev.map(l => 
+                                      l.id === lead.id ? { ...l, status: value as Lead['status'] } : l
+                                    ));
+                                  }}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="new">New</SelectItem>
+                                    <SelectItem value="contacted">Contacted</SelectItem>
+                                    <SelectItem value="qualified">Qualified</SelectItem>
+                                    <SelectItem value="converted">Converted</SelectItem>
+                                    <SelectItem value="lost">Lost</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Reason/Notes</label>
+                                <textarea
+                                  value={lead.reason || ''}
+                                  onChange={(e) => {
+                                    setLeads(prev => prev.map(l => 
+                                      l.id === lead.id ? { ...l, reason: e.target.value } : l
+                                    ));
+                                  }}
+                                  placeholder="Add reason for status change or additional notes..."
+                                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                  rows={3}
+                                />
+                              </div>
+                            </div>
+                            <DialogFooter>
+                              <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+                                Cancel
+                              </Button>
+                              <Button 
+                                onClick={() => {
+                                  setLeads(prev => prev.map(l => 
+                                    l.id === lead.id ? { ...l, lastContacted: new Date().toISOString().split('T')[0] } : l
+                                  ));
+                                  setIsEditModalOpen(false);
+                                }}
+                                className="bg-orange-500 hover:bg-orange-600"
+                              >
+                                Update Status
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+
+                        {/* Delete Lead */}
+                        <Dialog open={isDeleteModalOpen && selectedLead?.id === lead.id} onOpenChange={(open) => {
+                          setIsDeleteModalOpen(open);
+                          if (open) setSelectedLead(lead);
+                          else setSelectedLead(null);
+                        }}>
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Delete Lead</DialogTitle>
+                              <DialogDescription>
+                                Are you sure you want to delete {lead.name}? This action cannot be undone.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                              <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+                                Cancel
+                              </Button>
+                              <Button 
+                                variant="destructive" 
+                                onClick={() => handleDeleteLead(lead.id)}
+                              >
+                                Delete Lead
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                        
+                      </div>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

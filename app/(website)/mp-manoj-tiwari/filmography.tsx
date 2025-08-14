@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Film, Tv, Search, Calendar, Award, ThumbsUp, Filter, X } from 'lucide-react';
 import Link from 'next/link';

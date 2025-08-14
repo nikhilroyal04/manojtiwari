@@ -8,7 +8,6 @@
   --primary: #FF9933;
   --secondary: #138808;
   --accent: #000080;
-  --dark: #1a1a1a;
   --light: #f8f8f8;
 }
 
@@ -22,16 +21,9 @@
   --color-primary: var(--primary);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
-  --color-dark: var(--dark);
   --color-light: var(--light);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
 
 body {
   background: var(--background);
@@ -52,10 +44,6 @@ body {
   color: var(--accent);
 }
 
-.text-dark {
-  color: var(--dark);
-}
-
 .text-light {
   color: var(--light);
 }
@@ -72,10 +60,6 @@ body {
   background-color: var(--accent);
 }
 
-.bg-dark {
-  background-color: var(--dark);
-}
-
 .bg-light {
   background-color: var(--light);
 }
@@ -90,10 +74,6 @@ body {
 
 .border-accent {
   border-color: var(--accent);
-}
-
-.border-dark {
-  border-color: var(--dark);
 }
 
 .border-light {

@@ -80,15 +80,6 @@ export default function Achievements() {
         }
     };
 
-    const scaleIn = {
-        hidden: { opacity: 0, scale: 0.8 },
-        visible: {
-            opacity: 1,
-            scale: 1,
-            transition: { duration: 0.6 }
-        }
-    };
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-red-50">
             {/* Language Toggle */}
