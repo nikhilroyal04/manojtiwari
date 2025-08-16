@@ -14,7 +14,6 @@ import {
   XCircle,
   AlertCircle,
   Trash2,
-  Loader2,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -145,22 +144,32 @@ export default function Leads() {
     setIsAddModalOpen(false);
   };
 
-  const handleDeleteLead = (leadId: string) => {
-    dispatch(deleteLead(leadId));
-    setIsDeleteModalOpen(false);
-    setSelectedLead(null);
-  };
-
   const handleEditLead = () => {
-    if (!selectedLead) return;
+    if (!selectedLead || !selectedLead._id) {
+      console.error('No lead selected or lead ID is missing');
+      return;
+    }
+    
     const updatedLead: Partial<Lead> = {
       ...selectedLead,
       status: editStatus,
       notes: editReason,
       updatedOn: new Date().toISOString().split('T')[0],
     };
-    dispatch(updateLead(updatedLead as Lead));
+    
+    dispatch(updateLead(selectedLead._id, updatedLead as Lead));
     setIsEditModalOpen(false);
+    setSelectedLead(null);
+  };
+
+  const handleDeleteLead = (leadId: string) => {
+    if (!leadId) {
+      console.error('Lead ID is missing');
+      return;
+    }
+    
+    dispatch(deleteLead(leadId));
+    setIsDeleteModalOpen(false);
     setSelectedLead(null);
   };
 
@@ -177,10 +186,11 @@ export default function Leads() {
   }, [isEditModalOpen, selectedLead]);
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen"><Loader2 className="w-4 h-4 animate-spin" /></div>;
+    return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div></div>;
   }
+
   if (error) {
-    return <div className="flex justify-center items-center h-screen"><AlertCircle className="w-4 h-4" />Error: {error}</div>;
+    return <div className="flex justify-center items-center h-screen text-red-500">Error: {error}</div>;
   }
 
   return (
@@ -413,7 +423,7 @@ export default function Leads() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredLeads.map((lead: Lead, index: number) => (
                   <motion.tr
-                    key={lead._id}
+                    key={lead._id || `lead-${index}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
@@ -658,7 +668,13 @@ export default function Leads() {
                               </Button>
                               <Button
                                 variant="destructive"
-                                onClick={() => handleDeleteLead(lead._id || '')}
+                                onClick={() => {
+                                  if (lead._id) {
+                                    handleDeleteLead(lead._id);
+                                  } else {
+                                    console.error('Cannot delete lead: ID is missing');
+                                  }
+                                }}
                               >
                                 Delete Lead
                               </Button>

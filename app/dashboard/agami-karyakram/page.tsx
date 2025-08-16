@@ -12,10 +12,7 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  MoreVertical,
   Trash2,
-  MessageSquare,
-  FileText,
   Users,
   TrendingUp,
   BarChart3,
@@ -23,7 +20,6 @@ import {
   Pause,
   Zap
 } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -377,32 +373,6 @@ export default function AgamiKaryakram() {
                 <span className="text-gray-600">Low:</span>
                 <span className="font-semibold text-gray-600">{getPriorityCount('LOW')}</span>
               </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
-              <MoreVertical className="w-6 h-6 text-gray-500" />
-            </div>
-            <div className="space-y-2">
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <Calendar className="w-4 h-4 mr-2" />
-                Schedule New Event
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <FileText className="w-4 h-4 mr-2" />
-                Generate Report
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Send Notifications
-              </Button>
             </div>
           </motion.div>
         </div>

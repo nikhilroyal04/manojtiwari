@@ -17,7 +17,7 @@ export default function SamparkKarein() {
     phone: '',
     subject: '',
     message: '',  
-    status: 'new' as "new" | "contacted" | "interested" | "not_interested" | "converted",
+    status: 'new' as "new" | "contacted" | "qualified" | "converted" | "lost",
     priority: 'medium' as "low" | "medium" | "high",
     notes: ''
   });
@@ -56,7 +56,7 @@ export default function SamparkKarein() {
 
     try {
       // Dispatch addLead action and wait for completion
-       dispatch(addLead(formData));
+      dispatch(addLead(formData));
       
       setLeadSuccess(true);
       setSubmitted(true);
@@ -437,12 +437,11 @@ export default function SamparkKarein() {
                   <MapPin className="w-6 h-6 mr-2 text-orange-500" />
                   हमारा स्थान
                 </h2>
-                <div className="aspect-[16/7] w-full rounded-xl overflow-hidden">
+                <div className="h-[500px] w-full rounded-xl overflow-hidden">
                   <iframe 
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3501.6635726252367!2d77.22750081508564!3d28.63746488241679!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cfd37b741d057%3A0xcdee88e47393c3f5!2sParliament%20of%20India!5e0!3m2!1sen!2sin!4v1625812574375!5m2!1sen!2sin" 
                     width="100%" 
                     height="100%" 
-                    style={{ border: 0 }} 
                     allowFullScreen={true} 
                     loading="lazy"
                     className="rounded-xl"

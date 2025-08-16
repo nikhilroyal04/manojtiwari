@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Search, 
@@ -10,10 +10,7 @@ import {
   User,
   CheckCircle,
   XCircle,
-  MoreVertical,
   Trash2,
-  MessageSquare,
-  FileText,
   Users,
   TrendingUp,
   BarChart3,
@@ -40,139 +37,29 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-
-interface SamparkAdhikari {
-  id: number;
-  name: string;
-  email: string;
-  number: string;
-  officeNumber?: string;
-  workArea: string;
-  additionalInfo?: string;
-  department: string;
-  image: string;
-  status: 'ACTIVE' | 'INACTIVE' | 'ON_LEAVE' | 'RESIGNED';
-  designation: string;
-  joiningDate: string;
-  experience?: number;
-  qualification?: string;
-  address?: string;
-  emergencyContact?: string;
-  notes?: string;
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '@/lib/redux/store';
+import { selectAdhikari, selectLoading, selectError, fetchAdhikari, addAdhikari, updateAdhikari, deleteAdhikari, Adhikari } from '@/lib/redux/features/adhikariSlice';
 
 export default function SamparkAdhikari() {
-  const [officers, setOfficers] = useState<SamparkAdhikari[]>([
-    {
-      id: 1,
-      name: "कृष्णा चौबे (राजा)",
-      email: "krishna.choubey@example.com",
-      number: "9990152796",
-      officeNumber: "(011) 23094122",
-      workArea: "मा. सांसद जी के द्वारा जनसमस्याओं के निराकरण हेतु किये जा रहे कार्यों में समर्पण भाव से सहभागिता करना",
-      additionalInfo: "एजुकेशनल क्वालिफिकेशन - B.tech (ECE) शुरू से ही सामाजिक कार्य में अभिरुचि रखना",
-      department: "जनसमस्या निराकरण",
-      image: "/images/staff/krishna-choubey.jpg",
-      status: "ACTIVE",
-      designation: "सीनियर अधिकारी",
-      joiningDate: "2020-01-15",
-      experience: 4,
-      qualification: "B.Tech (ECE)",
-      address: "उत्तर पूर्वी दिल्ली",
-      emergencyContact: "9876543210"
-    },
-    {
-      id: 2,
-      name: "राजीव वर्मा",
-      email: "rajeev.verma@example.com",
-      number: "9999535258",
-      officeNumber: "(011) 23094122",
-      workArea: "मा. सांसद जी के द्वारा जनसमस्याओं के निराकरण हेतु किये जा रहे कार्यों में समर्पण भाव से सहभागिता करना",
-      department: "जनसमस्या निराकरण",
-      image: "/images/staff/rajeev-verma.jpg",
-      status: "ACTIVE",
-      designation: "अधिकारी",
-      joiningDate: "2021-03-20",
-      experience: 3,
-      qualification: "M.A. (Political Science)",
-      address: "दिल्ली",
-      emergencyContact: "8765432109"
-    },
-    {
-      id: 3,
-      name: "राजकुमार श्रीवास्तव",
-      email: "rajkumar.srivastava@example.com",
-      number: "098735 88120",
-      workArea: "सांसद जी के सहयोग आवर जन समस्या समादन में सहयोग करते हैं",
-      department: "जन समस्या समाधान",
-      image: "/images/staff/rajkumar-srivastava.jpg",
-      status: "ACTIVE",
-      designation: "सहायक अधिकारी",
-      joiningDate: "2022-06-10",
-      experience: 2,
-      qualification: "B.A. (Public Administration)",
-      address: "उत्तर पूर्वी दिल्ली",
-      emergencyContact: "7654321098"
-    },
-    {
-      id: 4,
-      name: "अमित शर्मा",
-      email: "amit.sharma@example.com",
-      number: "9876543210",
-      workArea: "सोशल मीडिया प्रबंधन और डिजिटल कम्युनिकेशन",
-      department: "मीडिया",
-      image: "/images/staff/amit-sharma.jpg",
-      status: "ACTIVE",
-      designation: "मीडिया अधिकारी",
-      joiningDate: "2021-08-15",
-      experience: 3,
-      qualification: "B.Tech (IT)",
-      address: "दिल्ली",
-      emergencyContact: "6543210987"
-    },
-    {
-      id: 5,
-      name: "प्रिया पटेल",
-      email: "priya.patel@example.com",
-      number: "8765432109",
-      workArea: "कार्यक्रम आयोजन और प्रबंधन",
-      department: "कार्यक्रम प्रबंधन",
-      image: "/images/staff/priya-patel.jpg",
-      status: "ON_LEAVE",
-      designation: "कार्यक्रम अधिकारी",
-      joiningDate: "2022-01-10",
-      experience: 2,
-      qualification: "M.B.A. (Event Management)",
-      address: "दिल्ली",
-      emergencyContact: "5432109876"
-    },
-    {
-      id: 6,
-      name: "विनोद यादव",
-      email: "vinod.yadav@example.com",
-      number: "7654321098",
-      workArea: "क्षेत्रीय विकास कार्य और योजनाओं का निरीक्षण",
-      department: "क्षेत्रीय विकास",
-      image: "/images/staff/vinod-yadav.jpg",
-      status: "ACTIVE",
-      designation: "विकास अधिकारी",
-      joiningDate: "2020-11-05",
-      experience: 4,
-      qualification: "M.A. (Development Studies)",
-      address: "उत्तर पूर्वी दिल्ली",
-      emergencyContact: "4321098765"
-    }
-  ]);
+  const dispatch = useDispatch<AppDispatch>();
+  const adhikaris = useSelector(selectAdhikari);
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
+
+  useEffect(() => {
+    dispatch(fetchAdhikari());
+  }, [dispatch]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
-  const [selectedOfficer, setSelectedOfficer] = useState<SamparkAdhikari | null>(null);
+  const [selectedOfficer, setSelectedOfficer] = useState<Adhikari | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newOfficer, setNewOfficer] = useState<Partial<SamparkAdhikari>>({
+  const [newOfficer, setNewOfficer] = useState<Partial<Adhikari>>({
     name: '',
     email: '',
     number: '',
@@ -203,7 +90,7 @@ export default function SamparkAdhikari() {
     RESIGNED: XCircle
   };
 
-  const filteredOfficers = officers.filter(officer => {
+  const filteredOfficers = adhikaris.filter(officer => {
     const matchesSearch = 
       officer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       officer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -217,8 +104,7 @@ export default function SamparkAdhikari() {
   });
 
   const handleAddOfficer = () => {
-    const officer: SamparkAdhikari = {
-      id: Date.now(),
+    const officer: Adhikari = {
       name: newOfficer.name || '',
       email: newOfficer.email || '',
       number: newOfficer.number || '',
@@ -236,7 +122,7 @@ export default function SamparkAdhikari() {
       emergencyContact: newOfficer.emergencyContact || ''
     };
     
-    setOfficers(prev => [officer, ...prev]);
+    dispatch(addAdhikari(officer));
     setNewOfficer({
       name: '',
       email: '',
@@ -256,22 +142,49 @@ export default function SamparkAdhikari() {
     setIsAddModalOpen(false);
   };
 
-  const handleDeleteOfficer = (id: number) => {
-    setOfficers(prev => prev.filter(officer => officer.id !== id));
+  const handleDeleteOfficer = (id: string) => {
+    if (!id) {
+      console.error('Officer ID is missing');
+      return;
+    }
+    dispatch(deleteAdhikari(id));
     setIsDeleteModalOpen(false);
     setSelectedOfficer(null);
   };
 
+  const handleEditOfficer = (officer: Adhikari) => {
+    if (!officer._id) {
+      console.error('Officer ID is missing');
+      return;
+    }
+    
+    const updatedOfficer: Partial<Adhikari> = {
+      ...officer,
+    };
+    
+    dispatch(updateAdhikari(officer._id, updatedOfficer as Adhikari));
+    setIsEditModalOpen(false);
+    setSelectedOfficer(null);
+  };
+
   const getStatusCount = (status: string) => {
-    return officers.filter(officer => status === 'all' ? true : officer.status === status).length;
+    return adhikaris.filter(officer => status === 'all' ? true : officer.status === status).length;
   };
 
   const getDepartmentCount = (department: string) => {
-    return officers.filter(officer => department === 'all' ? true : officer.department === department).length;
+    return adhikaris.filter(officer => department === 'all' ? true : officer.department === department).length;
   };
 
-  const totalExperience = officers.reduce((sum, officer) => sum + (officer.experience || 0), 0);
-  const departments = Array.from(new Set(officers.map(officer => officer.department)));
+  const totalExperience = adhikaris.reduce((sum, officer) => sum + (officer?.experience || 0), 0);
+  const departments = Array.from(new Set(adhikaris.map(officer => officer?.department)));
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div></div>;
+  }
+
+  if (error) {
+    return <div className="flex justify-center items-center h-screen text-red-500">Error: {error}</div>;
+  }
 
   return (
     <div className="min-h-screen">
@@ -285,7 +198,7 @@ export default function SamparkAdhikari() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8">
           {[
-            { label: 'Total Officers', count: officers.length, color: 'bg-blue-500', icon: Users },
+            { label: 'Total Officers', count: adhikaris.length, color: 'bg-blue-500', icon: Users },
             { label: 'Active', count: getStatusCount('ACTIVE'), color: 'bg-green-500', icon: CheckCircle },
             { label: 'On Leave', count: getStatusCount('ON_LEAVE'), color: 'bg-yellow-500', icon: Clock },
             { label: 'Inactive', count: getStatusCount('INACTIVE'), color: 'bg-gray-500', icon: XCircle },
@@ -350,49 +263,24 @@ export default function SamparkAdhikari() {
               <div className="flex justify-between">
                 <span className="text-gray-600">Average Experience:</span>
                 <span className="font-semibold text-blue-600">
-                  {Math.round(totalExperience / officers.length)} years
+                  {Math.round(totalExperience / adhikaris.length)} years
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Most Experienced:</span>
                 <span className="font-semibold text-green-600">
-                  {Math.max(...officers.map(o => o.experience || 0))} years
+                  {Math.max(...adhikaris.map(o => o?.experience || 0))} years
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Newest Member:</span>
                 <span className="font-semibold text-orange-600">
-                  {Math.min(...officers.map(o => o.experience || 0))} years
+                  {Math.min(...adhikaris.map(o => o?.experience || 0))} years
                 </span>
               </div>
             </div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
-              <MoreVertical className="w-6 h-6 text-gray-500" />
-            </div>
-            <div className="space-y-2">
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <User className="w-4 h-4 mr-2" />
-                Add New Officer
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <FileText className="w-4 h-4 mr-2" />
-                Generate Report
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Send Notifications
-              </Button>
-            </div>
-          </motion.div>
         </div>
 
         {/* Filters and Search */}
@@ -521,7 +409,7 @@ export default function SamparkAdhikari() {
                     </div>
                     <div>
                       <label className="text-sm font-medium">Status</label>
-                      <Select value={newOfficer.status} onValueChange={(value) => setNewOfficer(prev => ({ ...prev, status: value as SamparkAdhikari['status'] }))}>
+                      <Select value={newOfficer.status} onValueChange={(value) => setNewOfficer(prev => ({ ...prev, status: value as Adhikari['status'] }))}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -616,7 +504,7 @@ export default function SamparkAdhikari() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredOfficers.map((officer, index) => (
                   <motion.tr
-                    key={officer.id}
+                    key={officer._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
@@ -653,7 +541,7 @@ export default function SamparkAdhikari() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center gap-2">
                         {/* View Officer */}
-                        <Dialog open={isViewModalOpen && selectedOfficer?.id === officer.id} onOpenChange={(open) => {
+                        <Dialog open={isViewModalOpen && selectedOfficer?._id === officer._id} onOpenChange={(open) => {
                           setIsViewModalOpen(open);
                           if (open) setSelectedOfficer(officer);
                           else setSelectedOfficer(null);
@@ -759,7 +647,7 @@ export default function SamparkAdhikari() {
                         </Dialog>
 
                         {/* Edit Officer */}
-                        <Dialog open={isEditModalOpen && selectedOfficer?.id === officer.id} onOpenChange={(open) => {
+                        <Dialog open={isEditModalOpen && selectedOfficer?._id === officer._id} onOpenChange={(open) => {
                           setIsEditModalOpen(open);
                           if (open) setSelectedOfficer(officer);
                           else setSelectedOfficer(null);
@@ -780,11 +668,11 @@ export default function SamparkAdhikari() {
                               <div>
                                 <label className="text-sm font-medium">Name</label>
                                 <Input
-                                  value={officer.name}
+                                  value={selectedOfficer?.name || ''}
                                   onChange={(e) => {
-                                    setOfficers(prev => prev.map(o => 
-                                      o.id === officer.id ? { ...o, name: e.target.value } : o
-                                    ));
+                                    if (selectedOfficer) {
+                                      setSelectedOfficer({ ...selectedOfficer, name: e.target.value });
+                                    }
                                   }}
                                 />
                               </div>
@@ -792,11 +680,11 @@ export default function SamparkAdhikari() {
                                 <div>
                                   <label className="text-sm font-medium">Status</label>
                                   <Select 
-                                    value={officer.status} 
+                                    value={selectedOfficer?.status || 'ACTIVE'} 
                                     onValueChange={(value) => {
-                                      setOfficers(prev => prev.map(o => 
-                                        o.id === officer.id ? { ...o, status: value as SamparkAdhikari['status'] } : o
-                                      ));
+                                      if (selectedOfficer) {
+                                        setSelectedOfficer({ ...selectedOfficer, status: value as Adhikari['status'] });
+                                      }
                                     }}
                                   >
                                     <SelectTrigger>
@@ -813,11 +701,11 @@ export default function SamparkAdhikari() {
                                 <div>
                                   <label className="text-sm font-medium">Department</label>
                                   <Input
-                                    value={officer.department}
+                                    value={selectedOfficer?.department || ''}
                                     onChange={(e) => {
-                                      setOfficers(prev => prev.map(o => 
-                                        o.id === officer.id ? { ...o, department: e.target.value } : o
-                                      ));
+                                      if (selectedOfficer) {
+                                        setSelectedOfficer({ ...selectedOfficer, department: e.target.value });
+                                      }
                                     }}
                                   />
                                 </div>
@@ -827,22 +715,22 @@ export default function SamparkAdhikari() {
                                   <label className="text-sm font-medium">Experience (Years)</label>
                                   <Input
                                     type="number"
-                                    value={officer.experience || 0}
+                                    value={selectedOfficer?.experience || 0}
                                     onChange={(e) => {
-                                      setOfficers(prev => prev.map(o => 
-                                        o.id === officer.id ? { ...o, experience: parseInt(e.target.value) || 0 } : o
-                                      ));
+                                      if (selectedOfficer) {
+                                        setSelectedOfficer({ ...selectedOfficer, experience: parseInt(e.target.value) || 0 });
+                                      }
                                     }}
                                   />
                                 </div>
                                 <div>
                                   <label className="text-sm font-medium">Designation</label>
                                   <Input
-                                    value={officer.designation}
+                                    value={selectedOfficer?.designation || ''}
                                     onChange={(e) => {
-                                      setOfficers(prev => prev.map(o => 
-                                        o.id === officer.id ? { ...o, designation: e.target.value } : o
-                                      ));
+                                      if (selectedOfficer) {
+                                        setSelectedOfficer({ ...selectedOfficer, designation: e.target.value });
+                                      }
                                     }}
                                   />
                                 </div>
@@ -853,7 +741,12 @@ export default function SamparkAdhikari() {
                                 Cancel
                               </Button>
                               <Button 
-                                onClick={() => setIsEditModalOpen(false)}
+                                onClick={() => {
+                                  if (selectedOfficer) {
+                                    handleEditOfficer(selectedOfficer);
+                                    setIsEditModalOpen(false);
+                                  }
+                                }}
                                 className="bg-primary hover:bg-primary/90"
                               >
                                 Update Officer
@@ -863,7 +756,7 @@ export default function SamparkAdhikari() {
                         </Dialog>
 
                         {/* Delete Officer */}
-                        <Dialog open={isDeleteModalOpen && selectedOfficer?.id === officer.id} onOpenChange={(open) => {
+                        <Dialog open={isDeleteModalOpen && selectedOfficer?._id === officer._id} onOpenChange={(open) => {
                           setIsDeleteModalOpen(open);
                           if (open) setSelectedOfficer(officer);
                           else setSelectedOfficer(null);
@@ -886,7 +779,13 @@ export default function SamparkAdhikari() {
                               </Button>
                               <Button 
                                 variant="destructive" 
-                                onClick={() => handleDeleteOfficer(officer.id)}
+                                onClick={() => {
+                                  if (officer._id) {
+                                    handleDeleteOfficer(officer._id);
+                                  } else {
+                                    console.error('Cannot delete officer: ID is missing');
+                                  }
+                                }}
                               >
                                 Delete Officer
                               </Button>

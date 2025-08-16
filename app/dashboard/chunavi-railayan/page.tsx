@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { 
   Calendar, 
@@ -11,15 +11,12 @@ import {
   Eye,
   Edit,
   Trash2,
-  MoreVertical,
   Clock,
   Target,
   Award,
   Activity,
   Globe,
-  Share2,
-  Download,
-  MessageSquare,
+  Loader2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -30,7 +27,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import {
   Select,
@@ -39,122 +35,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
-interface ChunaviRailayan {
-  id: string
-  title: string
-  description: string
-  location: string
-  date: string
-  time: string
-  expectedCrowd: number
-  status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled'
-  priority: 'high' | 'medium' | 'low'
-  campaignType: 'roadshow' | 'rally' | 'meeting' | 'door-to-door' | 'media'
-  targetAudience: string[]
-  keySpeakers: string[]
-  budget: number
-  actualCrowd?: number
-  feedback?: string
-  photos?: string[]
-  videos?: string[]
-  createdAt: string
-  updatedAt: string
-}
-
-const mockData: ChunaviRailayan[] = [
-  {
-    id: '1',
-    title: 'महा रैली - पूर्वी दिल्ली',
-    description: 'पूर्वी दिल्ली में बड़ी रैली का आयोजन, जनता से सीधा संवाद',
-    location: 'शाहदरा, दिल्ली',
-    date: '2024-02-15',
-    time: '18:00',
-    expectedCrowd: 50000,
-    status: 'upcoming',
-    priority: 'high',
-    campaignType: 'rally',
-    targetAudience: ['युवा', 'महिलाएं', 'व्यापारी'],
-    keySpeakers: ['मनोज तिवारी', 'राज्य अध्यक्ष', 'स्थानीय नेता'],
-    budget: 2500000,
-    createdAt: '2024-01-20',
-    updatedAt: '2024-01-20'
-  },
-  {
-    id: '2',
-    title: 'रोड शो - नॉर्थ ईस्ट दिल्ली',
-    description: 'नॉर्थ ईस्ट दिल्ली में रोड शो, जनता का समर्थन जुटाना',
-    location: 'यमुना विहार, दिल्ली',
-    date: '2024-02-10',
-    time: '16:00',
-    expectedCrowd: 30000,
-    status: 'ongoing',
-    priority: 'high',
-    campaignType: 'roadshow',
-    targetAudience: ['सभी वर्ग'],
-    keySpeakers: ['मनोज तिवारी', 'संगठन सचिव'],
-    budget: 1500000,
-    actualCrowd: 35000,
-    feedback: 'बहुत अच्छा रेस्पॉन्स मिला',
-    createdAt: '2024-01-15',
-    updatedAt: '2024-02-10'
-  },
-  {
-    id: '3',
-    title: 'चुनावी बैठक - दक्षिण दिल्ली',
-    description: 'दक्षिण दिल्ली में चुनावी बैठक, कार्यकर्ताओं से मुलाकात',
-    location: 'साकेत, दिल्ली',
-    date: '2024-02-08',
-    time: '19:00',
-    expectedCrowd: 5000,
-    status: 'completed',
-    priority: 'medium',
-    campaignType: 'meeting',
-    targetAudience: ['कार्यकर्ता', 'पार्टी सदस्य'],
-    keySpeakers: ['मनोज तिवारी', 'जिला अध्यक्ष'],
-    budget: 500000,
-    actualCrowd: 4800,
-    feedback: 'कार्यकर्ताओं का मनोबल बढ़ा',
-    createdAt: '2024-01-10',
-    updatedAt: '2024-02-08'
-  },
-  {
-    id: '4',
-    title: 'दर-दर जाकर प्रचार',
-    description: 'महिला कार्यकर्ताओं के साथ दर-दर जाकर प्रचार',
-    location: 'लक्ष्मी नगर, दिल्ली',
-    date: '2024-02-12',
-    time: '10:00',
-    expectedCrowd: 2000,
-    status: 'upcoming',
-    priority: 'medium',
-    campaignType: 'door-to-door',
-    targetAudience: ['महिलाएं', 'परिवार'],
-    keySpeakers: ['महिला मोर्चा अध्यक्ष', 'स्थानीय नेता'],
-    budget: 200000,
-    createdAt: '2024-01-18',
-    updatedAt: '2024-01-18'
-  },
-  {
-    id: '5',
-    title: 'मीडिया इंटरव्यू',
-    description: 'प्रमुख न्यूज़ चैनल पर लाइव इंटरव्यू',
-    location: 'नई दिल्ली',
-    date: '2024-02-14',
-    time: '20:00',
-    expectedCrowd: 0,
-    status: 'upcoming',
-    priority: 'high',
-    campaignType: 'media',
-    targetAudience: ['दर्शक', 'मतदाता'],
-    keySpeakers: ['मनोज तिवारी'],
-    budget: 100000,
-    createdAt: '2024-01-22',
-    updatedAt: '2024-01-22'
-  }
-]
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch } from '@/lib/redux/store'
+import { fetchRailayan, selectRailayan, selectRailayanError, selectRailayanLoading } from '@/lib/redux/features/railayanSlice'
+import type { ChunaviRailayan } from '@/lib/redux/features/railayanSlice'
 
 export default function ChunaviRailayan() {
+  const dispatch = useDispatch<AppDispatch>()
+  const campaigns: ChunaviRailayan[] = useSelector(selectRailayan) || [];
+  const loading = useSelector(selectRailayanLoading);
+  const error = useSelector(selectRailayanError);
+
+  useEffect(() => {
+    dispatch(fetchRailayan());
+  }, [dispatch]);
+
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [priorityFilter, setPriorityFilter] = useState('all')
@@ -164,27 +59,29 @@ export default function ChunaviRailayan() {
   const [deleteModal, setDeleteModal] = useState<string | null>(null)
   const [addModal, setAddModal] = useState(false)
 
-  const filteredData = mockData.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.location.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || item.status === statusFilter
-    const matchesPriority = priorityFilter === 'all' || item.priority === priorityFilter
-    const matchesType = campaignTypeFilter === 'all' || item.campaignType === campaignTypeFilter
+  // Filter campaigns based on search and filters
+  const filteredData = campaigns.filter((campaign: ChunaviRailayan) => {
+    const matchesSearch = (campaign.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (campaign.location?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || campaign.status === statusFilter
+    const matchesPriority = priorityFilter === 'all' || campaign.priority === priorityFilter
+    const matchesType = campaignTypeFilter === 'all' || campaign.campaignType === campaignTypeFilter
     
     return matchesSearch && matchesStatus && matchesPriority && matchesType
   })
 
+  // Calculate stats from actual data
   const stats = {
-    total: mockData.length,
-    upcoming: mockData.filter(item => item.status === 'upcoming').length,
-    ongoing: mockData.filter(item => item.status === 'ongoing').length,
-    completed: mockData.filter(item => item.status === 'completed').length,
-    totalBudget: mockData.reduce((sum, item) => sum + item.budget, 0),
-    totalExpectedCrowd: mockData.reduce((sum, item) => sum + item.expectedCrowd, 0),
-    totalActualCrowd: mockData.filter(item => item.actualCrowd).reduce((sum, item) => sum + (item.actualCrowd || 0), 0)
+    total: campaigns.length,
+    upcoming: campaigns.filter((item: ChunaviRailayan) => item.status === 'upcoming').length,
+    ongoing: campaigns.filter((item: ChunaviRailayan) => item.status === 'ongoing').length,
+    completed: campaigns.filter((item: ChunaviRailayan) => item.status === 'completed').length,
+    totalBudget: campaigns.reduce((sum: number, item: ChunaviRailayan) => sum + (item.budget ?? 0), 0),
+    totalExpectedCrowd: campaigns.reduce((sum: number, item: ChunaviRailayan) => sum + (item.expectedCrowd ?? 0), 0),
+    totalActualCrowd: campaigns.filter((item: ChunaviRailayan) => item.actualCrowd !== undefined && item.actualCrowd !== null).reduce((sum: number, item: ChunaviRailayan) => sum + (item.actualCrowd ?? 0), 0)
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | undefined) => {
     switch (status) {
       case 'upcoming': return 'bg-blue-100 text-blue-800'
       case 'ongoing': return 'bg-green-100 text-green-800'
@@ -194,7 +91,7 @@ export default function ChunaviRailayan() {
     }
   }
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (priority: string | undefined) => {
     switch (priority) {
       case 'high': return 'bg-red-100 text-red-800'
       case 'medium': return 'bg-yellow-100 text-yellow-800'
@@ -203,7 +100,7 @@ export default function ChunaviRailayan() {
     }
   }
 
-  const getCampaignTypeIcon = (type: string) => {
+  const getCampaignTypeIcon = (type: string | undefined) => {
     switch (type) {
       case 'roadshow': return <Activity className="w-4 h-4" />
       case 'rally': return <Users className="w-4 h-4" />
@@ -214,16 +111,40 @@ export default function ChunaviRailayan() {
     }
   }
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <span>रैलियां लोड हो रही हैं...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen text-red-500">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">त्रुटि</h2>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-0 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">चुनावी रैलियां</h1>
           <p className="text-gray-600 mt-1">चुनावी अभियान और रैलियों का प्रबंधन</p>
         </div>
-        <Button onClick={() => setAddModal(true)} className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="w-4 h-4 mr-2" />
+        <Button onClick={() => setAddModal(true)} className="bg-primary">
+          <Plus className="w-4 h-4 mr-1" />
           नई रैली जोड़ें
         </Button>
       </div>
@@ -365,11 +286,11 @@ export default function ChunaviRailayan() {
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">औसत बजट</span>
-              <span className="text-sm font-medium">₹{(stats.totalBudget / stats.total / 100000).toFixed(1)}L</span>
+              <span className="text-sm font-medium">₹{stats.total > 0 ? (stats.totalBudget / stats.total / 100000).toFixed(1) : '0.0'}L</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">औसत भीड़</span>
-              <span className="text-sm font-medium">{(stats.totalExpectedCrowd / stats.total / 1000).toFixed(1)}K</span>
+              <span className="text-sm font-medium">{stats.total > 0 ? (stats.totalExpectedCrowd / stats.total / 1000).toFixed(1) : '0.0'}K</span>
             </div>
           </div>
         </motion.div>
@@ -444,9 +365,9 @@ export default function ChunaviRailayan() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredData.map((campaign, index) => (
+              {filteredData.map((campaign: ChunaviRailayan, index) => (
                 <motion.tr
-                  key={campaign.id}
+                  key={campaign._id ?? index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -471,13 +392,13 @@ export default function ChunaviRailayan() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {campaign.actualCrowd ? (
+                      {campaign.actualCrowd !== undefined && campaign.actualCrowd !== null ? (
                         <span className="text-green-600">{campaign.actualCrowd.toLocaleString()}</span>
                       ) : (
-                        <span className="text-gray-600">{campaign.expectedCrowd.toLocaleString()}</span>
+                        <span className="text-gray-600">{(campaign.expectedCrowd ?? 0).toLocaleString()}</span>
                       )}
                     </div>
-                    <div className="text-sm text-gray-500">अपेक्षित: {campaign.expectedCrowd.toLocaleString()}</div>
+                    <div className="text-sm text-gray-500">अपेक्षित: {(campaign.expectedCrowd ?? 0).toLocaleString()}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Badge className={getStatusColor(campaign.status)}>
@@ -495,64 +416,31 @@ export default function ChunaviRailayan() {
                     </Badge>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ₹{(campaign.budget / 100000).toFixed(1)}L
+                    ₹{((campaign.budget ?? 0) / 100000).toFixed(1)}L
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setViewModal(campaign.id)}
+                        onClick={() => setViewModal(campaign._id ?? null)}
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setEditModal(campaign.id)}
+                        onClick={() => setEditModal(campaign._id ?? null)}
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setDeleteModal(campaign.id)}
+                        onClick={() => setDeleteModal(campaign._id ?? null)}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-sm">
-                          <DialogHeader>
-                            <DialogTitle>त्वरित कार्य</DialogTitle>
-                            <DialogDescription>
-                              {campaign.title} के लिए कार्य चुनें
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="space-y-2">
-                            <Button variant="ghost" className="w-full justify-start">
-                              <Globe className="w-4 h-4 mr-2" />
-                              वेबसाइट पर देखें
-                            </Button>
-                            <Button variant="ghost" className="w-full justify-start">
-                              <Share2 className="w-4 h-4 mr-2" />
-                              रैली शेयर करें
-                            </Button>
-                            <Button variant="ghost" className="w-full justify-start">
-                              <Download className="w-4 h-4 mr-2" />
-                              रिपोर्ट डाउनलोड
-                            </Button>
-                            <Button variant="ghost" className="w-full justify-start">
-                              <MessageSquare className="w-4 h-4 mr-2" />
-                              फीडबैक देखें
-                            </Button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
                     </div>
                   </td>
                 </motion.tr>
@@ -571,7 +459,7 @@ export default function ChunaviRailayan() {
           {viewModal && (
             <div className="space-y-4">
               {(() => {
-                const campaign = mockData.find(c => c.id === viewModal)
+                const campaign = campaigns.find(c => c._id === viewModal)
                 if (!campaign) return null
                 
                 return (
@@ -602,18 +490,18 @@ export default function ChunaviRailayan() {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-600">अपेक्षित भीड़</p>
-                        <p className="text-sm text-gray-900">{campaign.expectedCrowd.toLocaleString()}</p>
+                        <p className="text-sm text-gray-900">{(campaign.expectedCrowd ?? 0).toLocaleString()}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-600">बजट</p>
-                        <p className="text-sm text-gray-900">₹{(campaign.budget / 100000).toFixed(1)}L</p>
+                        <p className="text-sm text-gray-900">₹{((campaign.budget ?? 0) / 100000).toFixed(1)}L</p>
                       </div>
                     </div>
                     
                     <div>
                       <p className="text-sm font-medium text-gray-600">लक्षित दर्शक</p>
                       <div className="flex flex-wrap gap-2 mt-1">
-                        {campaign.targetAudience.map((audience, index) => (
+                        {(campaign.targetAudience ?? []).map((audience, index) => (
                           <Badge key={index} variant="outline">{audience}</Badge>
                         ))}
                       </div>
@@ -622,13 +510,13 @@ export default function ChunaviRailayan() {
                     <div>
                       <p className="text-sm font-medium text-gray-600">मुख्य वक्ता</p>
                       <div className="flex flex-wrap gap-2 mt-1">
-                        {campaign.keySpeakers.map((speaker, index) => (
+                        {(campaign.keySpeakers ?? []).map((speaker, index) => (
                           <Badge key={index} variant="secondary">{speaker}</Badge>
                         ))}
                       </div>
                     </div>
                     
-                    {campaign.actualCrowd && (
+                    {campaign.actualCrowd !== undefined && campaign.actualCrowd !== null && (
                       <div>
                         <p className="text-sm font-medium text-gray-600">वास्तविक भीड़</p>
                         <p className="text-sm text-green-600">{campaign.actualCrowd.toLocaleString()}</p>
@@ -660,45 +548,45 @@ export default function ChunaviRailayan() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700">शीर्षक</label>
-                  <Input defaultValue={mockData.find(c => c.id === editModal)?.title} />
+                  <Input defaultValue={campaigns.find(c => c._id === editModal)?.title ?? ''} />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">स्थान</label>
-                  <Input defaultValue={mockData.find(c => c.id === editModal)?.location} />
+                  <Input defaultValue={campaigns.find(c => c._id === editModal)?.location ?? ''} />
                 </div>
               </div>
               
               <div>
                 <label className="text-sm font-medium text-gray-700">विवरण</label>
-                <Input defaultValue={mockData.find(c => c.id === editModal)?.description} />
+                <Input defaultValue={campaigns.find(c => c._id === editModal)?.description ?? ''} />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700">तारीख</label>
-                  <Input type="date" defaultValue={mockData.find(c => c.id === editModal)?.date} />
+                  <Input type="date" defaultValue={campaigns.find(c => c._id === editModal)?.date ?? ''} />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">समय</label>
-                  <Input type="time" defaultValue={mockData.find(c => c.id === editModal)?.time} />
+                  <Input type="time" defaultValue={campaigns.find(c => c._id === editModal)?.time ?? ''} />
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700">अपेक्षित भीड़</label>
-                  <Input type="number" defaultValue={mockData.find(c => c.id === editModal)?.expectedCrowd} />
+                  <Input type="number" defaultValue={campaigns.find(c => c._id === editModal)?.expectedCrowd ?? ''} />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">बजट (₹)</label>
-                  <Input type="number" defaultValue={mockData.find(c => c.id === editModal)?.budget} />
+                  <Input type="number" defaultValue={campaigns.find(c => c._id === editModal)?.budget ?? ''} />
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700">स्थिति</label>
-                  <Select defaultValue={mockData.find(c => c.id === editModal)?.status}>
+                  <Select defaultValue={campaigns.find(c => c._id === editModal)?.status ?? ''}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -712,7 +600,7 @@ export default function ChunaviRailayan() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">प्राथमिकता</label>
-                  <Select defaultValue={mockData.find(c => c.id === editModal)?.priority}>
+                  <Select defaultValue={campaigns.find(c => c._id === editModal)?.priority ?? ''}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

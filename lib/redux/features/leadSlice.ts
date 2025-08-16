@@ -10,7 +10,7 @@ export interface Lead {
   phone: string;
   subject: string;
   message: string;
-  status: "new" | "contacted" | "interested" | "not_interested" | "converted";
+  status: "new" | "contacted" | "qualified" | "converted" | "lost";
   priority: "low" | "medium" | "high";
   notes?: string;
   createdOn?: string;
@@ -103,18 +103,29 @@ export const fetchLeads = () => async (dispatch: Dispatch) => {
 export const addLead = (lead: Lead) => async (dispatch: Dispatch) => {
   try {
     dispatch(setLoading(true));
+    console.log('Adding new lead:', lead);
+    
     const response = await axios.post("/api/routes/leads", lead, {
       headers: {
         "Content-Type": "application/json",
       },
     });
+    
     if (response.status < 200 || response.status >= 300) {
       throw new Error(response.data?.message || "Failed to add lead");
     }
+    
     // Extract the actual lead data from the response
-    const newLead = response.data?.data;
+    const newLead = response.data;
+    console.log('Add response:', newLead);
+    
+    if (!newLead || !newLead._id) {
+      throw new Error('Invalid response: missing lead data or ID');
+    }
+    
     dispatch(addLeadSuccess(newLead));
   } catch (error: unknown) {
+    console.error('Error adding lead:', error);
     if (error instanceof Error) {
       dispatch(setError(error.message));
     } else {
@@ -123,24 +134,32 @@ export const addLead = (lead: Lead) => async (dispatch: Dispatch) => {
   }
 };
 
-export const updateLead = (lead: Lead) => async (dispatch: Dispatch) => {
+export const updateLead = (id: string, lead: Lead) => async (dispatch: Dispatch) => {
   try {
-    if (!lead._id) {
-      throw new Error("Lead ID is required for updating");
-    }
     dispatch(setLoading(true));
-    const response = await axios.put(`/api/routes/leads/${lead._id}`, lead, {
+    console.log('Updating lead with ID:', id, 'Data:', lead);
+    
+    const response = await axios.put(`/api/routes/leads/${id}`, lead, {
       headers: {
         "Content-Type": "application/json",
       },
     });
+    
     if (response.status < 200 || response.status >= 300) {
       throw new Error(response.data?.message || "Failed to update lead");
     }
+    
     // Extract the actual lead data from the response
-    const updatedLead = response.data?.data;
+    const updatedLead = response.data;
+    console.log('Update response:', updatedLead);
+    
+    if (!updatedLead || !updatedLead._id) {
+      throw new Error('Invalid response: missing lead data or ID');
+    }
+    
     dispatch(updateLeadSuccess(updatedLead));
   } catch (error: unknown) {
+    console.error('Error updating lead:', error);
     if (error instanceof Error) {
       dispatch(setError(error.message));
     } else {

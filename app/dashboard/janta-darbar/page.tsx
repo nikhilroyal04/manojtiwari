@@ -1,150 +1,59 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Search, 
-  Plus, 
-  Edit, 
-  Eye, 
+import {
+  Search,
+  Plus,
+  Edit,
+  Eye,
   Calendar,
   MapPin,
   CheckCircle,
-  Clock,
   XCircle,
   AlertCircle,
-  MoreVertical,
   Trash2,
-  MessageSquare,
-  ExternalLink,
-  Image as ImageIcon,
-  FileText,
   Users,
-  TrendingUp,
-  BarChart3
 } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
 } from '@/components/ui/dialog';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
+import {
+  fetchDarbars,
+  selectDarbars,
+  addDarbar,
+  updateDarbar,
+  deleteDarbar,
+  selectDarbarError,
+  selectDarbarLoading
+} from '@/lib/redux/features/darbarSlice';
+import { useSelector, useDispatch } from 'react-redux';
+import { AppDispatch } from '@/lib/redux/store';
 
-interface JantaDarbar {
-  id: number;
-  title: string;
-  agenda: string;
-  date: string;
-  status: 'OPEN' | 'CLOSE' | 'SCHEDULED' | 'CANCELLED';
-  location: string;
-  images: string[];
-  mainImage: string;
-  attendees?: number;
-  issues?: number;
-  resolved?: number;
-  notes?: string;
-}
+// Import the JantaDarbar type from the slice for type safety
+import type { JantaDarbar } from '@/lib/redux/features/darbarSlice';
 
-export default function JantaDarbar() {
-  const [jantaDarbars, setJantaDarbars] = useState<JantaDarbar[]>([
-    {
-      id: 1,
-      title: "बच्चों के चेहरे पर मुस्कान देख कर मन प्रफुल्लित हो गया",
-      agenda: "अपने आवासीय कार्यालय में बच्चों से मिला, बच्चों के चेहरे पर मुस्कान थी, बच्चों की अपने शहर प्रति, अपने देश के प्रति कर्तव्य, अपने देश के प्रधानमंत्री में विश्वास, स्वछता को लेकर Positive Attitude ये सब भाव देख कर मन प्रफुल्लित हो",
-      date: "Saturday, July 20, 2019 - 11:45",
-      status: "CLOSE",
-      location: "North East Delhi",
-      images: [
-        "/images/janta-darbar/jd1-1.jpg",
-        "/images/janta-darbar/jd1-2.jpg",
-        "/images/janta-darbar/jd1-3.jpg"
-      ],
-      mainImage: "/images/janta-darbar/jd1-main.jpg",
-      attendees: 150,
-      issues: 25,
-      resolved: 22
-    },
-    {
-      id: 2,
-      title: "जनता दरबार में लोगों की समस्याओं का समाधान",
-      agenda: "आज के जनता दरबार में क्षेत्र के नागरिकों की समस्याओं को सुना और संबंधित अधिकारियों को तुरंत समाधान के निर्देश दिए। जल आपूर्ति, सड़क मरम्मत और स्वच्छता से जुड़े मुद्दों पर विशेष ध्यान दिया गया।",
-      date: "Monday, August 12, 2019 - 10:30",
-      status: "CLOSE",
-      location: "North East Delhi",
-      images: [
-        "/images/janta-darbar/jd2-1.jpg",
-        "/images/janta-darbar/jd2-2.jpg"
-      ],
-      mainImage: "/images/janta-darbar/jd2-main.jpg",
-      attendees: 200,
-      issues: 35,
-      resolved: 30
-    },
-    {
-      id: 3,
-      title: "युवाओं के साथ संवाद कार्यक्रम",
-      agenda: "आज के जनता दरबार में युवाओं के साथ विशेष संवाद कार्यक्रम आयोजित किया गया। युवाओं ने शिक्षा, रोजगार और कौशल विकास से जुड़े अपने विचार साझा किए।",
-      date: "Wednesday, September 18, 2019 - 12:00",
-      status: "CLOSE",
-      location: "North East Delhi",
-      images: [
-        "/images/janta-darbar/jd3-1.jpg",
-        "/images/janta-darbar/jd3-2.jpg",
-        "/images/janta-darbar/jd3-3.jpg"
-      ],
-      mainImage: "/images/janta-darbar/jd3-main.jpg",
-      attendees: 180,
-      issues: 28,
-      resolved: 25
-    },
-    {
-      id: 4,
-      title: "महिला सशक्तिकरण पर विशेष चर्चा",
-      agenda: "आज के जनता दरबार में महिला सशक्तिकरण पर विशेष चर्चा की गई। महिलाओं ने अपनी समस्याएं और सुझाव साझा किए।",
-      date: "Friday, October 25, 2019 - 11:00",
-      status: "CLOSE",
-      location: "North East Delhi",
-      images: [
-        "/images/janta-darbar/jd4-1.jpg",
-        "/images/janta-darbar/jd4-2.jpg"
-      ],
-      mainImage: "/images/janta-darbar/jd4-main.jpg",
-      attendees: 120,
-      issues: 20,
-      resolved: 18
-    },
-    {
-      id: 5,
-      title: "स्वच्छता अभियान के साथ जनता दरबार",
-      agenda: "आज के जनता दरबार के साथ क्षेत्र में स्वच्छता अभियान भी चलाया गया। स्थानीय निवासियों और स्वयंसेवकों ने बढ़-चढ़कर हिस्सा लिया।",
-      date: "Sunday, November 10, 2019 - 09:30",
-      status: "CLOSE",
-      location: "North East Delhi",
-      images: [
-        "/images/janta-darbar/jd5-1.jpg",
-        "/images/janta-darbar/jd5-2.jpg",
-        "/images/janta-darbar/jd5-3.jpg"
-      ],
-      mainImage: "/images/janta-darbar/jd5-main.jpg",
-      attendees: 250,
-      issues: 40,
-      resolved: 35
-    }
-  ]);
+export default function JantaDarbarPage() {
+  const dispatch = useDispatch<AppDispatch>();
+  const jantaDarbars: JantaDarbar[] = useSelector(selectDarbars) || [];
+  const error = useSelector(selectDarbarError)
+  const loading = useSelector(selectDarbarLoading)
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -153,88 +62,151 @@ export default function JantaDarbar() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // For Add
   const [newJantaDarbar, setNewJantaDarbar] = useState<Partial<JantaDarbar>>({
     title: '',
-    agenda: '',
+    description: '',
     date: '',
-    status: 'SCHEDULED',
     location: 'North East Delhi',
-    images: [],
-    mainImage: '',
+    status: 'scheduled',
     attendees: 0,
-    issues: 0,
-    resolved: 0
+    notes: '',
   });
 
-  const statusColors = {
-    OPEN: 'bg-green-100 text-green-800 border-green-200',
-    CLOSE: 'bg-gray-100 text-gray-800 border-gray-200',
-    SCHEDULED: 'bg-blue-100 text-blue-800 border-blue-200',
-    CANCELLED: 'bg-red-100 text-red-800 border-red-200'
+  // For Edit
+  const [editJantaDarbar, setEditJantaDarbar] = useState<Partial<JantaDarbar>>({
+    _id: '',
+    title: '',
+    description: '',
+    date: '',
+    location: '',
+    status: 'scheduled',
+    attendees: 0,
+    notes: '',
+  });
+
+  useEffect(() => {
+    dispatch(fetchDarbars());
+  }, [dispatch]);
+
+  // Status color and icon mapping
+  const statusColors: Record<string, string> = {
+    scheduled: 'bg-blue-100 text-blue-800 border-blue-200',
+    completed: 'bg-gray-100 text-gray-800 border-gray-200',
+    cancelled: 'bg-red-100 text-red-800 border-red-200',
   };
 
-  const statusIcons = {
-    OPEN: CheckCircle,
-    CLOSE: Clock,
-    SCHEDULED: AlertCircle,
-    CANCELLED: XCircle
+  const statusIcons: Record<string, React.ElementType> = {
+    scheduled: AlertCircle,
+    completed: CheckCircle,
+    cancelled: XCircle,
   };
 
-  const filteredJantaDarbars = jantaDarbars.filter(jd => {
-    const matchesSearch = 
-      jd.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      jd.agenda.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      jd.location.toLowerCase().includes(searchTerm.toLowerCase());
-    
+  // Filtered list
+  const filteredJantaDarbars = jantaDarbars.filter((jd) => {
+    const matchesSearch =
+      (jd.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (jd.description?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (jd.location?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+
     const matchesStatus = statusFilter === 'all' || jd.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
 
-  const handleAddJantaDarbar = () => {
-    const jd: JantaDarbar = {
-      id: Date.now(),
-      title: newJantaDarbar.title || '',
-      agenda: newJantaDarbar.agenda || '',
-      date: newJantaDarbar.date || '',
-      status: newJantaDarbar.status || 'SCHEDULED',
-      location: newJantaDarbar.location || 'North East Delhi',
-      images: newJantaDarbar.images || [],
-      mainImage: newJantaDarbar.mainImage || '',
-      attendees: newJantaDarbar.attendees || 0,
-      issues: newJantaDarbar.issues || 0,
-      resolved: newJantaDarbar.resolved || 0
-    };
-    
-    setJantaDarbars(prev => [jd, ...prev]);
-    setNewJantaDarbar({
-      title: '',
-      agenda: '',
-      date: '',
-      status: 'SCHEDULED',
-      location: 'North East Delhi',
-      images: [],
-      mainImage: '',
-      attendees: 0,
-      issues: 0,
-      resolved: 0
-    });
-    setIsAddModalOpen(false);
-  };
-
-  const handleDeleteJantaDarbar = (id: number) => {
-    setJantaDarbars(prev => prev.filter(jd => jd.id !== id));
-    setIsDeleteModalOpen(false);
-    setSelectedJantaDarbar(null);
-  };
-
+  // Stats
   const getStatusCount = (status: string) => {
-    return jantaDarbars.filter(jd => status === 'all' ? true : jd.status === status).length;
+    if (status === 'all') return jantaDarbars.length;
+    return jantaDarbars.filter((jd) => jd.status === status).length;
   };
 
   const totalAttendees = jantaDarbars.reduce((sum, jd) => sum + (jd.attendees || 0), 0);
-  const totalIssues = jantaDarbars.reduce((sum, jd) => sum + (jd.issues || 0), 0);
-  const totalResolved = jantaDarbars.reduce((sum, jd) => sum + (jd.resolved || 0), 0);
+
+  // Add Janta Darbar
+  const handleAddJantaDarbar = async () => {
+    // Validate required fields
+    if (!newJantaDarbar.title || !newJantaDarbar.date || !newJantaDarbar.location) {
+      alert('Please fill in all required fields (title, date, location).');
+      return;
+    }
+    try {
+      await dispatch(addDarbar(newJantaDarbar as JantaDarbar));
+      setIsAddModalOpen(false);
+      setNewJantaDarbar({
+        title: '',
+        description: '',
+        date: '',
+        location: 'North East Delhi',
+        status: 'scheduled',
+        attendees: 0,
+        notes: '',
+      });
+      dispatch(fetchDarbars());
+    } catch (err) {
+      console.log(err,'Failed to add event.');
+    }
+  };
+
+  // Prepare Edit Modal
+  const openEditModal = (jd: JantaDarbar) => {
+    setEditJantaDarbar({
+      _id: jd._id,
+      title: jd.title,
+      description: jd.description,
+      date: jd.date,
+      location: jd.location,
+      status: jd.status,
+      attendees: jd.attendees,
+      notes: jd.notes,
+    });
+    setSelectedJantaDarbar(jd);
+    setIsEditModalOpen(true);
+  };
+
+  // Update Janta Darbar
+  const handleUpdateJantaDarbar = async () => {
+    if (!editJantaDarbar._id) return;
+    try {
+      await dispatch(updateDarbar(editJantaDarbar._id , editJantaDarbar as JantaDarbar));
+      setIsEditModalOpen(false);
+      setSelectedJantaDarbar(null);
+      setEditJantaDarbar({
+        _id: '',
+        title: '',
+        description: '',
+        date: '',
+        location: '',
+        status: 'scheduled',
+        attendees: 0,
+        notes: '',
+      });
+      dispatch(fetchDarbars());
+    } catch (err) {
+      console.log(err,'Failed to update event.');
+    }
+  };
+
+  // Delete Janta Darbar
+  const handleDeleteJantaDarbar = async (id?: string) => {
+    if (!id) return;
+    try {
+      await dispatch(deleteDarbar(id));
+      setIsDeleteModalOpen(false);
+      setSelectedJantaDarbar(null);
+      dispatch(fetchDarbars());
+    } catch (err) {
+      console.log(err,'Failed to delete event.');
+    }
+  };
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div></div>;
+  }
+
+  if (error) {
+    return <div className="flex justify-center items-center h-screen text-red-500">Error: {error}</div>;
+  }
 
   return (
     <div className="min-h-screen">
@@ -246,12 +218,11 @@ export default function JantaDarbar() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           {[
             { label: 'Total Events', count: jantaDarbars.length, color: 'bg-blue-500', icon: Calendar },
-            { label: 'Open', count: getStatusCount('OPEN'), color: 'bg-green-500', icon: CheckCircle },
             { label: 'Scheduled', count: getStatusCount('SCHEDULED'), color: 'bg-blue-500', icon: AlertCircle },
-            { label: 'Closed', count: getStatusCount('CLOSE'), color: 'bg-gray-500', icon: Clock },
+            { label: 'Completed', count: getStatusCount('COMPLETED'), color: 'bg-gray-500', icon: CheckCircle },
             { label: 'Cancelled', count: getStatusCount('CANCELLED'), color: 'bg-red-500', icon: XCircle },
             { label: 'Total Attendees', count: totalAttendees, color: 'bg-purple-500', icon: Users }
           ].map((stat, index) => (
@@ -275,80 +246,6 @@ export default function JantaDarbar() {
           ))}
         </div>
 
-        {/* Additional Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Issues & Resolutions</h3>
-              <BarChart3 className="w-6 h-6 text-blue-500" />
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Total Issues:</span>
-                <span className="font-semibold">{totalIssues}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Resolved:</span>
-                <span className="font-semibold text-green-600">{totalResolved}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Resolution Rate:</span>
-                <span className="font-semibold text-blue-600">
-                  {totalIssues > 0 ? Math.round((totalResolved / totalIssues) * 100) : 0}%
-                </span>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-              <TrendingUp className="w-6 h-6 text-green-500" />
-            </div>
-            <div className="space-y-2">
-              <div className="text-sm text-gray-600">Last 7 days: 3 events</div>
-              <div className="text-sm text-gray-600">Last 30 days: 12 events</div>
-              <div className="text-sm text-gray-600">Average attendees: {Math.round(totalAttendees / jantaDarbars.length)}</div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
-              <MoreVertical className="w-6 h-6 text-gray-500" />
-            </div>
-            <div className="space-y-2">
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <Calendar className="w-4 h-4 mr-2" />
-                Schedule New Event
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <FileText className="w-4 h-4 mr-2" />
-                Generate Report
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <ImageIcon className="w-4 h-4 mr-2" />
-                Upload Images
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-
         {/* Filters and Search */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
@@ -358,7 +255,7 @@ export default function JantaDarbar() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <Input
                   type="text"
-                  placeholder="Search janta darbar by title, agenda, or location..."
+                  placeholder="Search janta darbar by title, description, or location..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -373,9 +270,8 @@ export default function JantaDarbar() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="OPEN">Open</SelectItem>
                 <SelectItem value="SCHEDULED">Scheduled</SelectItem>
-                <SelectItem value="CLOSE">Closed</SelectItem>
+                <SelectItem value="COMPLETED">Completed</SelectItem>
                 <SelectItem value="CANCELLED">Cancelled</SelectItem>
               </SelectContent>
             </Select>
@@ -399,17 +295,17 @@ export default function JantaDarbar() {
                   <div>
                     <label className="text-sm font-medium">Title</label>
                     <Input
-                      value={newJantaDarbar.title}
-                      onChange={(e) => setNewJantaDarbar(prev => ({ ...prev, title: e.target.value }))}
+                      value={newJantaDarbar.title || ''}
+                      onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, title: e.target.value }))}
                       placeholder="Enter event title"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Agenda</label>
+                    <label className="text-sm font-medium">Description</label>
                     <textarea
-                      value={newJantaDarbar.agenda}
-                      onChange={(e) => setNewJantaDarbar(prev => ({ ...prev, agenda: e.target.value }))}
-                      placeholder="Enter event agenda"
+                      value={newJantaDarbar.description || ''}
+                      onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, description: e.target.value }))}
+                      placeholder="Enter event description"
                       className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                       rows={3}
                     />
@@ -419,31 +315,38 @@ export default function JantaDarbar() {
                       <label className="text-sm font-medium">Date & Time</label>
                       <Input
                         type="datetime-local"
-                        value={newJantaDarbar.date}
-                        onChange={(e) => setNewJantaDarbar(prev => ({ ...prev, date: e.target.value }))}
+                        value={newJantaDarbar.date || ''}
+                        onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, date: e.target.value }))}
                       />
                     </div>
                     <div>
                       <label className="text-sm font-medium">Location</label>
                       <Input
-                        value={newJantaDarbar.location}
-                        onChange={(e) => setNewJantaDarbar(prev => ({ ...prev, location: e.target.value }))}
+                        value={newJantaDarbar.location || ''}
+                        onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, location: e.target.value }))}
                         placeholder="Enter location"
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium">Status</label>
-                      <Select value={newJantaDarbar.status} onValueChange={(value) => setNewJantaDarbar(prev => ({ ...prev, status: value as JantaDarbar['status'] }))}>
+                      <Select
+                        value={newJantaDarbar.status || 'SCHEDULED'}
+                        onValueChange={(value) =>
+                          setNewJantaDarbar((prev) => ({
+                            ...prev,
+                            status: value as JantaDarbar['status'],
+                          }))
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="SCHEDULED">Scheduled</SelectItem>
-                          <SelectItem value="OPEN">Open</SelectItem>
-                          <SelectItem value="CLOSE">Closed</SelectItem>
-                          <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                          <SelectItem value="scheduled">Scheduled</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -451,19 +354,24 @@ export default function JantaDarbar() {
                       <label className="text-sm font-medium">Expected Attendees</label>
                       <Input
                         type="number"
-                        value={newJantaDarbar.attendees}
-                        onChange={(e) => setNewJantaDarbar(prev => ({ ...prev, attendees: parseInt(e.target.value) || 0 }))}
+                        value={newJantaDarbar.attendees || 0}
+                        onChange={(e) =>
+                          setNewJantaDarbar((prev) => ({
+                            ...prev,
+                            attendees: parseInt(e.target.value) || 0,
+                          }))
+                        }
                         placeholder="0"
                       />
                     </div>
-                    <div>
-                      <label className="text-sm font-medium">Main Image URL</label>
-                      <Input
-                        value={newJantaDarbar.mainImage}
-                        onChange={(e) => setNewJantaDarbar(prev => ({ ...prev, mainImage: e.target.value }))}
-                        placeholder="Enter image URL"
-                      />
-                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Notes</label>
+                    <Input
+                      value={newJantaDarbar.notes || ''}
+                      onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, notes: e.target.value }))}
+                      placeholder="Any notes"
+                    />
                   </div>
                 </div>
                 <DialogFooter>
@@ -486,17 +394,17 @@ export default function JantaDarbar() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Location</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stats</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attendees</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredJantaDarbars.map((jd, index) => (
                   <motion.tr
-                    key={jd.id}
+                    key={jd._id || jd.title + jd.date}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
@@ -509,15 +417,14 @@ export default function JantaDarbar() {
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900 max-w-xs truncate">{jd.title}</div>
-                          <div className="text-sm text-gray-500">{jd.images.length} images</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900 max-w-xs truncate">{jd.agenda}</div>
+                      <div className="text-sm text-gray-900 max-w-xs truncate">{jd.description}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{jd.date.split(" - ")[0]}</div>
+                      <div className="text-sm text-gray-900">{jd.date}</div>
                       <div className="text-sm text-gray-500 flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {jd.location}
@@ -525,25 +432,30 @@ export default function JantaDarbar() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Badge className={statusColors[jd.status]}>
-                        {React.createElement(statusIcons[jd.status], { className: "w-3 h-3" })}
+                        {(() => {
+                          const Icon = statusIcons[jd.status];
+                          if (!Icon) return null; // Don't render icon if undefined
+                          return <Icon className="w-3 h-3" />;
+                        })()}
                         {jd.status}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
                         <div>👥 {jd.attendees || 0}</div>
-                        <div>📋 {jd.issues || 0} issues</div>
-                        <div>✅ {jd.resolved || 0} resolved</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center gap-2">
                         {/* View Event */}
-                        <Dialog open={isViewModalOpen && selectedJantaDarbar?.id === jd.id} onOpenChange={(open) => {
-                          setIsViewModalOpen(open);
-                          if (open) setSelectedJantaDarbar(jd);
-                          else setSelectedJantaDarbar(null);
-                        }}>
+                        <Dialog
+                          open={isViewModalOpen && selectedJantaDarbar?._id === jd._id}
+                          onOpenChange={(open) => {
+                            setIsViewModalOpen(open);
+                            if (open) setSelectedJantaDarbar(jd);
+                            else setSelectedJantaDarbar(null);
+                          }}
+                        >
                           <DialogTrigger asChild>
                             <Button variant="ghost" size="icon">
                               <Eye className="w-4 h-4" />
@@ -578,60 +490,40 @@ export default function JantaDarbar() {
                                 </div>
                               </div>
                               <div>
-                                <label className="text-sm font-medium text-gray-500">Agenda</label>
-                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">{jd.agenda}</p>
-                              </div>
-                              <div className="grid grid-cols-3 gap-4">
-                                <div>
-                                  <label className="text-sm font-medium text-gray-500">Attendees</label>
-                                  <p className="text-sm text-gray-900">{jd.attendees || 0}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-500">Issues Raised</label>
-                                  <p className="text-sm text-gray-900">{jd.issues || 0}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-500">Issues Resolved</label>
-                                  <p className="text-sm text-gray-900">{jd.resolved || 0}</p>
-                                </div>
+                                <label className="text-sm font-medium text-gray-500">Description</label>
+                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">{jd.description}</p>
                               </div>
                               <div>
-                                <label className="text-sm font-medium text-gray-500">Images ({jd.images.length})</label>
-                                <div className="grid grid-cols-4 gap-2 mt-2">
-                                  {jd.images.map((image, i) => (
-                                    <div key={i} className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center">
-                                      <ImageIcon className="w-6 h-6 text-gray-400" />
-                                    </div>
-                                  ))}
-                                </div>
+                                <label className="text-sm font-medium text-gray-500">Attendees</label>
+                                <p className="text-sm text-gray-900">{jd.attendees || 0}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Notes</label>
+                                <p className="text-sm text-gray-900">{jd.notes || '-'}</p>
                               </div>
                             </div>
                             <DialogFooter>
                               <Button variant="outline" onClick={() => setIsViewModalOpen(false)}>
                                 Close
                               </Button>
-                              <Button 
-                                onClick={() => {
-                                  setIsViewModalOpen(false);
-                                  setSelectedJantaDarbar(jd);
-                                  setIsEditModalOpen(true);
-                                }}
-                                className="bg-primary hover:bg-primary/90"
-                              >
-                                Edit Event
-                              </Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
 
                         {/* Edit Event */}
-                        <Dialog open={isEditModalOpen && selectedJantaDarbar?.id === jd.id} onOpenChange={(open) => {
-                          setIsEditModalOpen(open);
-                          if (open) setSelectedJantaDarbar(jd);
-                          else setSelectedJantaDarbar(null);
-                        }}>
+                        <Dialog
+                          open={isEditModalOpen && selectedJantaDarbar?._id === jd._id}
+                          onOpenChange={(open) => {
+                            setIsEditModalOpen(open);
+                            if (open) openEditModal(jd);
+                            else {
+                              setIsEditModalOpen(false);
+                              setSelectedJantaDarbar(null);
+                            }
+                          }}
+                        >
                           <DialogTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" onClick={() => openEditModal(jd)}>
                               <Edit className="w-4 h-4" />
                             </Button>
                           </DialogTrigger>
@@ -639,78 +531,89 @@ export default function JantaDarbar() {
                             <DialogHeader>
                               <DialogTitle>Edit Janta Darbar Event</DialogTitle>
                               <DialogDescription>
-                                Update the details for {jd.title}
+                                Update the details for {editJantaDarbar.title}
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                               <div>
                                 <label className="text-sm font-medium">Title</label>
                                 <Input
-                                  value={jd.title}
-                                  onChange={(e) => {
-                                    setJantaDarbars(prev => prev.map(j => 
-                                      j.id === jd.id ? { ...j, title: e.target.value } : j
-                                    ));
-                                  }}
+                                  value={editJantaDarbar.title || ''}
+                                  onChange={e => setEditJantaDarbar(prev => ({ ...prev, title: e.target.value }))}
+                                  placeholder="Enter event title"
                                 />
                               </div>
                               <div>
-                                <label className="text-sm font-medium">Status</label>
-                                <Select 
-                                  value={jd.status} 
-                                  onValueChange={(value) => {
-                                    setJantaDarbars(prev => prev.map(j => 
-                                      j.id === jd.id ? { ...j, status: value as JantaDarbar['status'] } : j
-                                    ));
-                                  }}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="SCHEDULED">Scheduled</SelectItem>
-                                    <SelectItem value="OPEN">Open</SelectItem>
-                                    <SelectItem value="CLOSE">Closed</SelectItem>
-                                    <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                                  </SelectContent>
-                                </Select>
+                                <label className="text-sm font-medium">Description</label>
+                                <textarea
+                                  value={editJantaDarbar.description || ''}
+                                  onChange={e => setEditJantaDarbar(prev => ({ ...prev, description: e.target.value }))}
+                                  placeholder="Enter event description"
+                                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                  rows={3}
+                                />
                               </div>
                               <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium">Date & Time</label>
+                                  <Input
+                                    type="datetime-local"
+                                    value={editJantaDarbar.date || ''}
+                                    onChange={e => setEditJantaDarbar(prev => ({ ...prev, date: e.target.value }))}
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium">Location</label>
+                                  <Input
+                                    value={editJantaDarbar.location || ''}
+                                    onChange={e => setEditJantaDarbar(prev => ({ ...prev, location: e.target.value }))}
+                                    placeholder="Enter location"
+                                  />
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium">Status</label>
+                                  <Select
+                                    value={editJantaDarbar.status || 'scheduled'}
+                                    onValueChange={value =>
+                                      setEditJantaDarbar(prev => ({
+                                        ...prev,
+                                        status: value as JantaDarbar['status'],
+                                      }))
+                                    }
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="scheduled">Scheduled</SelectItem>
+                                      <SelectItem value="completed">Completed</SelectItem>
+                                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
                                 <div>
                                   <label className="text-sm font-medium">Attendees</label>
                                   <Input
                                     type="number"
-                                    value={jd.attendees || 0}
-                                    onChange={(e) => {
-                                      setJantaDarbars(prev => prev.map(j => 
-                                        j.id === jd.id ? { ...j, attendees: parseInt(e.target.value) || 0 } : j
-                                      ));
-                                    }}
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium">Issues Raised</label>
-                                  <Input
-                                    type="number"
-                                    value={jd.issues || 0}
-                                    onChange={(e) => {
-                                      setJantaDarbars(prev => prev.map(j => 
-                                        j.id === jd.id ? { ...j, issues: parseInt(e.target.value) || 0 } : j
-                                      ));
-                                    }}
+                                    value={editJantaDarbar.attendees || 0}
+                                    onChange={e =>
+                                      setEditJantaDarbar(prev => ({
+                                        ...prev,
+                                        attendees: parseInt(e.target.value) || 0,
+                                      }))
+                                    }
+                                    placeholder="0"
                                   />
                                 </div>
                               </div>
                               <div>
-                                <label className="text-sm font-medium">Issues Resolved</label>
+                                <label className="text-sm font-medium">Notes</label>
                                 <Input
-                                  type="number"
-                                  value={jd.resolved || 0}
-                                  onChange={(e) => {
-                                    setJantaDarbars(prev => prev.map(j => 
-                                      j.id === jd.id ? { ...j, resolved: parseInt(e.target.value) || 0 } : j
-                                    ));
-                                  }}
+                                  value={editJantaDarbar.notes || ''}
+                                  onChange={e => setEditJantaDarbar(prev => ({ ...prev, notes: e.target.value }))}
+                                  placeholder="Any notes"
                                 />
                               </div>
                             </div>
@@ -718,8 +621,8 @@ export default function JantaDarbar() {
                               <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
                                 Cancel
                               </Button>
-                              <Button 
-                                onClick={() => setIsEditModalOpen(false)}
+                              <Button
+                                onClick={handleUpdateJantaDarbar}
                                 className="bg-primary hover:bg-primary/90"
                               >
                                 Update Event
@@ -729,11 +632,14 @@ export default function JantaDarbar() {
                         </Dialog>
 
                         {/* Delete Event */}
-                        <Dialog open={isDeleteModalOpen && selectedJantaDarbar?.id === jd.id} onOpenChange={(open) => {
-                          setIsDeleteModalOpen(open);
-                          if (open) setSelectedJantaDarbar(jd);
-                          else setSelectedJantaDarbar(null);
-                        }}>
+                        <Dialog
+                          open={isDeleteModalOpen && selectedJantaDarbar?._id === jd._id}
+                          onOpenChange={(open) => {
+                            setIsDeleteModalOpen(open);
+                            if (open) setSelectedJantaDarbar(jd);
+                            else setSelectedJantaDarbar(null);
+                          }}
+                        >
                           <DialogTrigger asChild>
                             <Button variant="ghost" size="icon">
                               <Trash2 className="w-4 h-4" />
@@ -750,52 +656,13 @@ export default function JantaDarbar() {
                               <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
                                 Cancel
                               </Button>
-                              <Button 
-                                variant="destructive" 
-                                onClick={() => handleDeleteJantaDarbar(jd.id)}
+                              <Button
+                                variant="destructive"
+                                onClick={() => handleDeleteJantaDarbar(jd._id)}
                               >
                                 Delete Event
                               </Button>
                             </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-
-                        {/* Quick Actions */}
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-sm">
-                            <DialogHeader>
-                              <DialogTitle>Quick Actions</DialogTitle>
-                              <DialogDescription>
-                                Choose an action for {jd.title}
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-2">
-                              <Button variant="ghost" className="w-full justify-start">
-                                <ImageIcon className="w-4 h-4 mr-2" />
-                                Upload Images
-                              </Button>
-                              <Button variant="ghost" className="w-full justify-start">
-                                <FileText className="w-4 h-4 mr-2" />
-                                Generate Report
-                              </Button>
-                              <Button variant="ghost" className="w-full justify-start">
-                                <Users className="w-4 h-4 mr-2" />
-                                Manage Attendees
-                              </Button>
-                              <Button variant="ghost" className="w-full justify-start">
-                                <MessageSquare className="w-4 h-4 mr-2" />
-                                Send Notifications
-                              </Button>
-                              <Button variant="ghost" className="w-full justify-start">
-                                <ExternalLink className="w-4 h-4 mr-2" />
-                                View on Website
-                              </Button>
-                            </div>
                           </DialogContent>
                         </Dialog>
                       </div>

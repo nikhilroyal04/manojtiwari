@@ -6,9 +6,17 @@ const leadSchema = new mongoose.Schema({
   phone: String,
   subject: String,
   message: String,  
-  status: String,
+  status: {
+    type: String,
+    enum: ['new', 'contacted', 'interested', 'not_interested', 'converted', 'qualified', 'lost'],
+    default: 'new'
+  },
   notes: String,
-  priority: String,
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high'],
+    default: 'medium'
+  },
   createdOn: { type: Date, default: Date.now },
   updatedOn: { type: Date, default: Date.now },
 }); 
