@@ -6,7 +6,7 @@ import {
   Users, 
   Eye, 
   FileText, 
-  Image, 
+  Image as ImageIcon, 
   Video, 
   Award, 
   TrendingUp,
@@ -40,7 +40,7 @@ export default function Dashboard() {
       value: "8,456",
       change: "+15.3%",
       changeType: "positive",
-      icon: Image,
+      icon: ImageIcon,
       color: "from-purple-500 to-purple-600"
     },
     {
@@ -86,7 +86,7 @@ export default function Dashboard() {
       name: "Gallery",
       views: 8456,
       growth: "+22.1%",
-      icon: Image,
+      icon: ImageIcon,
       color: "bg-green-500"
     },
     {
@@ -239,7 +239,7 @@ export default function Dashboard() {
                         activity.type === 'contact' ? 'bg-green-100' : 'bg-gray-100'
                       } flex items-center justify-center mr-3`}>
                         {activity.type === 'visitor' && <Users className="w-4 h-4 text-blue-600" />}
-                        {activity.type === 'gallery' && <Image className="w-4 h-4 text-purple-600" />}
+                        {activity.type === 'gallery' && <ImageIcon className="w-4 h-4 text-purple-600" />}
                         {activity.type === 'video' && <Video className="w-4 h-4 text-red-600" />}
                         {activity.type === 'contact' && <Mail className="w-4 h-4 text-green-600" />}
                         {activity.type === 'page' && <FileText className="w-4 h-4 text-gray-600" />}

@@ -1,135 +1,63 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Search, 
-  Plus, 
-  Edit, 
-  Eye, 
-  Phone, 
-  User,
+import {
+  Search,
+  Plus,
+  Edit,
+  Eye,
+  Phone,
+  Mail,
   CheckCircle,
   Clock,
   XCircle,
   AlertCircle,
   Trash2,
+  Loader2,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
-
-interface Lead {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  location: string;
-  subject: string;
-  message: string;
-  status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost';
-  priority: 'low' | 'medium' | 'high';
-  source: string;
-  createdAt: string;
-  lastContacted?: string;
-  reason?: string;
-  notes?: string;
-}
+import {
+  Lead,
+  fetchLeads,
+  addLead,
+  updateLead,
+  deleteLead,
+  selectLeads,
+  selectError,
+  selectLoading,
+} from '@/lib/redux/features/leadSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '@/lib/redux/store';
 
 export default function Leads() {
-  const [leads, setLeads] = useState<Lead[]>([
-    {
-      id: "1",
-      name: "Rahul Kumar",
-      email: "rahul.kumar@email.com",
-      phone: "+91 98765 43210",
-      location: "Delhi, India",
-      subject: "Political Support Request",
-      message: "Looking for support in upcoming elections. Need guidance on campaign strategies.",
-      status: "new",
-      priority: "high",
-      source: "Website Contact",
-      createdAt: "2024-01-15",
-      notes: "Interested in local politics"
-    },
-    {
-      id: "2",
-      name: "Priya Sharma",
-      email: "priya.sharma@email.com",
-      phone: "+91 87654 32109",
-      location: "Mumbai, India",
-      subject: "Event Participation",
-      message: "Would like to participate in upcoming political events and rallies.",
-      status: "contacted",
-      priority: "medium",
-      source: "Social Media",
-      createdAt: "2024-01-14",
-      lastContacted: "2024-01-16",
-      reason: "Follow up required"
-    },
-    {
-      id: "3",
-      name: "Amit Patel",
-      email: "amit.patel@email.com",
-      phone: "+91 76543 21098",
-      location: "Ahmedabad, India",
-      subject: "Volunteer Opportunity",
-      message: "Want to volunteer for the campaign. Have experience in social work.",
-      status: "qualified",
-      priority: "high",
-      source: "Referral",
-      createdAt: "2024-01-13",
-      lastContacted: "2024-01-15",
-      reason: "Good potential volunteer"
-    },
-    {
-      id: "4",
-      name: "Sneha Reddy",
-      email: "sneha.reddy@email.com",
-      phone: "+91 65432 10987",
-      location: "Hyderabad, India",
-      subject: "Donation Inquiry",
-      message: "Interested in making a donation to support the campaign.",
-      status: "converted",
-      priority: "high",
-      source: "Email Campaign",
-      createdAt: "2024-01-12",
-      lastContacted: "2024-01-14",
-      reason: "Donation received"
-    },
-    {
-      id: "5",
-      name: "Vikram Singh",
-      email: "vikram.singh@email.com",
-      phone: "+91 54321 09876",
-      location: "Punjab, India",
-      subject: "General Inquiry",
-      message: "General questions about political policies and future plans.",
-      status: "lost",
-      priority: "low",
-      source: "Website Contact",
-      createdAt: "2024-01-11",
-      lastContacted: "2024-01-13",
-      reason: "Not interested in active participation"
-    }
-  ]);
+  const dispatch = useDispatch<AppDispatch>();
+  const leads = useSelector(selectLeads);
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
+
+  useEffect(() => {
+    dispatch(fetchLeads());
+  }, [dispatch]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -143,42 +71,45 @@ export default function Leads() {
     name: '',
     email: '',
     phone: '',
-    location: '',
     subject: '',
     message: '',
     status: 'new',
     priority: 'medium',
-    source: 'Website Contact'
+    notes: '',
   });
 
-  const statusColors = {
+  // For editing a lead's status and notes
+  const [editStatus, setEditStatus] = useState<Lead['status']>('new');
+  const [editReason, setEditReason] = useState<string>('');
+
+  const statusColors: Record<string, string> = {
     new: 'bg-blue-100 text-blue-800 border-blue-200',
     contacted: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     qualified: 'bg-purple-100 text-purple-800 border-purple-200',
     converted: 'bg-green-100 text-green-800 border-green-200',
-    lost: 'bg-red-100 text-red-800 border-red-200'
+    lost: 'bg-red-100 text-red-800 border-red-200',
   };
 
-  const priorityColors = {
+  const priorityColors: Record<string, string> = {
     low: 'bg-gray-100 text-gray-800 border-gray-200',
     medium: 'bg-orange-100 text-orange-800 border-orange-200',
-    high: 'bg-red-100 text-red-800 border-red-200'
+    high: 'bg-red-100 text-red-800 border-red-200',
   };
 
-  const statusIcons = {
+  const statusIcons: Record<string, React.ElementType> = {
     new: Clock,
     contacted: AlertCircle,
     qualified: CheckCircle,
     converted: CheckCircle,
-    lost: XCircle
+    lost: XCircle,
   };
 
-  const filteredLeads = leads.filter(lead => {
-    const matchesSearch = 
-      lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.subject.toLowerCase().includes(searchTerm.toLowerCase());
-    
+  const filteredLeads = leads.filter((lead: Lead) => {
+    const matchesSearch =
+      (lead.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (lead.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (lead.subject || '').toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesStatus = statusFilter === 'all' || lead.status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || lead.priority === priorityFilter;
 
@@ -187,43 +118,70 @@ export default function Leads() {
 
   const handleAddLead = () => {
     const lead: Lead = {
-      id: Date.now().toString(),
+      // id will be generated by backend or redux slice
       name: newLead.name || '',
       email: newLead.email || '',
       phone: newLead.phone || '',
-      location: newLead.location || '',
       subject: newLead.subject || '',
       message: newLead.message || '',
-      status: newLead.status || 'new',
-      priority: newLead.priority || 'medium',
-      source: newLead.source || 'Website Contact',
-      createdAt: new Date().toISOString().split('T')[0]
+      status: (newLead.status as Lead['status']) || 'new',
+      priority: (newLead.priority as Lead['priority']) || 'medium',
+      createdOn: new Date().toISOString().split('T')[0],
+      updatedOn: new Date().toISOString().split('T')[0],
+      notes: newLead.notes || '',
     };
-    
-    setLeads(prev => [lead, ...prev]);
+
+    dispatch(addLead(lead));
     setNewLead({
       name: '',
       email: '',
       phone: '',
-      location: '',
       subject: '',
       message: '',
       status: 'new',
       priority: 'medium',
-      source: 'Website Contact'
+      notes: '',
     });
     setIsAddModalOpen(false);
   };
 
   const handleDeleteLead = (leadId: string) => {
-    setLeads(prev => prev.filter(lead => lead.id !== leadId));
+    dispatch(deleteLead(leadId));
     setIsDeleteModalOpen(false);
     setSelectedLead(null);
   };
 
-  const getStatusCount = (status: string) => {
-    return leads.filter(lead => status === 'all' ? true : lead.status === status).length;
+  const handleEditLead = () => {
+    if (!selectedLead) return;
+    const updatedLead: Partial<Lead> = {
+      ...selectedLead,
+      status: editStatus,
+      notes: editReason,
+      updatedOn: new Date().toISOString().split('T')[0],
+    };
+    dispatch(updateLead(updatedLead as Lead));
+    setIsEditModalOpen(false);
+    setSelectedLead(null);
   };
+
+  const getStatusCount = (status: string) => {
+    return leads.filter((lead: Lead) => (status === 'all' ? true : lead.status === status)).length;
+  };
+
+  // When opening edit modal, set local state for status and reason
+  useEffect(() => {
+    if (isEditModalOpen && selectedLead) {
+      setEditStatus(selectedLead.status);
+      setEditReason(selectedLead.notes || '');
+    }
+  }, [isEditModalOpen, selectedLead]);
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen"><Loader2 className="w-4 h-4 animate-spin" /></div>;
+  }
+  if (error) {
+    return <div className="flex justify-center items-center h-screen"><AlertCircle className="w-4 h-4" />Error: {error}</div>;
+  }
 
   return (
     <div className="min-h-screen">
@@ -242,7 +200,7 @@ export default function Leads() {
             { label: 'Contacted', count: getStatusCount('contacted'), color: 'bg-yellow-500' },
             { label: 'Qualified', count: getStatusCount('qualified'), color: 'bg-purple-500' },
             { label: 'Converted', count: getStatusCount('converted'), color: 'bg-green-500' },
-            { label: 'Lost', count: getStatusCount('lost'), color: 'bg-red-500' }
+            { label: 'Lost', count: getStatusCount('lost'), color: 'bg-red-500' },
           ].map((stat, index) => (
             <motion.div
               key={index}
@@ -327,7 +285,7 @@ export default function Leads() {
                     <label className="text-sm font-medium">Name</label>
                     <Input
                       value={newLead.name}
-                      onChange={(e) => setNewLead(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={(e) => setNewLead((prev) => ({ ...prev, name: e.target.value }))}
                       placeholder="Enter name"
                     />
                   </div>
@@ -336,7 +294,7 @@ export default function Leads() {
                     <Input
                       type="email"
                       value={newLead.email}
-                      onChange={(e) => setNewLead(prev => ({ ...prev, email: e.target.value }))}
+                      onChange={(e) => setNewLead((prev) => ({ ...prev, email: e.target.value }))}
                       placeholder="Enter email"
                     />
                   </div>
@@ -344,23 +302,15 @@ export default function Leads() {
                     <label className="text-sm font-medium">Phone</label>
                     <Input
                       value={newLead.phone}
-                      onChange={(e) => setNewLead(prev => ({ ...prev, phone: e.target.value }))}
+                      onChange={(e) => setNewLead((prev) => ({ ...prev, phone: e.target.value }))}
                       placeholder="Enter phone"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Location</label>
-                    <Input
-                      value={newLead.location}
-                      onChange={(e) => setNewLead(prev => ({ ...prev, location: e.target.value }))}
-                      placeholder="Enter location"
                     />
                   </div>
                   <div>
                     <label className="text-sm font-medium">Subject</label>
                     <Input
                       value={newLead.subject}
-                      onChange={(e) => setNewLead(prev => ({ ...prev, subject: e.target.value }))}
+                      onChange={(e) => setNewLead((prev) => ({ ...prev, subject: e.target.value }))}
                       placeholder="Enter subject"
                     />
                   </div>
@@ -368,7 +318,7 @@ export default function Leads() {
                     <label className="text-sm font-medium">Message</label>
                     <textarea
                       value={newLead.message}
-                      onChange={(e) => setNewLead(prev => ({ ...prev, message: e.target.value }))}
+                      onChange={(e) => setNewLead((prev) => ({ ...prev, message: e.target.value }))}
                       placeholder="Enter message"
                       className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                       rows={3}
@@ -377,7 +327,15 @@ export default function Leads() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium">Status</label>
-                      <Select value={newLead.status} onValueChange={(value) => setNewLead(prev => ({ ...prev, status: value as Lead['status'] }))}>
+                      <Select
+                        value={newLead.status}
+                        onValueChange={(value) =>
+                          setNewLead((prev) => ({
+                            ...prev,
+                            status: value as Lead['status'],
+                          }))
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -392,7 +350,15 @@ export default function Leads() {
                     </div>
                     <div>
                       <label className="text-sm font-medium">Priority</label>
-                      <Select value={newLead.priority} onValueChange={(value) => setNewLead(prev => ({ ...prev, priority: value as Lead['priority'] }))}>
+                      <Select
+                        value={newLead.priority}
+                        onValueChange={(value) =>
+                          setNewLead((prev) => ({
+                            ...prev,
+                            priority: value as Lead['priority'],
+                          }))
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -424,38 +390,41 @@ export default function Leads() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lead</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Lead
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Subject
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Priority
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Created
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredLeads.map((lead, index) => (
+                {filteredLeads.map((lead: Lead, index: number) => (
                   <motion.tr
-                    key={lead.id}
+                    key={lead._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     className="hover:bg-gray-50"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-orange-600" />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{lead.name}</div>
-                          <div className="text-sm text-gray-500">{lead.location}</div>
-                        </div>
+                      <div className="text-sm text-gray-900">{lead.name}</div>
+                      <div className="text-sm text-gray-500 flex items-center gap-1">
+                        <Mail className="w-3 h-3" />
+                        {lead.email}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{lead.email}</div>
                       <div className="text-sm text-gray-500 flex items-center gap-1">
                         <Phone className="w-3 h-3" />
                         {lead.phone}
@@ -466,7 +435,7 @@ export default function Leads() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Badge className={statusColors[lead.status]}>
-                        {React.createElement(statusIcons[lead.status], { className: "w-3 h-3" })}
+                        {React.createElement(statusIcons[lead.status], { className: 'w-3 h-3' })}
                         {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
                       </Badge>
                     </td>
@@ -476,19 +445,19 @@ export default function Leads() {
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {lead.source}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(lead.createdAt).toLocaleDateString()}
+                      {new Date(lead.createdOn || '').toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center gap-2">
                         {/* View Lead */}
-                        <Dialog open={isViewModalOpen && selectedLead?.id === lead.id} onOpenChange={(open) => {
-                          setIsViewModalOpen(open);
-                          if (open) setSelectedLead(lead);
-                          else setSelectedLead(null);
-                        }}>
+                        <Dialog
+                          open={isViewModalOpen && selectedLead?._id === lead._id}
+                          onOpenChange={(open) => {
+                            setIsViewModalOpen(open);
+                            if (open) setSelectedLead(lead);
+                            else setSelectedLead(null);
+                          }}
+                        >
                           <DialogTrigger asChild>
                             <Button variant="ghost" size="icon">
                               <Eye className="w-4 h-4" />
@@ -515,10 +484,6 @@ export default function Leads() {
                                   <label className="text-sm font-medium text-gray-500">Phone</label>
                                   <p className="text-sm text-gray-900">{lead.phone}</p>
                                 </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-500">Location</label>
-                                  <p className="text-sm text-gray-900">{lead.location}</p>
-                                </div>
                               </div>
                               <div>
                                 <label className="text-sm font-medium text-gray-500">Subject</label>
@@ -526,7 +491,9 @@ export default function Leads() {
                               </div>
                               <div>
                                 <label className="text-sm font-medium text-gray-500">Message</label>
-                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">{lead.message}</p>
+                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">
+                                  {lead.message}
+                                </p>
                               </div>
                               <div className="grid grid-cols-3 gap-4">
                                 <div>
@@ -541,26 +508,28 @@ export default function Leads() {
                                     {lead.priority.charAt(0).toUpperCase() + lead.priority.slice(1)}
                                   </Badge>
                                 </div>
-                                <div>
-                                  <label className="text-sm font-medium text-gray-500">Source</label>
-                                  <p className="text-sm text-gray-900">{lead.source}</p>
-                                </div>
                               </div>
-                              {lead.reason && (
+                              {lead.notes && (
                                 <div>
                                   <label className="text-sm font-medium text-gray-500">Reason/Notes</label>
-                                  <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">{lead.reason}</p>
+                                  <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">{lead.notes}</p>
                                 </div>
                               )}
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
                                   <label className="text-sm font-medium text-gray-500">Created</label>
-                                  <p className="text-sm text-gray-900">{new Date(lead.createdAt).toLocaleDateString()}</p>
+                                  <p className="text-sm text-gray-900">
+                                    {new Date(lead.createdOn || '').toLocaleDateString()}
+                                  </p>
                                 </div>
-                                {lead.lastContacted && (
+                                {lead.updatedOn && (
                                   <div>
-                                    <label className="text-sm font-medium text-gray-500">Last Contacted</label>
-                                    <p className="text-sm text-gray-900">{new Date(lead.lastContacted).toLocaleDateString()}</p>
+                                    <label className="text-sm font-medium text-gray-500">
+                                      Last Contacted
+                                    </label>
+                                    <p className="text-sm text-gray-900">
+                                      {new Date(lead.updatedOn).toLocaleDateString()}
+                                    </p>
                                   </div>
                                 )}
                               </div>
@@ -569,7 +538,7 @@ export default function Leads() {
                               <Button variant="outline" onClick={() => setIsViewModalOpen(false)}>
                                 Close
                               </Button>
-                              <Button 
+                              <Button
                                 onClick={() => {
                                   setIsViewModalOpen(false);
                                   setSelectedLead(lead);
@@ -584,11 +553,19 @@ export default function Leads() {
                         </Dialog>
 
                         {/* Edit Lead */}
-                        <Dialog open={isEditModalOpen && selectedLead?.id === lead.id} onOpenChange={(open) => {
-                          setIsEditModalOpen(open);
-                          if (open) setSelectedLead(lead);
-                          else setSelectedLead(null);
-                        }}>
+                        <Dialog
+                          open={isEditModalOpen && selectedLead?._id === lead._id}
+                          onOpenChange={(open) => {
+                            setIsEditModalOpen(open);
+                            if (open) {
+                              setSelectedLead(lead);
+                              setEditStatus(lead.status);
+                              setEditReason(lead.notes || '');
+                            } else {
+                              setSelectedLead(null);
+                            }
+                          }}
+                        >
                           <DialogTrigger asChild>
                             <Button variant="ghost" size="icon">
                               <Edit className="w-4 h-4" />
@@ -610,13 +587,11 @@ export default function Leads() {
                               </div>
                               <div>
                                 <label className="text-sm font-medium">New Status</label>
-                                <Select 
-                                  value={lead.status} 
-                                  onValueChange={(value) => {
-                                    setLeads(prev => prev.map(l => 
-                                      l.id === lead.id ? { ...l, status: value as Lead['status'] } : l
-                                    ));
-                                  }}
+                                <Select
+                                  value={editStatus}
+                                  onValueChange={(value) =>
+                                    setEditStatus(value as Lead['status'])
+                                  }
                                 >
                                   <SelectTrigger>
                                     <SelectValue />
@@ -633,12 +608,8 @@ export default function Leads() {
                               <div>
                                 <label className="text-sm font-medium">Reason/Notes</label>
                                 <textarea
-                                  value={lead.reason || ''}
-                                  onChange={(e) => {
-                                    setLeads(prev => prev.map(l => 
-                                      l.id === lead.id ? { ...l, reason: e.target.value } : l
-                                    ));
-                                  }}
+                                  value={editReason}
+                                  onChange={(e) => setEditReason(e.target.value)}
                                   placeholder="Add reason for status change or additional notes..."
                                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                                   rows={3}
@@ -649,13 +620,8 @@ export default function Leads() {
                               <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
                                 Cancel
                               </Button>
-                              <Button 
-                                onClick={() => {
-                                  setLeads(prev => prev.map(l => 
-                                    l.id === lead.id ? { ...l, lastContacted: new Date().toISOString().split('T')[0] } : l
-                                  ));
-                                  setIsEditModalOpen(false);
-                                }}
+                              <Button
+                                onClick={handleEditLead}
                                 className="bg-orange-500 hover:bg-orange-600"
                               >
                                 Update Status
@@ -665,11 +631,14 @@ export default function Leads() {
                         </Dialog>
 
                         {/* Delete Lead */}
-                        <Dialog open={isDeleteModalOpen && selectedLead?.id === lead.id} onOpenChange={(open) => {
-                          setIsDeleteModalOpen(open);
-                          if (open) setSelectedLead(lead);
-                          else setSelectedLead(null);
-                        }}>
+                        <Dialog
+                          open={isDeleteModalOpen && selectedLead?._id === lead._id}
+                          onOpenChange={(open) => {
+                            setIsDeleteModalOpen(open);
+                            if (open) setSelectedLead(lead);
+                            else setSelectedLead(null);
+                          }}
+                        >
                           <DialogTrigger asChild>
                             <Button variant="ghost" size="icon">
                               <Trash2 className="w-4 h-4" />
@@ -679,23 +648,23 @@ export default function Leads() {
                             <DialogHeader>
                               <DialogTitle>Delete Lead</DialogTitle>
                               <DialogDescription>
-                                Are you sure you want to delete {lead.name}? This action cannot be undone.
+                                Are you sure you want to delete {lead.name}? This action cannot be
+                                undone.
                               </DialogDescription>
                             </DialogHeader>
                             <DialogFooter>
                               <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
                                 Cancel
                               </Button>
-                              <Button 
-                                variant="destructive" 
-                                onClick={() => handleDeleteLead(lead.id)}
+                              <Button
+                                variant="destructive"
+                                onClick={() => handleDeleteLead(lead._id || '')}
                               >
                                 Delete Lead
                               </Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
-                        
                       </div>
                     </td>
                   </motion.tr>

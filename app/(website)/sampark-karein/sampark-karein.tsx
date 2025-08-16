@@ -2,16 +2,24 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Phone, Mail, MapPin, User, MessageSquare, CheckCircle } from 'lucide-react';
+import { Send, Phone, Mail, MapPin, User, MessageSquare, CheckCircle, XCircle } from 'lucide-react';
 import CTA from '@/components/all/cta-section';
+import { useDispatch } from 'react-redux';
+import { addLead } from '@/lib/redux/features/leadSlice';
+import { AppDispatch } from '@/lib/redux/store';
 
 export default function SamparkKarein() {
+  const dispatch = useDispatch<AppDispatch>();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     subject: '',
-    message: ''
+    message: '',  
+    status: 'new' as "new" | "contacted" | "interested" | "not_interested" | "converted",
+    priority: 'medium' as "low" | "medium" | "high",
+    notes: ''
   });
 
   const [focused, setFocused] = useState({
@@ -24,6 +32,8 @@ export default function SamparkKarein() {
 
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [leadSuccess, setLeadSuccess] = useState(false);
+  const [leadError, setLeadError] = useState<string | null>(null);
 
   const handleFocus = (field: string) => {
     setFocused(prev => ({ ...prev, [field]: true }));
@@ -41,21 +51,30 @@ export default function SamparkKarein() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
+    setLeadError(null);
+    setLeadSuccess(false);
+
+    try {
+      // Dispatch addLead action and wait for completion
+       dispatch(addLead(formData));
       
+      setLeadSuccess(true);
+      setSubmitted(true);
+      setLoading(false);
+
       // Reset form after 3 seconds
       setTimeout(() => {
         setSubmitted(false);
+        setLeadSuccess(false);
         setFormData({
           name: '',
           email: '',
           phone: '',
           subject: '',
-          message: ''
+          message: '',
+          status: 'new',
+          priority: 'medium',
+          notes: ''
         });
         setFocused({
           name: false,
@@ -65,7 +84,12 @@ export default function SamparkKarein() {
           message: false
         });
       }, 3000);
-    }, 1500);
+    } catch (err: unknown) {
+      setLoading(false);
+      console.log(err);
+      setLeadError("लीड जोड़ने में त्रुटि हुई। कृपया पुनः प्रयास करें।");
+      setTimeout(() => setLeadError(null), 4000);
+    }
   };
 
   return (
@@ -102,7 +126,19 @@ export default function SamparkKarein() {
                 <CheckCircle className="w-14 h-14 text-white" />
               </motion.div>
               <h2 className="text-4xl font-bold text-gray-800 mb-6">धन्यवाद!</h2>
-              <p className="text-gray-600 text-xl mb-8">आपका संदेश सफलतापूर्वक भेज दिया गया है। हम जल्द ही आपसे संपर्क करेंगे।</p>
+              <p className="text-gray-600 text-xl mb-8">
+                आपका संदेश सफलतापूर्वक भेज दिया गया है।<br />
+                {leadSuccess && (
+                  <span className="block text-green-600 font-semibold mt-2">
+                    लीड सफलतापूर्वक जोड़ी गई!
+                  </span>
+                )}
+                {!leadSuccess && (
+                  <span className="block text-orange-500 font-semibold mt-2">
+                    आपका संदेश सफलतापूर्वक भेजा गया।
+                  </span>
+                )}
+              </p>
               <div className="w-32 h-1.5 bg-gradient-to-r from-orange-300 to-red-400 mx-auto rounded-full"></div>
             </motion.div>
           ) : (
@@ -228,7 +264,19 @@ export default function SamparkKarein() {
                     <div className="h-12 w-1.5 bg-gradient-to-b from-orange-500 to-red-500 rounded-full mr-4"></div>
                     <h2 className="text-3xl font-bold text-gray-800">अपना संदेश भेजें</h2>
                   </div>
-                  
+                  {/* Lead Success/Error Message */}
+                  {leadSuccess && (
+                    <div className="mb-6 flex items-center justify-center">
+                      <CheckCircle className="w-6 h-6 text-green-600 mr-2" />
+                      <span className="text-green-700 font-semibold">लीड सफलतापूर्वक जोड़ी गई!</span>
+                    </div>
+                  )}
+                  {leadError && (
+                    <div className="mb-6 flex items-center justify-center">
+                      <XCircle className="w-6 h-6 text-red-500 mr-2" />
+                      <span className="text-red-600 font-semibold">{leadError}</span>
+                    </div>
+                  )}
                   <form onSubmit={handleSubmit} className="space-y-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       {/* Name Field */}
@@ -360,7 +408,7 @@ export default function SamparkKarein() {
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            संदेश भेज रहा है...
+                            <span className="ml-1">लीड जोड़ी जा रही है...</span>
                           </>
                         ) : (
                           <>
