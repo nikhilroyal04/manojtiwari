@@ -242,6 +242,14 @@ export default function Gallery() {
     }
   };
 
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div></div>;
+  }
+
+  if (error) {
+    return <div className="flex justify-center items-center h-screen text-red-500">Error: {error}</div>;
+  }
+
   // UI
   return (
     <div className="min-h-screen">

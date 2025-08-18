@@ -141,7 +141,7 @@ export default function VividhtaSection() {
           transition={{ duration: 0.8 }}
         >
           {/* Background Image */}
-          <div className="relative h-96">
+          <div className="relative h-[34rem] md:h-[38rem]">
             <Image
               src="/parliament-hall.jpg"
               alt="Parliament Hall"
@@ -157,7 +157,7 @@ export default function VividhtaSection() {
             </div>
 
             {/* Video Thumbnails */}
-            <div className="absolute right-8 top-8 space-y-4">
+            <div className="absolute right-4 md:right-8 top-20 md:top-8 bottom-4 md:bottom-8 w-72 md:w-96 overflow-y-auto space-y-4 pr-2">
               {videoThumbnails.map((video, index) => (
                 <motion.div
                   key={index}
@@ -183,7 +183,7 @@ export default function VividhtaSection() {
                   </div>
 
                   {/* Video Thumbnail */}
-                  <div className="relative h-24 mb-2 rounded overflow-hidden">
+                  <div className="relative h-28 md:h-32 mb-2 rounded overflow-hidden">
                     <Image
                       src={video.image}
                       alt={video.title}

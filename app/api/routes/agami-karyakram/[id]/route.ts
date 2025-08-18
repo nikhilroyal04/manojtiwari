@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         }
         return NextResponse.json({ error: 'Failed to get karyakram by id' }, { status: 500 });
     }
-}           
+}   
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -30,9 +30,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         }
         return NextResponse.json({ error: 'Failed to update karyakram' }, { status: 500 });
     }
-}       
+}   
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {           
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params;
         await karyakramServices.deleteKaryakram(id);
@@ -41,7 +41,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     catch (error: unknown) {
         if (error instanceof Error) {
             return NextResponse.json({ error: error.message }, { status: 500 });
-        }       
+        }
         return NextResponse.json({ error: 'Failed to delete karyakram' }, { status: 500 });
     }
 }   

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Search, 
@@ -39,136 +39,28 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-
-interface AgamiKaryakram {
-  id: number;
-  title: string;
-  description: string;
-  date: string;
-  time: string;
-  location: string;
-  type: string;
-  image: string;
-  status: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELLED' | 'POSTPONED';
-  expectedAttendees?: number;
-  actualAttendees?: number;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-  organizer?: string;
-  contactPerson?: string;
-  contactNumber?: string;
-  notes?: string;
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchKaryakram, selectLoading, selectKaryakram, selectError, addKaryakram, updateKaryakram, deleteKaryakram, Karyakram } from '@/lib/redux/features/karyakramSlice';
+import { AppDispatch } from '@/lib/redux/store';
 
 export default function AgamiKaryakram() {
-  const [events, setEvents] = useState<AgamiKaryakram[]>([
-    {
-      id: 1,
-      title: "सांसद श्री मनोज तिवारी जी पार्क का लोकार्पण और मिशन अनिवार्य के तहत जरूरतमंद महिलाओं को सैनेटरी नैपकिन वितरण",
-      description: "पार्क का लोकार्पण और मिशन अनिवार्य के तहत जरूरतमंद महिलाओं को सैनेटरी नैपकिन वितरण",
-      date: "2024-06-26",
-      time: "11:00 AM",
-      location: "DDA द्वारा निर्मित खजूर पार्क, सेयदराजा विधानसभा",
-      type: "लोकार्पण",
-      image: "/images/events/park-inauguration.jpg",
-      status: "UPCOMING",
-      expectedAttendees: 500,
-      priority: "HIGH",
-      organizer: "मनोज तिवारी",
-      contactPerson: "राजेश कुमार",
-      contactNumber: "+91 98765 43210"
-    },
-    {
-      id: 2,
-      title: "जनता दरबार - समस्याओं का समाधान",
-      description: "सांसद श्री मनोज तिवारी जी द्वारा आयोजित जनता दरबार में क्षेत्र के नागरिकों की समस्याओं का समाधान किया जाएगा। सभी नागरिक अपनी समस्याओं के साथ आमंत्रित हैं।",
-      date: "2024-07-15",
-      time: "10:00 AM",
-      location: "कार्यालय, उत्तर पूर्वी दिल्ली",
-      type: "जनता दरबार",
-      image: "/images/events/janta-darbar.jpg",
-      status: "UPCOMING",
-      expectedAttendees: 300,
-      priority: "MEDIUM",
-      organizer: "मनोज तिवारी",
-      contactPerson: "प्रिया शर्मा",
-      contactNumber: "+91 87654 32109"
-    },
-    {
-      id: 3,
-      title: "स्वच्छता अभियान - स्वच्छ भारत मिशन",
-      description: "स्वच्छ भारत मिशन के अंतर्गत स्वच्छता अभियान का आयोजन किया जाएगा। सभी नागरिकों से अनुरोध है कि इस अभियान में बढ़-चढ़कर हिस्सा लें।",
-      date: "2024-07-22",
-      time: "09:00 AM",
-      location: "यमुना घाट, उत्तर पूर्वी दिल्ली",
-      type: "अभियान",
-      image: "/images/events/swachhta-abhiyan.jpg",
-      status: "UPCOMING",
-      expectedAttendees: 200,
-      priority: "HIGH",
-      organizer: "मनोज तिवारी",
-      contactPerson: "अमित पटेल",
-      contactNumber: "+91 76543 21098"
-    },
-    {
-      id: 4,
-      title: "वृक्षारोपण अभियान",
-      description: "पर्यावरण संरक्षण के लिए वृक्षारोपण अभियान का आयोजन किया जाएगा। सभी नागरिकों से अनुरोध है कि इस अभियान में भाग लें और अपने क्षेत्र को हरा-भरा बनाएं।",
-      date: "2024-08-05",
-      time: "08:30 AM",
-      location: "यमुना खादर क्षेत्र, उत्तर पूर्वी दिल्ली",
-      type: "अभियान",
-      image: "/images/events/tree-plantation.jpg",
-      status: "UPCOMING",
-      expectedAttendees: 150,
-      priority: "MEDIUM",
-      organizer: "मनोज तिवारी",
-      contactPerson: "सुनील वर्मा",
-      contactNumber: "+91 65432 10987"
-    },
-    {
-      id: 5,
-      title: "स्वास्थ्य शिविर",
-      description: "निःशुल्क स्वास्थ्य जांच शिविर का आयोजन किया जाएगा। इस शिविर में विभिन्न बीमारियों की जांच और परामर्श दिया जाएगा।",
-      date: "2024-08-15",
-      time: "10:00 AM",
-      location: "सामुदायिक भवन, उत्तर पूर्वी दिल्ली",
-      type: "शिविर",
-      image: "/images/events/health-camp.jpg",
-      status: "UPCOMING",
-      expectedAttendees: 400,
-      priority: "HIGH",
-      organizer: "मनोज तिवारी",
-      contactPerson: "डॉ. रेखा सिंह",
-      contactNumber: "+91 54321 09876"
-    },
-    {
-      id: 6,
-      title: "स्वतंत्रता दिवस समारोह",
-      description: "75वें स्वतंत्रता दिवस के उपलक्ष्य में विशेष समारोह का आयोजन किया जाएगा। इस अवसर पर ध्वजारोहण और सांस्कृतिक कार्यक्रम होंगे।",
-      date: "2024-08-15",
-      time: "08:00 AM",
-      location: "डीडीए मैदान, उत्तर पूर्वी दिल्ली",
-      type: "समारोह",
-      image: "/images/events/independence-day.jpg",
-      status: "UPCOMING",
-      expectedAttendees: 1000,
-      priority: "URGENT",
-      organizer: "मनोज तिवारी",
-      contactPerson: "राजेश कुमार",
-      contactNumber: "+91 98765 43210"
-    }
-  ]);
+
+  const dispatch = useDispatch<AppDispatch>();
+  const karyakram = useSelector(selectKaryakram);
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
-  const [selectedEvent, setSelectedEvent] = useState<AgamiKaryakram | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Karyakram | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newEvent, setNewEvent] = useState<Partial<AgamiKaryakram>>({
+  const [editEvent, setEditEvent] = useState<Partial<Karyakram>>({});
+    const [newEvent, setNewEvent] = useState<Partial<Karyakram>>({
     title: '',
     description: '',
     date: '',
@@ -176,45 +68,49 @@ export default function AgamiKaryakram() {
     location: '',
     type: '',
     image: '',
-    status: 'UPCOMING',
+    status: 'upcoming',
     expectedAttendees: 0,
-    priority: 'MEDIUM',
+    priority: 'medium',
     organizer: 'मनोज तिवारी',
     contactPerson: '',
     contactNumber: ''
   });
 
+  useEffect(() => {
+    dispatch(fetchKaryakram());
+  }, [dispatch]);
+
   const statusColors = {
-    UPCOMING: 'bg-blue-100 text-blue-800 border-blue-200',
-    ONGOING: 'bg-green-100 text-green-800 border-green-200',
-    COMPLETED: 'bg-gray-100 text-gray-800 border-gray-200',
-    CANCELLED: 'bg-red-100 text-red-800 border-red-200',
-    POSTPONED: 'bg-yellow-100 text-yellow-800 border-yellow-200'
+    upcoming: 'bg-blue-100 text-blue-800 border-blue-200',
+    ongoing: 'bg-green-100 text-green-800 border-green-200',
+    completed: 'bg-gray-100 text-gray-800 border-gray-200',
+    cancelled: 'bg-red-100 text-red-800 border-red-200',
+    postponed: 'bg-yellow-100 text-yellow-800 border-yellow-200'
   };
 
   const priorityColors = {
-    LOW: 'bg-gray-100 text-gray-800 border-gray-200',
-    MEDIUM: 'bg-blue-100 text-blue-800 border-blue-200',
-    HIGH: 'bg-orange-100 text-orange-800 border-orange-200',
-    URGENT: 'bg-red-100 text-red-800 border-red-200'
+    low: 'bg-gray-100 text-gray-800 border-gray-200',
+    medium: 'bg-blue-100 text-blue-800 border-blue-200',
+    high: 'bg-orange-100 text-orange-800 border-orange-200',
+    urgent: 'bg-red-100 text-red-800 border-red-200'
   };
 
   const statusIcons = {
-    UPCOMING: Clock,
-    ONGOING: Play,
-    COMPLETED: CheckCircle,
-    CANCELLED: XCircle,
-    POSTPONED: Pause
+    upcoming: Clock,
+    ongoing: Play,
+    completed: CheckCircle,
+    cancelled: XCircle,
+    postponed: Pause
   };
 
   const priorityIcons = {
-    LOW: AlertCircle,
-    MEDIUM: AlertCircle,
-    HIGH: Zap,
-    URGENT: Zap
+    low: AlertCircle,
+    medium: AlertCircle,
+    high: Zap,
+    urgent: Zap
   };
 
-  const filteredEvents = events.filter(event => {
+  const filteredEvents = karyakram.filter(event => {
     const matchesSearch = 
       event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -228,8 +124,7 @@ export default function AgamiKaryakram() {
   });
 
   const handleAddEvent = () => {
-    const event: AgamiKaryakram = {
-      id: Date.now(),
+    const event: Karyakram = {
       title: newEvent.title || '',
       description: newEvent.description || '',
       date: newEvent.date || '',
@@ -237,15 +132,15 @@ export default function AgamiKaryakram() {
       location: newEvent.location || '',
       type: newEvent.type || '',
       image: newEvent.image || '',
-      status: newEvent.status || 'UPCOMING',
+      status: newEvent.status || 'upcoming',
       expectedAttendees: newEvent.expectedAttendees || 0,
-      priority: newEvent.priority || 'MEDIUM',
+      priority: newEvent.priority || 'medium',
       organizer: newEvent.organizer || 'मनोज तिवारी',
       contactPerson: newEvent.contactPerson || '',
       contactNumber: newEvent.contactNumber || ''
     };
     
-    setEvents(prev => [event, ...prev]);
+    dispatch(addKaryakram(event));
     setNewEvent({
       title: '',
       description: '',
@@ -254,9 +149,9 @@ export default function AgamiKaryakram() {
       location: '',
       type: '',
       image: '',
-      status: 'UPCOMING',
+      status: 'upcoming',
       expectedAttendees: 0,
-      priority: 'MEDIUM',
+      priority: 'medium',
       organizer: 'मनोज तिवारी',
       contactPerson: '',
       contactNumber: ''
@@ -264,24 +159,33 @@ export default function AgamiKaryakram() {
     setIsAddModalOpen(false);
   };
 
-  const handleDeleteEvent = (id: number) => {
-    setEvents(prev => prev.filter(event => event.id !== id));
+  const handleDeleteEvent = (id: string | undefined) => {
+    if (id) {
+      dispatch(deleteKaryakram(id));
+    }
     setIsDeleteModalOpen(false);
     setSelectedEvent(null);
   };
 
   const getStatusCount = (status: string) => {
-    return events.filter(event => status === 'all' ? true : event.status === status).length;
+    return karyakram.filter(event => status === 'all' ? true : event.status === status).length;
   };
 
   const getPriorityCount = (priority: string) => {
-    return events.filter(event => priority === 'all' ? true : event.priority === priority).length;
+    return karyakram.filter(event => priority === 'all' ? true : event.priority === priority).length;
   };
 
-  const totalExpectedAttendees = events.reduce((sum, event) => sum + (event.expectedAttendees || 0), 0);
-  const urgentEvents = events.filter(event => event.priority === 'URGENT').length;
+  const totalExpectedAttendees = karyakram.reduce((sum, event) => sum + (event.expectedAttendees || 0), 0);
 
-  const eventTypes = Array.from(new Set(events.map(event => event.type)));
+  const eventTypes = Array.from(new Set(karyakram.map(event => event.type)));
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div></div>;
+  }
+
+  if (error) {
+    return <div className="flex justify-center items-center h-screen text-red-500">Error: {error}</div>;
+  }
 
   return (
     <div className="min-h-screen">
@@ -295,11 +199,11 @@ export default function AgamiKaryakram() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8">
           {[
-            { label: 'Total Events', count: events.length, color: 'bg-blue-500', icon: Calendar },
-            { label: 'Upcoming', count: getStatusCount('UPCOMING'), color: 'bg-blue-500', icon: Clock },
-            { label: 'Ongoing', count: getStatusCount('ONGOING'), color: 'bg-green-500', icon: Play },
-            { label: 'Completed', count: getStatusCount('COMPLETED'), color: 'bg-gray-500', icon: CheckCircle },
-            { label: 'Urgent', count: urgentEvents, color: 'bg-red-500', icon: Zap },
+            { label: 'Total Events', count: karyakram.length, color: 'bg-blue-500', icon: Calendar },
+            { label: 'Upcoming', count: getStatusCount('upcoming'), color: 'bg-blue-500', icon: Clock },
+            { label: 'Ongoing', count: getStatusCount('ongoing'), color: 'bg-green-500', icon: Play },
+            { label: 'Completed', count: getStatusCount('completed'), color: 'bg-gray-500', icon: CheckCircle },
+            { label: 'Urgent', count: getPriorityCount('urgent'), color: 'bg-red-500', icon: Zap },
             { label: 'Expected Attendees', count: totalExpectedAttendees, color: 'bg-purple-500', icon: Users }
           ].map((stat, index) => (
             <motion.div
@@ -339,7 +243,7 @@ export default function AgamiKaryakram() {
                 <div key={type} className="flex justify-between">
                   <span className="text-gray-600">{type}:</span>
                   <span className="font-semibold">
-                    {events.filter(event => event.type === type).length}
+                    {karyakram.filter(event => event.type === type).length}
                   </span>
                 </div>
               ))}
@@ -359,19 +263,19 @@ export default function AgamiKaryakram() {
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-gray-600">Urgent:</span>
-                <span className="font-semibold text-red-600">{getPriorityCount('URGENT')}</span>
+                <span className="font-semibold text-red-600">{getPriorityCount('urgent')}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">High:</span>
-                <span className="font-semibold text-orange-600">{getPriorityCount('HIGH')}</span>
+                <span className="font-semibold text-orange-600">{getPriorityCount('high')}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Medium:</span>
-                <span className="font-semibold text-blue-600">{getPriorityCount('MEDIUM')}</span>
+                <span className="font-semibold text-blue-600">{getPriorityCount('medium')}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Low:</span>
-                <span className="font-semibold text-gray-600">{getPriorityCount('LOW')}</span>
+                <span className="font-semibold text-gray-600">{getPriorityCount('low')}</span>
               </div>
             </div>
           </motion.div>
@@ -401,11 +305,11 @@ export default function AgamiKaryakram() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="UPCOMING">Upcoming</SelectItem>
-                <SelectItem value="ONGOING">Ongoing</SelectItem>
-                <SelectItem value="COMPLETED">Completed</SelectItem>
-                <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                <SelectItem value="POSTPONED">Postponed</SelectItem>
+                <SelectItem value="upcoming">Upcoming</SelectItem>
+                <SelectItem value="ongoing">Ongoing</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectItem value="postponed">Postponed</SelectItem>
               </SelectContent>
             </Select>
 
@@ -429,10 +333,10 @@ export default function AgamiKaryakram() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Priority</SelectItem>
-                <SelectItem value="URGENT">Urgent</SelectItem>
-                <SelectItem value="HIGH">High</SelectItem>
-                <SelectItem value="MEDIUM">Medium</SelectItem>
-                <SelectItem value="LOW">Low</SelectItem>
+                <SelectItem value="urgent">Urgent</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
               </SelectContent>
             </Select>
 
@@ -507,30 +411,30 @@ export default function AgamiKaryakram() {
                     </div>
                     <div>
                       <label className="text-sm font-medium">Status</label>
-                      <Select value={newEvent.status} onValueChange={(value) => setNewEvent(prev => ({ ...prev, status: value as AgamiKaryakram['status'] }))}>
+                      <Select value={newEvent.status} onValueChange={(value) => setNewEvent(prev => ({ ...prev, status: value as Karyakram['status'] }))}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="UPCOMING">Upcoming</SelectItem>
-                          <SelectItem value="ONGOING">Ongoing</SelectItem>
-                          <SelectItem value="COMPLETED">Completed</SelectItem>
-                          <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                          <SelectItem value="POSTPONED">Postponed</SelectItem>
+                          <SelectItem value="upcoming">Upcoming</SelectItem>
+                          <SelectItem value="ongoing">Ongoing</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                          <SelectItem value="postponed">Postponed</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
                       <label className="text-sm font-medium">Priority</label>
-                      <Select value={newEvent.priority} onValueChange={(value) => setNewEvent(prev => ({ ...prev, priority: value as AgamiKaryakram['priority'] }))}>
+                      <Select value={newEvent.priority} onValueChange={(value) => setNewEvent(prev => ({ ...prev, priority: value as Karyakram['priority'] }))}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="LOW">Low</SelectItem>
-                          <SelectItem value="MEDIUM">Medium</SelectItem>
-                          <SelectItem value="HIGH">High</SelectItem>
-                          <SelectItem value="URGENT">Urgent</SelectItem>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                          <SelectItem value="urgent">Urgent</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -604,7 +508,7 @@ export default function AgamiKaryakram() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredEvents.map((event, index) => (
                   <motion.tr
-                    key={event.id}
+                    key={event._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
@@ -651,7 +555,7 @@ export default function AgamiKaryakram() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center gap-2">
                         {/* View Event */}
-                        <Dialog open={isViewModalOpen && selectedEvent?.id === event.id} onOpenChange={(open) => {
+                        <Dialog open={isViewModalOpen && selectedEvent?._id === event._id} onOpenChange={(open) => {
                           setIsViewModalOpen(open);
                           if (open) setSelectedEvent(event);
                           else setSelectedEvent(null);
@@ -748,6 +652,7 @@ export default function AgamiKaryakram() {
                                 onClick={() => {
                                   setIsViewModalOpen(false);
                                   setSelectedEvent(event);
+                                  setEditEvent(event);
                                   setIsEditModalOpen(true);
                                 }}
                                 className="bg-primary hover:bg-primary/90"
@@ -759,10 +664,15 @@ export default function AgamiKaryakram() {
                         </Dialog>
 
                         {/* Edit Event */}
-                        <Dialog open={isEditModalOpen && selectedEvent?.id === event.id} onOpenChange={(open) => {
+                        <Dialog open={isEditModalOpen && selectedEvent?._id === event._id} onOpenChange={(open) => {
                           setIsEditModalOpen(open);
-                          if (open) setSelectedEvent(event);
-                          else setSelectedEvent(null);
+                          if (open) {
+                            setSelectedEvent(event);
+                            setEditEvent(event);
+                          } else {
+                            setSelectedEvent(null);
+                            setEditEvent({});
+                          }
                         }}>
                           <DialogTrigger asChild>
                             <Button variant="ghost" size="icon">
@@ -780,55 +690,47 @@ export default function AgamiKaryakram() {
                               <div>
                                 <label className="text-sm font-medium">Title</label>
                                 <Input
-                                  value={event.title}
-                                  onChange={(e) => {
-                                    setEvents(prev => prev.map(ev => 
-                                      ev.id === event.id ? { ...ev, title: e.target.value } : ev
-                                    ));
-                                  }}
+                                  value={editEvent.title ?? ''}
+                                  onChange={(e) => setEditEvent(prev => ({ ...prev, title: e.target.value }))}
                                 />
                               </div>
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
                                   <label className="text-sm font-medium">Status</label>
                                   <Select 
-                                    value={event.status} 
+                                    value={editEvent.status ?? 'upcoming'} 
                                     onValueChange={(value) => {
-                                      setEvents(prev => prev.map(ev => 
-                                        ev.id === event.id ? { ...ev, status: value as AgamiKaryakram['status'] } : ev
-                                      ));
+                                      setEditEvent(prev => ({ ...prev, status: value as Karyakram['status'] }));
                                     }}
                                   >
                                     <SelectTrigger>
                                       <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="UPCOMING">Upcoming</SelectItem>
-                                      <SelectItem value="ONGOING">Ongoing</SelectItem>
-                                      <SelectItem value="COMPLETED">Completed</SelectItem>
-                                      <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                                      <SelectItem value="POSTPONED">Postponed</SelectItem>
+                                      <SelectItem value="upcoming">Upcoming</SelectItem>
+                                      <SelectItem value="ongoing">Ongoing</SelectItem>
+                                      <SelectItem value="completed">Completed</SelectItem>
+                                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                                      <SelectItem value="postponed">Postponed</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
                                 <div>
                                   <label className="text-sm font-medium">Priority</label>
                                   <Select 
-                                    value={event.priority} 
+                                    value={editEvent.priority ?? 'medium'} 
                                     onValueChange={(value) => {
-                                      setEvents(prev => prev.map(ev => 
-                                        ev.id === event.id ? { ...ev, priority: value as AgamiKaryakram['priority'] } : ev
-                                      ));
+                                      setEditEvent(prev => ({ ...prev, priority: value as Karyakram['priority'] }));
                                     }}
                                   >
                                     <SelectTrigger>
                                       <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="LOW">Low</SelectItem>
-                                      <SelectItem value="MEDIUM">Medium</SelectItem>
-                                      <SelectItem value="HIGH">High</SelectItem>
-                                      <SelectItem value="URGENT">Urgent</SelectItem>
+                                      <SelectItem value="low">Low</SelectItem>
+                                      <SelectItem value="medium">Medium</SelectItem>
+                                      <SelectItem value="high">High</SelectItem>
+                                      <SelectItem value="urgent">Urgent</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
@@ -838,24 +740,16 @@ export default function AgamiKaryakram() {
                                   <label className="text-sm font-medium">Expected Attendees</label>
                                   <Input
                                     type="number"
-                                    value={event.expectedAttendees || 0}
-                                    onChange={(e) => {
-                                      setEvents(prev => prev.map(ev => 
-                                        ev.id === event.id ? { ...ev, expectedAttendees: parseInt(e.target.value) || 0 } : ev
-                                      ));
-                                    }}
+                                    value={editEvent.expectedAttendees ?? 0}
+                                    onChange={(e) => setEditEvent(prev => ({ ...prev, expectedAttendees: parseInt(e.target.value) || 0 }))}
                                   />
                                 </div>
                                 <div>
                                   <label className="text-sm font-medium">Actual Attendees</label>
                                   <Input
                                     type="number"
-                                    value={event.actualAttendees || ''}
-                                    onChange={(e) => {
-                                      setEvents(prev => prev.map(ev => 
-                                        ev.id === event.id ? { ...ev, actualAttendees: parseInt(e.target.value) || undefined } : ev
-                                      ));
-                                    }}
+                                    value={editEvent.actualAttendees ?? ''}
+                                    onChange={(e) => setEditEvent(prev => ({ ...prev, actualAttendees: parseInt(e.target.value) || undefined }))}
                                     placeholder="Enter after event"
                                   />
                                 </div>
@@ -866,7 +760,18 @@ export default function AgamiKaryakram() {
                                 Cancel
                               </Button>
                               <Button 
-                                onClick={() => setIsEditModalOpen(false)}
+                                onClick={() => {
+                                  if (selectedEvent?._id) {
+                                    const payload: Karyakram = {
+                                      ...selectedEvent,
+                                      ...editEvent,
+                                    } as Karyakram;
+                                    dispatch(updateKaryakram(selectedEvent._id, payload));
+                                  }
+                                  setIsEditModalOpen(false);
+                                  setSelectedEvent(null);
+                                  setEditEvent({});
+                                }}
                                 className="bg-primary hover:bg-primary/90"
                               >
                                 Update Event
@@ -876,7 +781,7 @@ export default function AgamiKaryakram() {
                         </Dialog>
 
                         {/* Delete Event */}
-                        <Dialog open={isDeleteModalOpen && selectedEvent?.id === event.id} onOpenChange={(open) => {
+                        <Dialog open={isDeleteModalOpen && selectedEvent?._id === event._id} onOpenChange={(open) => {
                           setIsDeleteModalOpen(open);
                           if (open) setSelectedEvent(event);
                           else setSelectedEvent(null);
@@ -899,7 +804,7 @@ export default function AgamiKaryakram() {
                               </Button>
                               <Button 
                                 variant="destructive" 
-                                onClick={() => handleDeleteEvent(event.id)}
+                                onClick={() => handleDeleteEvent(event._id)}
                               >
                                 Delete Event
                               </Button>

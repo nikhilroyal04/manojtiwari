@@ -174,7 +174,7 @@ export const updateKaryakram = (id: string, karyakram: Karyakram) => async (disp
     }
 };
 
-export const deleteAdhikari = (id: string) => async (dispatch: Dispatch) => {
+export const deleteKaryakram = (id: string) => async (dispatch: Dispatch) => {
     try {
         dispatch(setLoading(true));
         const response = await axios.delete(`/api/routes/agami-karyakram/${id}`);

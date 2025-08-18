@@ -16,7 +16,6 @@ import {
   Award,
   Activity,
   Globe,
-  Loader2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -111,28 +110,12 @@ export default function ChunaviRailayan() {
     }
   }
 
-  // Loading state
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="flex items-center space-x-2">
-          <Loader2 className="w-6 h-6 animate-spin" />
-          <span>रैलियां लोड हो रही हैं...</span>
-        </div>
-      </div>
-    );
+    return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div></div>;
   }
 
-  // Error state
   if (error) {
-    return (
-      <div className="flex justify-center items-center h-screen text-red-500">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">त्रुटि</h2>
-          <p>{error}</p>
-        </div>
-      </div>
-    );
+    return <div className="flex justify-center items-center h-screen text-red-500">Error: {error}</div>;
   }
 
   return (
