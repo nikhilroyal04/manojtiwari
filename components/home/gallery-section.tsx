@@ -11,11 +11,11 @@ export default function GallerySection() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const categories = [
-    { id: 'all', name: 'सभी', count: 12 },
-    { id: 'parliament', name: 'संसद', count: 4 },
-    { id: 'rallies', name: 'रैलियां', count: 3 },
-    { id: 'meetings', name: 'बैठकें', count: 3 },
-    { id: 'media', name: 'मीडिया', count: 2 }
+    { id: 'all', name: 'सभी' },
+    { id: 'parliament', name: 'संसद' },
+    { id: 'rallies', name: 'रैलियां' },
+    { id: 'meetings', name: 'बैठकें' },
+    { id: 'media', name: 'मीडिया' }
   ];
 
   const galleryImages = [
@@ -121,6 +121,12 @@ export default function GallerySection() {
     ? galleryImages 
     : galleryImages.filter(img => img.category === selectedCategory);
 
+  // Update category counts dynamically
+  const getCategoryCount = (categoryId: string) => {
+    if (categoryId === 'all') return galleryImages.length;
+    return galleryImages.filter(img => img.category === categoryId).length;
+  };
+
   const openLightbox = (index: number) => {
     setCurrentImageIndex(index);
     setSelectedImage(index);
@@ -200,7 +206,7 @@ export default function GallerySection() {
             >
               <Filter className="w-4 h-4" />
               <span>{category.name}</span>
-              <span className="text-xs opacity-75">({category.count})</span>
+              <span className="text-xs opacity-75">({getCategoryCount(category.id)})</span>
             </motion.button>
           ))}
         </motion.div>
@@ -213,18 +219,19 @@ export default function GallerySection() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
         >
-          <AnimatePresence mode="wait">
-            {filteredImages.map((image, index) => (
-              <motion.div
-                key={image.id}
-                className="mb-4 break-inside-avoid"
-                variants={itemVariants}
-                layout
-                whileHover={{ 
-                  scale: 1.02,
-                  transition: { duration: 0.2 }
-                }}
-              >
+          {filteredImages.map((image, index) => (
+            <motion.div
+              key={`${image.id}-${selectedCategory}`}
+              className="mb-4 break-inside-avoid"
+              variants={itemVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              whileHover={{ 
+                scale: 1.02,
+                transition: { duration: 0.2 }
+              }}
+            >
                 <div 
                   className="relative group cursor-pointer overflow-hidden rounded-lg shadow-lg"
                   onClick={() => openLightbox(index)}
@@ -259,7 +266,6 @@ export default function GallerySection() {
                 </div>
               </motion.div>
             ))}
-          </AnimatePresence>
         </motion.div>
 
         {/* Lightbox */}
