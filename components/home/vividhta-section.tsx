@@ -164,12 +164,13 @@ export default function VividhtaSection() {
               {videoThumbnails.map((video, index) => (
                 <motion.div
                   key={index}
-                  className="bg-white rounded-lg p-3 shadow-lg max-w-sm"
+                  className="bg-white rounded-lg p-3 shadow-lg max-w-sm cursor-pointer"
                   initial={{ opacity: 0, x: 50 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.2 }}
                   whileHover={{ scale: 1.05 }}
+                  onClick={() => window.open(video.videoUrl, '_blank')}
                 >
                   {/* Video Header */}
                   <div className="flex items-center justify-between mb-2">
@@ -186,14 +187,17 @@ export default function VividhtaSection() {
                   </div>
 
                   {/* Video Thumbnail */}
-                  <div className="relative h-28 md:h-32 mb-2 rounded overflow-hidden">
+                  <div 
+                    className="relative h-28 md:h-32 mb-2 rounded overflow-hidden cursor-pointer"
+                    onClick={() => window.open(video.videoUrl, '_blank')}
+                  >
                     <Image
                       src={video.image}
                       alt={video.title}
                       fill
                       className="object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center hover:bg-black/40 transition-colors">
                       <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
                         <Play className="w-4 h-4 text-white" />
                       </div>

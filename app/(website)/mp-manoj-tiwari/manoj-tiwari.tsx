@@ -57,7 +57,7 @@ export default function ManojTiwari() {
       <section className="relative h-[60vh] bg-gradient-to-r from-primary/90 to-accent/90 overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="/manoj-tiwari-bg.jpg"
+            src="/about-2.jpeg"
             alt="Manoj Tiwari Background"
             fill
             className="object-cover opacity-20"
@@ -74,7 +74,7 @@ export default function ManojTiwari() {
               transition={{ duration: 0.8 }}
             >
               <Image
-                src="/manoj-tiwari-profile.jpg"
+                src="/about-1.jpeg"
                 alt="Manoj Tiwari"
                 width={200}
                 height={200}
