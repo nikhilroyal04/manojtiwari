@@ -11,21 +11,21 @@ export default function RecentPostSection() {
   const posts = [
     {
       id: 1,
-      image: "/posts/sealing-industry.jpg",
+      image: "/post-1.jpg",
       headline: "दिल्ली में सीलिंग एक उद्योग बन गया है: मनोज तिवारी",
       description: "दिल्ली बीजेपी अध्यक्ष मनोज तिवारी ने कहा है कि दिल्ली में सीलिंग एक उद्योग बन गया है. भ्रष्ट अधिकारियों के साथ मिलकर मॉनिटरिंग कमिटी 2006 से लेकर 2018 तक भय में दिल्ली के लोगों को रखा है.",
       hasButton: false
     },
     {
       id: 2,
-      image: "/posts/cheap-electricity.jpg",
+      image: "/post-2.jpeg",
       headline: "दिल्ली की जनता को सस्ती बिजली देने के लिए ही केंद्र सरकार ला ...",
       description: "दिल्ली भाजपा अध्यक्ष मनोज तिवारी ने दिल्ली के मुख्यमंत्री अरविंद केजरीवाल सरकार पर एक बार फिर हमला बोला है.",
       hasButton: true
     },
     {
       id: 3,
-      image: "/posts/infiltrators-investigation.jpg",
+      image: "/post-3.jpeg",
       headline: "मनोज तिवारी ने गृहमंत्री से की अपील, दिल्ली में घुसपैठियों की जांच ...",
       description: "भाजपा सांसद मनोज तिवारी ने गृहमंत्री राजनाथ सिंह को पत्र लिखकर दिल्ली में मौजूद रोहिंग्या घुसपैठियों को हटाने की मांग की है.",
       hasButton: false

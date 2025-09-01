@@ -112,9 +112,13 @@ export const fetchGallery = () => async (dispatch: Dispatch) => {
 export const addGalleryItem = (galleryItem: GalleryItem) => async (dispatch: Dispatch) => {
     try {
         dispatch(setLoading(true));
-        const response = await axios.post("/api/routes/gallery", galleryItem, {
+        const formData = new FormData();
+        Object.entries(galleryItem).forEach(([key, value]) => {
+            formData.append(key, value as string);
+        });
+        const response = await axios.post("/api/routes/gallery", formData, {
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "multipart/form-data",
             },
         });
 

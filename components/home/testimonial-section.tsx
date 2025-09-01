@@ -11,7 +11,7 @@ const testimonials = [
     id: 1,
     name: "राजेश कुमार",
     position: "स्थानीय व्यापारी",
-    image: "/images/testimonial1.jpg",
+    image: "https://randomuser.me/api/portraits/men/1.jpg",
     quote: "मनोज तिवारी जी ने हमारे क्षेत्र की समस्याओं को सुलझाने में बहुत मदद की है। उनके प्रयासों से हमारे इलाके में सड़कों और बिजली की स्थिति में काफी सुधार हुआ है।",
     rating: 5
   },
@@ -19,7 +19,7 @@ const testimonials = [
     id: 2,
     name: "प्रिया शर्मा",
     position: "शिक्षिका",
-    image: "/images/testimonial2.jpg",
+    image: "https://randomuser.me/api/portraits/women/1.jpg",
     quote: "मनोज जी ने हमारे स्कूल के विकास में महत्वपूर्ण भूमिका निभाई है। उनके सहयोग से हमारे स्कूल में नई कंप्यूटर लैब और पुस्तकालय का निर्माण हुआ है।",
     rating: 5
   },
@@ -27,7 +27,7 @@ const testimonials = [
     id: 3,
     name: "अमित सिंह",
     position: "किसान",
-    image: "/images/testimonial3.jpg",
+    image: "https://randomuser.me/api/portraits/men/2.jpg",
     quote: "मनोज तिवारी जी हमेशा किसानों के हित में काम करते हैं। उन्होंने हमारे गांव में सिंचाई की समस्या को हल करवाया और हमें नई कृषि तकनीकों से अवगत कराया।",
     rating: 4
   },
@@ -35,7 +35,7 @@ const testimonials = [
     id: 4,
     name: "सुनीता देवी",
     position: "गृहिणी",
-    image: "/images/testimonial4.jpg",
+    image: "https://randomuser.me/api/portraits/women/2.jpg",
     quote: "मनोज जी ने महिला सशक्तिकरण के लिए कई कार्यक्रम शुरू किए हैं। उनके प्रयासों से हमारे क्षेत्र की महिलाओं को रोजगार के अवसर मिले हैं।",
     rating: 5
   }

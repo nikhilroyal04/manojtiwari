@@ -21,7 +21,7 @@ export default function GallerySection() {
   const galleryImages = [
     {
       id: 1,
-      src: "/gallery/parliament-1.jpg",
+      src: "/gal1.jpeg",
       alt: "Manoj Tiwari in Parliament",
       category: "parliament",
       title: "संसद में भाषण",
@@ -29,7 +29,7 @@ export default function GallerySection() {
     },
     {
       id: 2,
-      src: "/gallery/rally-1.jpg",
+      src: "/gal2.jpeg",
       alt: "Political Rally",
       category: "rallies",
       title: "जनता रैली",
@@ -37,7 +37,7 @@ export default function GallerySection() {
     },
     {
       id: 3,
-      src: "/gallery/meeting-1.jpg",
+      src: "/gal3.jpeg",
       alt: "Party Meeting",
       category: "meetings",
       title: "पार्टी बैठक",
@@ -45,7 +45,7 @@ export default function GallerySection() {
     },
     {
       id: 4,
-      src: "/gallery/media-1.jpg",
+      src: "/gal4.jpeg",
       alt: "Media Interview",
       category: "media",
       title: "मीडिया साक्षात्कार",
@@ -53,7 +53,7 @@ export default function GallerySection() {
     },
     {
       id: 5,
-      src: "/gallery/parliament-2.jpg",
+      src: "/gal5.jpeg",
       alt: "Parliament Session",
       category: "parliament",
       title: "संसद सत्र",
@@ -61,7 +61,7 @@ export default function GallerySection() {
     },
     {
       id: 6,
-      src: "/gallery/rally-2.jpg",
+      src: "/gal6.jpeg",
       alt: "Election Rally",
       category: "rallies",
       title: "चुनावी रैली",
@@ -69,7 +69,7 @@ export default function GallerySection() {
     },
     {
       id: 7,
-      src: "/gallery/meeting-2.jpg",
+      src: "/gal7.jpeg",
       alt: "Cabinet Meeting",
       category: "meetings",
       title: "मंत्रिमंडल बैठक",
@@ -77,7 +77,7 @@ export default function GallerySection() {
     },
     {
       id: 8,
-      src: "/gallery/parliament-3.jpg",
+      src: "/gal8.jpeg",
       alt: "Parliament Debate",
       category: "parliament",
       title: "संसदीय बहस",
@@ -85,7 +85,7 @@ export default function GallerySection() {
     },
     {
       id: 9,
-      src: "/gallery/media-2.jpg",
+      src: "/gal9.jpeg",
       alt: "Press Conference",
       category: "media",
       title: "प्रेस कॉन्फ्रेंस",
@@ -93,7 +93,7 @@ export default function GallerySection() {
     },
     {
       id: 10,
-      src: "/gallery/rally-3.jpg",
+      src: "/gal10.jpeg",
       alt: "Public Meeting",
       category: "rallies",
       title: "जनसभा",
@@ -101,7 +101,7 @@ export default function GallerySection() {
     },
     {
       id: 11,
-      src: "/gallery/meeting-3.jpg",
+      src: "/gal11.jpeg",
       alt: "Party Conference",
       category: "meetings",
       title: "पार्टी सम्मेलन",
@@ -109,7 +109,7 @@ export default function GallerySection() {
     },
     {
       id: 12,
-      src: "/gallery/parliament-4.jpg",
+      src: "/gal12.jpeg",
       alt: "Parliament Address",
       category: "parliament",
       title: "संसद में संबोधन",

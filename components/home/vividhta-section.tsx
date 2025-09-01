@@ -9,19 +9,19 @@ export default function VividhtaSection() {
   const contentCards = [
     {
       title: "मीडिया कवरेज",
-      image: "/media-coverage.jpg",
+      image: "/rp-1.jpg",
       description: "We will ensure MCDs get money direct from Centre",
       subtitle: "INTERVIEW Delhi BJP chief Manoj Tiwari insists though both AAP and Cong governments in Delhi choked the flow of funds to municipalities, the party-ruled civic bodies have developed parks and improved school education."
     },
     {
       title: "एक राजनीतिक के रूप में",
-      image: "/politician.jpg",
+      image: "/rp-2.jpg",
       description: "Speaking at political podium",
       subtitle: "Manoj Tiwari addressing the audience in a formal political setting, representing the voice of the people."
     },
     {
       title: "लाइव डिबेट",
-      image: "/live-debate.jpg",
+      image: "/rp-3.jpg",
       description: "INDIA TV Live Debate",
       subtitle: "Participating in live television debates and discussions on current political issues."
     }
@@ -35,7 +35,8 @@ export default function VividhtaSection() {
       speaker: "डॉ एम तबि दुरै, माननीय उपाध्यक्ष",
       status: "IN THE CHAIR",
       topic: "LEGISLATIVE BUSINESS",
-      image: "/parliament-video1.jpg"
+      image: "/thumb-1.jpg",
+      videoUrl: "https://www.youtube.com/watch?v=YF0sedWtbk4&t=1s"
     },
     {
       title: "Shri Manoj Kumar Tiwari's speech during Motion of Thanks",
@@ -44,7 +45,8 @@ export default function VividhtaSection() {
       speaker: "Manoj Ti",
       status: "Parliament Session",
       topic: "Motion of Thanks Discussion",
-      image: "/parliament-video2.jpg"
+      image: "/thumb-2.jpg",
+      videoUrl: "https://www.youtube.com/watch?v=YQLoxwLpjSUs"
     }
   ];
 
@@ -143,7 +145,7 @@ export default function VividhtaSection() {
           {/* Background Image */}
           <div className="relative h-[34rem] md:h-[38rem]">
             <Image
-              src="/parliament-hall.jpg"
+              src="/thumb-3.jpg"
               alt="Parliament Hall"
               fill
               className="object-cover"
@@ -154,6 +156,7 @@ export default function VividhtaSection() {
             <div className="absolute left-8 top-8 text-white">
               <h3 className="text-3xl font-bold mb-2">In Parliament</h3>
               <p className="text-lg opacity-90">Legislative proceedings and debates</p>
+              <a href="https://www.youtube.com/watch?v=p4hIFH5RLSE" target="_blank" className="text-blue-500">Watch on YouTube</a>
             </div>
 
             {/* Video Thumbnails */}
