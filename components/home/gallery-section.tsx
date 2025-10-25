@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -13,13 +13,28 @@ import {
   Loader2,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, AppDispatch } from "@/lib/redux/store";
+import { AppDispatch } from "@/lib/redux/store";
 import {
   fetchGallery,
   selectGallery,
   selectGalleryLoading,
   selectGalleryError,
+  GalleryItem,
 } from "@/lib/redux/features/gallerySlice";
+
+/**
+ * Utility to normalize & filter categories, handles empty/undefined/null
+ */
+function getGalleryCategories(images: GalleryItem[]) {
+  const set = new Set<string>();
+  for (const img of images) {
+    if (img.category && String(img.category).trim()) {
+      // Normalize: trim and convert to string
+      set.add(String(img.category).trim());
+    }
+  }
+  return Array.from(set).sort();
+}
 
 export default function GallerySection() {
   const dispatch = useDispatch<AppDispatch>();
@@ -28,46 +43,82 @@ export default function GallerySection() {
   const error = useSelector(selectGalleryError);
 
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedImage, setSelectedImage] = useState<number | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  // Fetch gallery on mount
   useEffect(() => {
     dispatch(fetchGallery());
   }, [dispatch]);
 
-  const categories = [
+  // Get unique categories only once galleryImages change
+  const categories = useMemo(() => ([
     { id: "all", name: "सभी" },
-    ...Array.from(new Set(galleryImages.map((img) => img.category))).map(
-      (cat) => ({ id: cat, name: cat })
-    ),
-  ];
+    ...getGalleryCategories(galleryImages).map((cat) => ({
+      id: String(cat),
+      name: String(cat),
+    })),
+  ]), [galleryImages]);
 
-  const filteredImages =
-    selectedCategory === "all"
-      ? galleryImages
-      : galleryImages.filter((img) => img.category === selectedCategory);
+  // Reset to "all" if current selected category doesn't exist in new categories
+  useEffect(() => {
+    const categoryExists = categories.some(cat => cat.id === selectedCategory);
+    if (!categoryExists && selectedCategory !== "all") {
+      setSelectedCategory("all");
+    }
+  }, [categories, selectedCategory]);
 
+  // Reset current image index/lightbox when filter or images change
+  useEffect(() => {
+    setSelectedImage(null);
+    setCurrentImageIndex(0);
+  }, [selectedCategory, galleryImages.length]);
+
+  // Strict category filtering
+  const filteredImages = useMemo(() => {
+    if (selectedCategory === "all") {
+      return galleryImages;
+    }
+    return galleryImages.filter(
+      (img) =>
+        img.category &&
+        String(img.category).trim() === selectedCategory
+    );
+  }, [selectedCategory, galleryImages]);
+
+  // Category counts with strict comparison
   const getCategoryCount = (categoryId: string) => {
     if (categoryId === "all") return galleryImages.length;
-    return galleryImages.filter((img) => img.category === categoryId).length;
+    return galleryImages.filter(
+      (img) => img.category && String(img.category).trim() === categoryId
+    ).length;
   };
 
-  const openLightbox = (index: number) => {
-    setCurrentImageIndex(index);
-    setSelectedImage(index);
+  const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Open image in lightbox with correct index in filteredImages
+  const openLightbox = (filteredIndex: number) => {
+    setCurrentImageIndex(filteredIndex);
+    setSelectedImage(filteredIndex);
   };
 
   const closeLightbox = () => {
     setSelectedImage(null);
   };
 
+  // Next/Prev logic is now based on filteredImages
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % filteredImages.length);
+    setCurrentImageIndex((prev) =>
+      filteredImages.length === 0
+        ? 0
+        : (prev + 1) % filteredImages.length
+    );
   };
 
   const prevImage = () => {
-    setCurrentImageIndex(
-      (prev) => (prev - 1 + filteredImages.length) % filteredImages.length
+    setCurrentImageIndex((prev) =>
+      filteredImages.length === 0
+        ? 0
+        : (prev - 1 + filteredImages.length) % filteredImages.length
     );
   };
 
@@ -150,14 +201,21 @@ export default function GallerySection() {
           ))}
         </motion.div>
 
-        <motion.div
-          className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-4"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          {filteredImages.map((image, index) => (
+        {filteredImages.length === 0 ? (
+          <div className="text-center text-gray-500 py-12">
+            <p className="text-xl font-semibold mb-2">कोई चित्र नहीं मिला</p>
+            <p className="text-sm">कृपया अन्य श्रेणी का चयन करें</p>
+          </div>
+        ) : (
+          <motion.div
+            className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-4"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            key={selectedCategory}
+          >
+            {filteredImages.map((image, index) => (
             <motion.div
               key={`${image._id}-${selectedCategory}`}
               className="mb-4 break-inside-avoid"
@@ -168,13 +226,15 @@ export default function GallerySection() {
                 className="relative group cursor-pointer overflow-hidden rounded-lg shadow-lg"
                 onClick={() => openLightbox(index)}
               >
-                <img
-                  src={image.url}
-                  alt={image.title}
-                  width={400}
-                  height={300}
-                  className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-110"
-                />
+                <div className="relative w-full" style={{ aspectRatio: '4/3' }}>
+                  <Image
+                    src={image.url}
+                    alt={image.title}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    unoptimized
+                  />
+                </div>
 
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                   <div className="text-center text-white p-4">
@@ -197,11 +257,14 @@ export default function GallerySection() {
                 </div>
               </div>
             </motion.div>
-          ))}
-        </motion.div>
+            ))}
+          </motion.div>
+        )}
 
         <AnimatePresence>
-          {selectedImage !== null && filteredImages[currentImageIndex] && (
+          {selectedImage !== null &&
+            filteredImages.length > 0 &&
+            filteredImages[currentImageIndex] && (
             <motion.div
               className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
               initial={{ opacity: 0 }}
@@ -244,14 +307,17 @@ export default function GallerySection() {
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ duration: 0.3 }}
                   onClick={(e) => e.stopPropagation()}
+                  className="relative w-full max-w-4xl"
                 >
-                  <img
-                    src={filteredImages[currentImageIndex].url}
-                    alt={filteredImages[currentImageIndex].title}
-                    width={800}
-                    height={600}
-                    className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
-                  />
+                  <div className="relative w-full" style={{ maxHeight: '80vh', aspectRatio: '4/3' }}>
+                    <Image
+                      src={filteredImages[currentImageIndex].url}
+                      alt={filteredImages[currentImageIndex].title}
+                      fill
+                      className="object-contain rounded-lg"
+                      unoptimized
+                    />
+                  </div>
 
                   <div className="mt-4 text-center text-white">
                     <h3 className="text-xl font-semibold mb-2">

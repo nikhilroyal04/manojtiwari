@@ -23,7 +23,7 @@ export default function Header() {
     { href: "/chunavi-railayan", label: "चुनावी रैलियां", color: "var(--secondary)" },
     { href: "/sampark-adhikari", label: "संपर्क अधिकारी", color: "var(--dark)" },
     { href: "/agami-karyakram", label: "आगामी कार्यक्रम", color: "var(--accent)" },
-    { href: "/bhojpuri-duniya", label: "भोजपुरी दुनिया", color: "var(--primary)" },
+    { href: "/posts", label: "पोस्ट्स", color: "var(--primary)" },
     { href: "/sampark-karein", label: "संपर्क करें", color: "var(--secondary)" },
   ];
 

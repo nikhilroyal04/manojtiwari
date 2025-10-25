@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import React from 'react';
-import Image from 'next/image';
 import { Search } from 'lucide-react';
 
 interface CTAProps {

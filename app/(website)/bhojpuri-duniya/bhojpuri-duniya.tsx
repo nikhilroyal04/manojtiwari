@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Filter, ChevronDown, X, Play, Music, Film, Star, Calendar, ArrowRight, Heart } from 'lucide-react';
+import { Filter, ChevronDown, X, Play, Music, Film, Star, Calendar, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import CTA from '@/components/all/cta-section'; 
 
@@ -305,20 +305,6 @@ export default function BhojpuriDuniya() {
                     <p className="text-gray-600 mb-4 line-clamp-3 flex-grow">
                       {item.description}
                     </p>
-                    <div className="mt-auto">
-                      <div className="flex justify-between items-center">
-                        <Link
-                          href={`/bhojpuri-duniya/${item.id}`}
-                          className="inline-flex items-center gap-1 text-primary hover:text-primary/80"
-                        >
-                          विस्तृत जानकारी
-                          <ArrowRight className="w-4 h-4" />
-                        </Link>
-                        <button className="flex items-center gap-1 text-gray-500 hover:text-primary">
-                          <Heart className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </div>
                   </div>
                 </motion.div>
               ))}
