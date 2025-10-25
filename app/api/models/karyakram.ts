@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
 
 const karyakramSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  date: { type: Date, required: true },
-  time: { type: String, required: true },
-  location: { type: String, required: true },
-  type: { type: String, required: true },
-  image: { type: String, required: true },
+  title: { type: String, required: false },
+  description: { type: String, required: false },
+  date: { type: Date, required: false },
+  time: { type: String, required: false },
+  location: { type: String, required: false },
+  type: { type: String, required: false },
+  image: { type: String, required: false },
   status: {
     type: String,
     enum: ['upcoming', 'ongoing', 'completed', 'cancelled', 'postponed'],

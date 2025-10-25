@@ -1,17 +1,17 @@
 import mongoose from 'mongoose';
 
 const jantaDarbarSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  agenda: { type: String, required: true },
-  date: { type: Date, required: true },
+  title: { type: String, required: false },
+  agenda: { type: String, required: false },
+  date: { type: Date, required: false },
   status: { 
     type: String, 
     enum: ['open', 'close', 'ongoing'], 
-    required: true 
+    required: false 
   },
-  location: { type: String, required: true },
+  location: { type: String, required: false },
   images: [{ type: String }], // Made optional - array can be empty
-  mainImage: { type: String, required: true },
+  mainImage: { type: String, required: false },
   attendees: { type: Number, default: 0 },
   issues: { type: Number, default: 0 },
   resolved: { type: Number, default: 0 }

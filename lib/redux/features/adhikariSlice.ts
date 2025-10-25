@@ -6,18 +6,18 @@ import axios from "axios";
 export interface Adhikari {
     _id?: string;
     name: string;
-    email: string;
+    email?: string;
     number: string;
     officeNumber?: string;
     workArea: string;
     additionalInfo?: string;
-    department: string;
+    department?: string;
     image?: string;
     status: "ACTIVE" | "INACTIVE" | "ON_LEAVE" | "RESIGNED";
-    designation: string;
-    joiningDate: string;
+    designation?: string;
+    joiningDate?: string;
     experience: number;
-    qualification: string;
+    qualification?: string;
     address?: string;
     emergencyContact?: string;
 }

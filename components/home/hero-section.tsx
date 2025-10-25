@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { ChevronRight, Play, Users, Award, MapPin } from 'lucide-react';
+import Link from 'next/link';
 
 const heroSlides = [
   {
@@ -17,7 +18,7 @@ const heroSlides = [
       { icon: MapPin, value: "7", label: "लोकसभा क्षेत्र" }
     ],
     cta: "और जानें",
-    ctaLink: "/manoj-tiwari"
+    ctaLink: "/mp-manoj-tiwari"
   },
   {
     id: 2,
@@ -31,7 +32,7 @@ const heroSlides = [
       { icon: MapPin, value: "100%", label: "जनता की सेवा" }
     ],
     cta: "दरबार में आएं",
-    ctaLink: "/janata-darbar"
+    ctaLink: "/janta-darbar"
   },
   {
     id: 3,
@@ -147,10 +148,10 @@ export default function HeroSection() {
                     </div>
 
                     {/* CTA Button */}
-                    <button className="inline-flex items-center px-8 py-4 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg animate-fadeIn animation-delay-600">
+                    <Link href={slide.ctaLink} className="inline-flex items-center px-8 py-4 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg animate-fadeIn animation-delay-600">
                       {slide.cta}
                       <ChevronRight className="w-5 h-5 ml-2" />
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>

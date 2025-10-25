@@ -3,23 +3,23 @@ import mongoose from 'mongoose';
 const postSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true,
+    required: false,
   },
   content: {
     type: String,
-    required: true,
+    required: false,
   },
   excerpt: {
     type: String,
-    required: true,
+    required: false,
   },
   author: {
     type: String,
-    required: true,
+    required: false,
   },
   category: {
     type: String,
-    required: true,
+    required: false,
   },
   tags: [{
     type: String,
@@ -31,7 +31,7 @@ const postSchema = new mongoose.Schema({
   },
   publishDate: {
     type: Date,
-    required: true,
+    required: false,
   },
   featuredImage: {
     type: String,
@@ -63,7 +63,7 @@ const postSchema = new mongoose.Schema({
   },
   slug: {
     type: String,
-    required: true,
+    required: false,
     unique: true,
   },
   lastModified: {
