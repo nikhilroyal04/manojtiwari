@@ -82,18 +82,7 @@ export default function Achievements() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-red-50">
-            {/* Language Toggle */}
-            <div className="fixed top-6 right-6 z-50">
-                <motion.button 
-                    onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')}
-                    className="flex items-center gap-3 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 border border-orange-200"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                >
-                    <Globe className="w-5 h-5 text-orange-600" />
-                    <span className="font-semibold text-gray-800">{language === 'en' ? 'हिंदी' : 'English'}</span>
-                </motion.button>
-            </div>
+
 
             {/* Highlights Section */}
             <section className="py-20 bg-white">

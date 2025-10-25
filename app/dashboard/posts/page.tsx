@@ -184,7 +184,11 @@ export default function Posts() {
   const totalViews = posts.reduce((sum, post) => sum + post.views, 0);
   const totalLikes = posts.reduce((sum, post) => sum + post.likes, 0);
   const totalComments = posts.reduce((sum, post) => sum + post.comments, 0);
-  const categories = Array.from(new Set(posts.map((post) => post.category)));
+  const categories = Array.from(new Set(
+    posts
+      .map((post) => post.category)
+      .filter((cat): cat is string => !!cat && cat.trim() !== '')
+  ));
 
   if (loading) {
   return (
@@ -203,8 +207,8 @@ export default function Posts() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
-      <div className="flex-shrink-0 p-8 overflow-y-auto">
+    <div className="flex flex-col overflow-y-auto">
+      <div className="flex-shrink-0 ">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             पोस्ट प्रबंधन
@@ -295,15 +299,19 @@ export default function Posts() {
             </div>
             <div className="space-y-3">
               {" "}
-              {categories.map((category) => (
+              {categories.length > 0 ? (
+                categories.map((category) => (
                 <div key={category} className="flex justify-between">
-                  {" "}
-                  <span className="text-gray-600">{category}:</span>{" "}
+                    {" "}
+                    <span className="text-gray-600">{category}:</span>{" "}
                   <span className="font-semibold">
                     {getCategoryCount(category)}
-                  </span>{" "}
+                    </span>{" "}
                 </div>
-              ))}{" "}
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No categories available</p>
+              )}{" "}
             </div>
           </motion.div>
           <motion.div
@@ -422,11 +430,15 @@ export default function Posts() {
               <SelectContent>
                 {" "}
                 <SelectItem value="all">All Categories</SelectItem>{" "}
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}{" "}
+                {categories.length > 0 ? (
+                  categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="px-2 py-1.5 text-sm text-gray-500">No categories</div>
+                )}{" "}
               </SelectContent>{" "}
             </Select>
             <Button

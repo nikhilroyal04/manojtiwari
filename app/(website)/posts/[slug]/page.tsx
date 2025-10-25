@@ -40,7 +40,9 @@ export default function PostDetailPage() {
   // Find post by slug or ID
   const post = useMemo(() => {
     const slug = params.slug as string;
-    return posts.find((p: Post) => p.slug === slug || p._id === slug);
+    // Decode the slug to handle Hindi characters
+    const decodedSlug = decodeURIComponent(slug);
+    return posts.find((p: Post) => p.slug === decodedSlug || p._id === decodedSlug || p.slug === slug || p._id === slug);
   }, [posts, params.slug]);
 
   // Get related posts (same category, exclude current)
