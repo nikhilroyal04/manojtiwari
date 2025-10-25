@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import { ExternalLink, ArrowRight } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '@/lib/redux/store';
 import {
@@ -20,7 +20,6 @@ export default function RecentPostSection() {
   const posts = useSelector(selectRecentPosts);
   const loading = useSelector(selectRecentPostsLoading);
   const error = useSelector(selectPostsError);
-  const [currentSlide, setCurrentSlide] = useState(0);
 
   // Fetch recent posts on mount
   useEffect(() => {
@@ -47,14 +46,6 @@ export default function RecentPostSection() {
         duration: 0.6
       }
     }
-  };
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % posts.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + posts.length) % posts.length);
   };
 
   // Loading state
@@ -156,68 +147,35 @@ export default function RecentPostSection() {
                 </p>
                 
                 {/* View Details Link */}
-                <Link 
-                  href={`/posts/${post.slug || post._id}`}
+                <a 
+                  href={post.slug && post.slug.trim() !== '' ? `/posts/${post.slug}` : '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
                 >
                   View Details
                   <ExternalLink className="w-4 h-4 ml-2" />
-                </Link>
+                </a>
               </div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Navigation Controls */}
+        {/* View All Button */}
         <motion.div 
-          className="flex flex-col items-center space-y-4"
+          className="flex justify-center mt-8"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          {/* Green Line */}
-          <div className="w-32 h-0.5 bg-secondary"></div>
-          
-          {/* Navigation Buttons */}
-          <div className="flex items-center space-x-4">
-            <motion.button
-              onClick={prevSlide}
-              className="w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </motion.button>
-            
-            <motion.button
-              onClick={nextSlide}
-              className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary/90 transition-all duration-300"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </motion.button>
-          </div>
-        </motion.div>
-
-        {/* Slide Indicators */}
-        <motion.div 
-          className="flex justify-center space-x-2 mt-6"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-        >
-          {posts.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentSlide ? 'bg-primary scale-125' : 'bg-gray-300 hover:bg-gray-400'
-              }`}
-            />
-          ))}
+          <Link 
+            href="/posts"
+            className="inline-flex items-center px-8 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all duration-300 text-base font-semibold shadow-md hover:shadow-lg"
+          >
+            View All Posts
+            <ArrowRight className="w-5 h-5 ml-2" />
+          </Link>
         </motion.div>
       </div>
     </section>
