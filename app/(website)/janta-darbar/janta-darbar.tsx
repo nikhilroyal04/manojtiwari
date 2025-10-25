@@ -1,116 +1,96 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Calendar, MapPin, Filter, ChevronDown, X } from "lucide-react";
 import Link from "next/link";
 import CTA from '@/components/all/cta-section';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '@/lib/redux/store';
+import { fetchDarbars, selectDarbars, selectDarbarLoading, selectDarbarError } from '@/lib/redux/features/darbarSlice';
+import type { JantaDarbar as JantaDarbarType } from '@/lib/redux/features/darbarSlice';
 
 export default function JantaDarbar() {
+  const dispatch = useDispatch<AppDispatch>();
+  const jantaDarbarPosts = useSelector(selectDarbars);
+  const loading = useSelector(selectDarbarLoading);
+  const error = useSelector(selectDarbarError);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
-  // Sample janta darbar posts
-  const jantaDarbarPosts = [
-    {
-      id: 1,
-      title: "बच्चों के चेहरे पर मुस्कान देख कर मन प्रफुल्लित हो गया",
-      agenda: "अपने आवासीय कार्यालय में बच्चों से मिला, बच्चों के चेहरे पर मुस्कान थी, बच्चों की अपने शहर प्रति, अपने देश के प्रति कर्तव्य, अपने देश के प्रधानमंत्री में विश्वास, स्वछता को लेकर Positive Attitude ये सब भाव देख कर मन प्रफुल्लित हो",
-      date: "Saturday, July 20, 2019 - 11:45",
-      status: "CLOSE",
-      location: "North East Delhi",
-      images: [
-        "/images/janta-darbar/jd1-1.jpg",
-        "/images/janta-darbar/jd1-2.jpg",
-        "/images/janta-darbar/jd1-3.jpg"
-      ],
-      mainImage: "/images/janta-darbar/jd1-main.jpg"
-    },
-    {
-      id: 2,
-      title: "जनता दरबार में लोगों की समस्याओं का समाधान",
-      agenda: "आज के जनता दरबार में क्षेत्र के नागरिकों की समस्याओं को सुना और संबंधित अधिकारियों को तुरंत समाधान के निर्देश दिए। जल आपूर्ति, सड़क मरम्मत और स्वच्छता से जुड़े मुद्दों पर विशेष ध्यान दिया गया।",
-      date: "Monday, August 12, 2019 - 10:30",
-      status: "CLOSE",
-      location: "North East Delhi",
-      images: [
-        "/images/janta-darbar/jd2-1.jpg",
-        "/images/janta-darbar/jd2-2.jpg"
-      ],
-      mainImage: "/images/janta-darbar/jd2-main.jpg"
-    },
-    {
-      id: 3,
-      title: "युवाओं के साथ संवाद कार्यक्रम",
-      agenda: "आज के जनता दरबार में युवाओं के साथ विशेष संवाद कार्यक्रम आयोजित किया गया। युवाओं ने शिक्षा, रोजगार और कौशल विकास से जुड़े अपने विचार साझा किए। सभी युवाओं को सरकार की विभिन्न योजनाओं के बारे में जानकारी दी गई।",
-      date: "Wednesday, September 18, 2019 - 12:00",
-      status: "CLOSE",
-      location: "North East Delhi",
-      images: [
-        "/images/janta-darbar/jd3-1.jpg",
-        "/images/janta-darbar/jd3-2.jpg",
-        "/images/janta-darbar/jd3-3.jpg"
-      ],
-      mainImage: "/images/janta-darbar/jd3-main.jpg"
-    },
-    {
-      id: 4,
-      title: "महिला सशक्तिकरण पर विशेष चर्चा",
-      agenda: "आज के जनता दरबार में महिला सशक्तिकरण पर विशेष चर्चा की गई। महिलाओं ने अपनी समस्याएं और सुझाव साझा किए। महिला स्वयं सहायता समूहों को प्रोत्साहन देने और महिलाओं के लिए रोजगार के अवसर बढ़ाने पर जोर दिया गया।",
-      date: "Friday, October 25, 2019 - 11:00",
-      status: "CLOSE",
-      location: "North East Delhi",
-      images: [
-        "/images/janta-darbar/jd4-1.jpg",
-        "/images/janta-darbar/jd4-2.jpg"
-      ],
-      mainImage: "/images/janta-darbar/jd4-main.jpg"
-    },
-    {
-      id: 5,
-      title: "स्वच्छता अभियान के साथ जनता दरबार",
-      agenda: "आज के जनता दरबार के साथ क्षेत्र में स्वच्छता अभियान भी चलाया गया। स्थानीय निवासियों और स्वयंसेवकों ने बढ़-चढ़कर हिस्सा लिया। स्वच्छ भारत मिशन के तहत लोगों को जागरूक किया गया और सफाई के महत्व पर प्रकाश डाला गया।",
-      date: "Sunday, November 10, 2019 - 09:30",
-      status: "CLOSE",
-      location: "North East Delhi",
-      images: [
-        "/images/janta-darbar/jd5-1.jpg",
-        "/images/janta-darbar/jd5-2.jpg",
-        "/images/janta-darbar/jd5-3.jpg"
-      ],
-      mainImage: "/images/janta-darbar/jd5-main.jpg"
-    }
+  // Fetch darbar posts on component mount
+  useEffect(() => {
+    dispatch(fetchDarbars());
+  }, [dispatch]);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h1 className="text-2xl font-bold mb-4 text-red-600">त्रुटि</h1>
+          <p className="text-gray-600 mb-4">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Get unique years and statuses for filters
+  const years = Array.from(new Set(jantaDarbarPosts.map((post: JantaDarbarType) => 
+    new Date(post.date).getFullYear().toString()
+  ))).sort((a, b) => parseInt(b) - parseInt(a));
+
+  const statuses = [
+    { value: "open", label: "खुला" },
+    { value: "ongoing", label: "चल रहा है" },
+    { value: "close", label: "बंद" }
   ];
 
   // Filter posts based on search term and filters
-  const filteredPosts = jantaDarbarPosts.filter(post => {
+  const filteredPosts = jantaDarbarPosts.filter((post: JantaDarbarType) => {
     let matchesSearch = true;
     let matchesYear = true;
     let matchesMonth = true;
 
+    let matchesStatus = true;
+
     if (searchTerm) {
       matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                     post.agenda.toLowerCase().includes(searchTerm.toLowerCase());
+                     post.agenda.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                     post.location.toLowerCase().includes(searchTerm.toLowerCase());
     }
 
     if (selectedYear) {
-      const postYear = new Date(post.date.split(" - ")[0]).getFullYear().toString();
+      const postYear = new Date(post.date).getFullYear().toString();
       matchesYear = postYear === selectedYear;
     }
 
     if (selectedMonth) {
-      const postMonth = new Date(post.date.split(" - ")[0]).getMonth().toString();
+      const postMonth = new Date(post.date).getMonth().toString();
       matchesMonth = postMonth === selectedMonth;
     }
 
-    return matchesSearch && matchesYear && matchesMonth;
-  });
+    if (selectedStatus) {
+      matchesStatus = post.status === selectedStatus;
+    }
 
-  // Years for filter
-  const years = ["2019", "2020", "2021", "2022", "2023"];
+    return matchesSearch && matchesYear && matchesMonth && matchesStatus;
+  });
   
   // Months for filter
   const months = [
@@ -187,6 +167,16 @@ export default function JantaDarbar() {
                   <X className="w-4 h-4" />
                 </button>
               )}
+              
+              {selectedStatus && (
+                <button 
+                  onClick={() => setSelectedStatus(null)}
+                  className="flex items-center gap-1 py-2 px-4 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
+                >
+                  <span>{statuses.find(s => s.value === selectedStatus)?.label}</span>
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
           
@@ -236,6 +226,25 @@ export default function JantaDarbar() {
                     ))}
                   </div>
                 </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">स्थिति</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {statuses.map(status => (
+                      <button
+                        key={status.value}
+                        onClick={() => setSelectedStatus(status.value === selectedStatus ? null : status.value)}
+                        className={`py-1 px-3 rounded-full text-sm ${
+                          status.value === selectedStatus 
+                            ? 'bg-primary text-white' 
+                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                        }`}
+                      >
+                        {status.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </motion.div>
           )}
@@ -247,54 +256,65 @@ export default function JantaDarbar() {
         <div className="container mx-auto px-4">
           {filteredPosts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredPosts.map((post, index) => (
+              {filteredPosts.map((post: JantaDarbarType, index: number) => (
                 <motion.div
-                  key={post.id}
+                  key={post._id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
                 >
-                  <Link href={`/janta-darbar/${post.id}`}>
+                  <Link href={`/janta-darbar/${post._id}`}>
                     <div className="relative h-56 overflow-hidden">
                       <Image
-                        src={post.mainImage}
+                        src={post.mainImage || '/images/janta-darbar/default-darbar.jpg'}
                         alt={post.title}
                         fill
                         className="object-cover hover:scale-105 transition-transform duration-500"
                       />
                     </div>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold mb-3 line-clamp-2">{post.title}</h3>
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-xl font-bold line-clamp-2 flex-1">{post.title}</h3>
+                        <span className={`ml-2 px-2 py-1 text-xs font-bold rounded-full whitespace-nowrap ${
+                          post.status === 'open' ? 'bg-green-100 text-green-600' :
+                          post.status === 'ongoing' ? 'bg-blue-100 text-blue-600' :
+                          'bg-gray-100 text-gray-600'
+                        }`}>
+                          {post.status === 'open' ? 'खुला' : post.status === 'ongoing' ? 'चल रहा है' : 'बंद'}
+                        </span>
+                      </div>
                       <p className="text-gray-600 mb-4 line-clamp-3">{post.agenda}</p>
                       
                       <div className="flex items-center text-gray-500 text-sm mb-2">
                         <Calendar className="w-4 h-4 mr-2" />
-                        <span>{post.date.split(" - ")[0]}</span>
+                        <span>{new Date(post.date).toLocaleDateString('hi-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                       </div>
                       
-                      <div className="flex items-center text-gray-500 text-sm">
+                      <div className="flex items-center text-gray-500 text-sm mb-3">
                         <MapPin className="w-4 h-4 mr-2" />
                         <span>{post.location}</span>
                       </div>
                       
-                      <div className="mt-4 flex gap-2">
-                        {post.images.slice(0, 3).map((image, i) => (
-                          <div key={i} className="w-12 h-12 relative rounded-md overflow-hidden">
-                            <Image
-                              src={image}
-                              alt={`${post.title} - ${i+1}`}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        ))}
-                        {post.images.length > 3 && (
-                          <div className="w-12 h-12 bg-gray-100 rounded-md flex items-center justify-center text-sm font-medium text-gray-600">
-                            +{post.images.length - 3}
-                          </div>
-                        )}
-                      </div>
+                      {post.images && post.images.length > 0 && (
+                        <div className="mt-4 flex gap-2">
+                          {post.images.slice(0, 3).map((image, i) => (
+                            <div key={i} className="w-12 h-12 relative rounded-md overflow-hidden">
+                              <Image
+                                src={image}
+                                alt={`${post.title} - ${i+1}`}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          ))}
+                          {post.images.length > 3 && (
+                            <div className="w-12 h-12 bg-gray-100 rounded-md flex items-center justify-center text-sm font-medium text-gray-600">
+                              +{post.images.length - 3}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </Link>
                 </motion.div>
@@ -310,6 +330,7 @@ export default function JantaDarbar() {
                   setSearchTerm("");
                   setSelectedYear(null);
                   setSelectedMonth(null);
+                  setSelectedStatus(null);
                 }}
                 className="py-2 px-6 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
               >

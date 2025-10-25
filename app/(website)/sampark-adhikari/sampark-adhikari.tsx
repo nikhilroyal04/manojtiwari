@@ -1,82 +1,57 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Briefcase, UserPlus, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import CTA from '@/components/all/cta-section';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '@/lib/redux/store';
+import { fetchAdhikari, selectAdhikari, selectLoading, selectError } from '@/lib/redux/features/adhikariSlice';
+import type { Adhikari } from '@/lib/redux/features/adhikariSlice';
 
 export default function SamparkAdhikari() {
+  const dispatch = useDispatch<AppDispatch>();
+  const staffProfiles = useSelector(selectAdhikari);
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
 
-  // Staff profiles data
-  const staffProfiles = [
-    {
-      id: 1,
-      name: "कृष्णा चौबे (राजा)",
-      email: "krishna.choubey@example.com",
-      number: "9990152796",
-      officeNumber: "(011) 23094122",
-      workArea: "मा. सांसद जी के द्वारा जनसमस्याओं के निराकरण हेतु किये जा रहे कार्यों में समर्पण भाव से सहभागिता करना",
-      additionalInfo: "एजुकेशनल क्वालिफिकेशन - B.tech (ECE) शुरू से ही सामाजिक कार्य में अभिरुचि रखना",
-      department: "जनसमस्या निराकरण",
-      image: "/images/staff/krishna-choubey.jpg"
-    },
-    {
-      id: 2,
-      name: "राजीव वर्मा",
-      email: "rajeev.verma@example.com",
-      number: "9999535258",
-      officeNumber: "(011) 23094122",
-      workArea: "मा. सांसद जी के द्वारा जनसमस्याओं के निराकरण हेतु किये जा रहे कार्यों में समर्पण भाव से सहभागिता करना",
-      department: "जनसमस्या निराकरण",
-      image: "/images/staff/rajeev-verma.jpg"
-    },
-    {
-      id: 3,
-      name: "राजकुमार श्रीवास्तव",
-      email: "rajkumar.srivastava@example.com",
-      number: "098735 88120",
-      workArea: "सांसद जी के सहयोग आवर जन समस्या समादन में सहयोग करते हैं",
-      department: "जन समस्या समाधान",
-      image: "/images/staff/rajkumar-srivastava.jpg"
-    },
-    {
-      id: 4,
-      name: "अमित शर्मा",
-      email: "amit.sharma@example.com",
-      number: "9876543210",
-      workArea: "सोशल मीडिया प्रबंधन और डिजिटल कम्युनिकेशन",
-      department: "मीडिया",
-      image: "/images/staff/amit-sharma.jpg"
-    },
-    {
-      id: 5,
-      name: "प्रिया पटेल",
-      email: "priya.patel@example.com",
-      number: "8765432109",
-      workArea: "कार्यक्रम आयोजन और प्रबंधन",
-      department: "कार्यक्रम प्रबंधन",
-      image: "/images/staff/priya-patel.jpg"
-    },
-    {
-      id: 6,
-      name: "विनोद यादव",
-      email: "vinod.yadav@example.com",
-      number: "7654321098",
-      workArea: "क्षेत्रीय विकास कार्य और योजनाओं का निरीक्षण",
-      department: "क्षेत्रीय विकास",
-      image: "/images/staff/vinod-yadav.jpg"
-    }
-  ];
+  // Fetch adhikari on component mount
+  useEffect(() => {
+    dispatch(fetchAdhikari());
+  }, [dispatch]);
 
-  // Get unique departments for filter
-  const departments = Array.from(new Set(staffProfiles.map(profile => profile.department)));
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h1 className="text-2xl font-bold mb-4 text-red-600">त्रुटि</h1>
+          <p className="text-gray-600 mb-4">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Get unique departments for filter - now dynamically from database
+  const departments = Array.from(new Set(staffProfiles.map((profile: Adhikari) => profile.department)));
 
   // Filter profiles based on search term and selected department
-  const filteredProfiles = staffProfiles.filter(profile => {
+  const filteredProfiles = staffProfiles.filter((profile: Adhikari) => {
     let matchesSearch = true;
     let matchesDepartment = true;
 
@@ -84,7 +59,8 @@ export default function SamparkAdhikari() {
       matchesSearch = 
         profile.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
         profile.workArea.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        profile.department.toLowerCase().includes(searchTerm.toLowerCase());
+        profile.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (!!profile.designation && profile.designation.toLowerCase().includes(searchTerm.toLowerCase()));
     }
 
     if (selectedDepartment) {
@@ -177,9 +153,9 @@ export default function SamparkAdhikari() {
               initial="hidden"
               animate="visible"
             >
-              {filteredProfiles.map((profile) => (
+              {filteredProfiles.map((profile: Adhikari) => (
                 <motion.div
-                  key={profile.id}
+                  key={profile._id}
                   variants={itemVariants}
                   className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all"
                 >
@@ -187,7 +163,7 @@ export default function SamparkAdhikari() {
                     <div className="relative bg-gradient-to-r from-orange-100 to-red-100 p-6">
                       <div className="relative h-64 w-64 mx-auto rounded-full overflow-hidden border-4 border-white shadow-lg">
                         <Image
-                          src={profile.image}
+                          src={profile.image || '/images/staff/default-avatar.jpg'}
                           alt={profile.name}
                           fill
                           className="object-cover"
@@ -207,7 +183,7 @@ export default function SamparkAdhikari() {
                             <Mail className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                             <div>
                               <div className="text-sm text-gray-500">Email:</div>
-                              <div>{profile.email}</div>
+                              <div className="text-sm break-all">{profile.email}</div>
                             </div>
                           </div>
                         )}
@@ -215,7 +191,7 @@ export default function SamparkAdhikari() {
                         <div className="flex items-start gap-3">
                           <Phone className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                           <div>
-                            <div className="text-sm text-gray-500">Number:</div>
+                            <div className="text-sm text-gray-500">संपर्क:</div>
                             <div>{profile.number} {profile.officeNumber && `/ ${profile.officeNumber}`}</div>
                           </div>
                         </div>
@@ -223,8 +199,16 @@ export default function SamparkAdhikari() {
                         <div className="flex items-start gap-3">
                           <Briefcase className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                           <div>
-                            <div className="text-sm text-gray-500">Work Area:</div>
+                            <div className="text-sm text-gray-500">कार्य क्षेत्र:</div>
                             <div className="text-sm">{profile.workArea}</div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-3">
+                          <UserPlus className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                          <div>
+                            <div className="text-sm text-gray-500">पद:</div>
+                            <div className="text-sm">{profile.designation}</div>
                           </div>
                         </div>
                         
@@ -232,7 +216,7 @@ export default function SamparkAdhikari() {
                           <div className="flex items-start gap-3">
                             <UserPlus className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                             <div>
-                              <div className="text-sm text-gray-500">Additional Info:</div>
+                              <div className="text-sm text-gray-500">अतिरिक्त जानकारी:</div>
                               <div className="text-sm">{profile.additionalInfo}</div>
                             </div>
                           </div>
