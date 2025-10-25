@@ -27,25 +27,63 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         
         if (contentType.includes('multipart/form-data')) {
             const formData = await request.formData();
-            const file = formData.get('image') as File | null;
-            const formDataObj = Object.fromEntries(formData.entries());
+            
+            // Get all image files (support multiple images)
+            const imageFiles: File[] = [];
+            formData.forEach((value, key) => {
+                if (key.startsWith('image') && value instanceof File) {
+                    imageFiles.push(value);
+                }
+            });
+            
+            // Get other form data (excluding image files)
+            const formDataObj: Record<string, unknown> = {};
+            formData.forEach((value, key) => {
+                if (!key.startsWith('image')) {
+                    formDataObj[key] = value;
+                }
+            });
+            
             chunaviRailayanData = { ...formDataObj };
             
-            if (file) {
-                // Convert File to Multer-like file object
-                const buffer = Buffer.from(await file.arrayBuffer());
-                const multerFile = {
-                    fieldname: 'image',
-                    originalname: file.name,
-                    encoding: '7bit',
-                    mimetype: file.type,
-                    buffer: buffer,
-                    size: file.size
-                } as Express.Multer.File;
-                
-                const uploaded = await uploadToS3(multerFile);
-                chunaviRailayanData.image = uploaded.url;
+            // Get existing images to keep (sent from frontend)
+            const existingImages = chunaviRailayanData.existingImages 
+                ? (typeof chunaviRailayanData.existingImages === 'string' 
+                    ? chunaviRailayanData.existingImages.split(',').filter((url: string) => url.trim())
+                    : chunaviRailayanData.existingImages)
+                : [];
+            
+            // Upload new images to S3
+            const uploadedUrls: string[] = [];
+            if (imageFiles.length > 0) {
+                for (const file of imageFiles) {
+                    // Convert File to Multer-like file object
+                    const buffer = Buffer.from(await file.arrayBuffer());
+                    const multerFile = {
+                        fieldname: 'image',
+                        originalname: file.name,
+                        encoding: '7bit',
+                        mimetype: file.type,
+                        buffer: buffer,
+                        size: file.size
+                    } as Express.Multer.File;
+                    
+                    const uploaded = await uploadToS3(multerFile);
+                    uploadedUrls.push(uploaded.url);
+                }
             }
+            
+            // Combine existing images (that should be kept) + newly uploaded images
+            const finalImages = [...existingImages, ...uploadedUrls];
+            
+            if (finalImages.length > 0) {
+                // First image from final array is mainImage
+                chunaviRailayanData.mainImage = finalImages[0];
+                chunaviRailayanData.images = finalImages;
+            }
+            
+            // Remove existingImages field as it's not part of the schema
+            delete chunaviRailayanData.existingImages;
         } else {
             chunaviRailayanData = await request.json();
         }

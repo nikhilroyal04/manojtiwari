@@ -27,6 +27,7 @@ export interface ChunaviRailayan {
   videos?: string[];
   createdOn?: string;
   updatedOn?: string;
+  existingImages?: string[]; // For edit: existing images to keep
 }
 
 interface ChunaviRailayanState {
@@ -112,21 +113,31 @@ export const fetchRailayan = () => async (dispatch: Dispatch) => {
 };
 
 // Add a new Chunavi Railayan post
-export const addRailayan = (railayan: ChunaviRailayan, file?: File | null) => async (dispatch: Dispatch) => {
+export const addRailayan = (railayan: ChunaviRailayan, files?: File[] | File | null) => async (dispatch: Dispatch) => {
   try {
     dispatch(setLoading(true));
     const formData = new FormData();
+    
+    // Add all form fields
     Object.entries(railayan).forEach(([key, value]) => {
-      if (key === "image" && file) {
-        formData.append("image", file);
-      } else if (typeof value === "string") {
-        formData.append(key, value);
-      } else if (Array.isArray(value)) {
-        formData.append(key, value.join(","));
-      } else if (value != null) {
-        formData.append(key, String(value));
+      if (key !== "image" && key !== "images" && key !== "mainImage") {
+        if (typeof value === "string") {
+          formData.append(key, value);
+        } else if (Array.isArray(value)) {
+          formData.append(key, value.join(","));
+        } else if (value != null) {
+          formData.append(key, String(value));
+        }
       }
     });
+
+    // Add multiple image files
+    if (files) {
+      const fileArray = Array.isArray(files) ? files : [files];
+      fileArray.forEach((file, index) => {
+        formData.append(`image${index}`, file);
+      });
+    }
 
     const response = await axios.post("/api/routes/chunavi-railayan", formData, {
       headers: {
@@ -151,23 +162,37 @@ export const addRailayan = (railayan: ChunaviRailayan, file?: File | null) => as
 };
 
 // Update a Chunavi Railayan post
-export const updateRailayan = (id: string, railayan: ChunaviRailayan, file?: File | null) => async (dispatch: Dispatch) => {
+export const updateRailayan = (id: string, railayan: ChunaviRailayan, files?: File[] | File | null) => async (dispatch: Dispatch) => {
   try {
     dispatch(setLoading(true));
     let response;
-    if (file) {
+    
+    // Always use FormData if we have files or existingImages to manage
+    if (files || railayan.existingImages) {
       const formData = new FormData();
+      
+      // Add all form fields
       Object.entries(railayan).forEach(([key, value]) => {
-        if (key === "image" && file) {
-          formData.append("image", file);
-        } else if (typeof value === "string") {
-          formData.append(key, value);
-        } else if (Array.isArray(value)) {
-          formData.append(key, value.join(","));
-        } else if (value != null) {
-          formData.append(key, String(value));
+        if (key !== "image" && key !== "images" && key !== "mainImage") {
+          if (typeof value === "string") {
+            formData.append(key, value);
+          } else if (Array.isArray(value)) {
+            // Send array as comma-separated string
+            formData.append(key, value.join(","));
+          } else if (value != null) {
+            formData.append(key, String(value));
+          }
         }
       });
+
+      // Add multiple image files if provided
+      if (files) {
+        const fileArray = Array.isArray(files) ? files : [files];
+        fileArray.forEach((file, index) => {
+          formData.append(`image${index}`, file);
+        });
+      }
+
       response = await axios.put(`/api/routes/chunavi-railayan/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });

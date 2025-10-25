@@ -57,10 +57,58 @@ export default function ChunaviRailayan() {
   const [editModal, setEditModal] = useState<string | null>(null)
   const [deleteModal, setDeleteModal] = useState<string | null>(null)
   const [addModal, setAddModal] = useState(false)
-  const [newImageFile, setNewImageFile] = useState<File | null>(null)
-  const [editImageFile, setEditImageFile] = useState<File | null>(null)
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([])
+  const [editImageFiles, setEditImageFiles] = useState<File[]>([])
+  const [existingImagesToKeep, setExistingImagesToKeep] = useState<string[]>([])
   const [newRailayan, setNewRailayan] = useState<Partial<ChunaviRailayan>>({})
   const [editRailayan, setEditRailayan] = useState<Partial<ChunaviRailayan>>({})
+
+  // Handle multiple image selection for Add
+  const handleNewImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const totalImages = newImageFiles.length + files.length;
+    
+    if (totalImages > 5) {
+      alert(`Maximum 5 images allowed / Maximum 5 images hi upload kar sakte hain. Aapne ${totalImages} select kiye hain.`);
+      return;
+    }
+    
+    // Add new files to existing files
+    setNewImageFiles(prev => [...prev, ...files]);
+    // Clear the input so same file can be selected again if needed
+    e.target.value = '';
+  };
+
+  // Handle multiple image selection for Edit
+  const handleEditImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const totalImages = existingImagesToKeep.length + editImageFiles.length + files.length;
+    
+    if (totalImages > 5) {
+      alert(`Maximum 5 images allowed / Maximum 5 images hi upload kar sakte hain. Total images: ${totalImages}`);
+      return;
+    }
+    
+    // Add new files to existing files
+    setEditImageFiles(prev => [...prev, ...files]);
+    // Clear the input so same file can be selected again if needed
+    e.target.value = '';
+  };
+
+  // Remove image from new images
+  const removeNewImage = (index: number) => {
+    setNewImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Remove image from edit images
+  const removeEditImage = (index: number) => {
+    setEditImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Remove existing image (mark for deletion)
+  const removeExistingImage = (imageUrl: string) => {
+    setExistingImagesToKeep(prev => prev.filter(url => url !== imageUrl));
+  };
 
   // Filter campaigns based on search and filters
   const filteredData = campaigns.filter((campaign: ChunaviRailayan) => {
@@ -441,7 +489,7 @@ export default function ChunaviRailayan() {
       <Dialog open={!!viewModal} onOpenChange={() => setViewModal(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>रैली विवरण</DialogTitle>
+            <DialogTitle>Rally Details / रैली विवरण</DialogTitle>
           </DialogHeader>
           {viewModal && (
             <div className="space-y-4">
@@ -458,61 +506,65 @@ export default function ChunaviRailayan() {
                       </div>
                       <div className="text-right">
                         <Badge className={getStatusColor(campaign.status)}>
-                          {campaign.status === 'upcoming' && 'आगामी'}
-                          {campaign.status === 'ongoing' && 'चल रही'}
-                          {campaign.status === 'completed' && 'पूर्ण'}
-                          {campaign.status === 'cancelled' && 'रद्द'}
+                          {campaign.status === 'upcoming' && 'Upcoming / आगामी'}
+                          {campaign.status === 'ongoing' && 'Ongoing / चल रही'}
+                          {campaign.status === 'completed' && 'Completed / पूर्ण'}
+                          {campaign.status === 'cancelled' && 'Cancelled / रद्द'}
                         </Badge>
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">स्थान</p>
+                        <p className="text-sm font-medium text-gray-600">Location / स्थान</p>
                         <p className="text-sm text-gray-900">{campaign.location}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-600">तारीख और समय</p>
+                        <p className="text-sm font-medium text-gray-600">Date & Time / तारीख और समय</p>
                         <p className="text-sm text-gray-900">{campaign.date} • {campaign.time}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-600">अपेक्षित भीड़</p>
+                        <p className="text-sm font-medium text-gray-600">Expected Crowd / अपेक्षित भीड़</p>
                         <p className="text-sm text-gray-900">{(campaign.expectedCrowd ?? 0).toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-600">बजट</p>
+                        <p className="text-sm font-medium text-gray-600">Budget / बजट</p>
                         <p className="text-sm text-gray-900">₹{((campaign.budget ?? 0) / 100000).toFixed(1)}L</p>
                       </div>
                     </div>
                     
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">लक्षित दर्शक</p>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {(campaign.targetAudience ?? []).map((audience, index) => (
-                          <Badge key={index} variant="outline">{audience}</Badge>
-                        ))}
+                    {campaign.targetAudience && campaign.targetAudience.length > 0 && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Target Audience / लक्षित दर्शक</p>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {campaign.targetAudience.map((audience, index) => (
+                            <Badge key={index} variant="outline">{audience}</Badge>
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
                     
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">मुख्य वक्ता</p>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {(campaign.keySpeakers ?? []).map((speaker, index) => (
-                          <Badge key={index} variant="secondary">{speaker}</Badge>
-                        ))}
+                    {campaign.keySpeakers && campaign.keySpeakers.length > 0 && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Key Speakers / मुख्य वक्ता</p>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {campaign.keySpeakers.map((speaker, index) => (
+                            <Badge key={index} variant="secondary">{speaker}</Badge>
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
                     
                     {campaign.actualCrowd !== undefined && campaign.actualCrowd !== null && (
                       <div>
-                        <p className="text-sm font-medium text-gray-600">वास्तविक भीड़</p>
+                        <p className="text-sm font-medium text-gray-600">Actual Crowd / वास्तविक भीड़</p>
                         <p className="text-sm text-green-600">{campaign.actualCrowd.toLocaleString()}</p>
                       </div>
                     )}
                     
                     {campaign.feedback && (
                       <div>
-                        <p className="text-sm font-medium text-gray-600">फीडबैक</p>
+                        <p className="text-sm font-medium text-gray-600">Feedback / फीडबैक</p>
                         <p className="text-sm text-gray-900">{campaign.feedback}</p>
                       </div>
                     )}
@@ -534,98 +586,179 @@ export default function ChunaviRailayan() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">शीर्षक</label>
+                  <label className="text-sm font-medium text-gray-700">Title / शीर्षक</label>
                   <Input defaultValue={campaigns.find(c => c._id === editModal)?.title ?? ''} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">स्थान</label>
+                  <label className="text-sm font-medium text-gray-700">Location / स्थान</label>
                   <Input defaultValue={campaigns.find(c => c._id === editModal)?.location ?? ''} />
                 </div>
               </div>
               
               <div>
-                <label className="text-sm font-medium text-gray-700">विवरण</label>
+                <label className="text-sm font-medium text-gray-700">Description / विवरण</label>
                 <Input defaultValue={campaigns.find(c => c._id === editModal)?.description ?? ''} />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">तारीख</label>
+                  <label className="text-sm font-medium text-gray-700">Date / तारीख</label>
                   <Input type="date" defaultValue={campaigns.find(c => c._id === editModal)?.date ?? ''} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">समय</label>
+                  <label className="text-sm font-medium text-gray-700">Time / समय</label>
                   <Input type="time" defaultValue={campaigns.find(c => c._id === editModal)?.time ?? ''} />
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">अपेक्षित भीड़</label>
+                  <label className="text-sm font-medium text-gray-700">Expected Crowd / अपेक्षित भीड़</label>
                   <Input type="number" defaultValue={campaigns.find(c => c._id === editModal)?.expectedCrowd ?? ''} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">बजट (₹)</label>
+                  <label className="text-sm font-medium text-gray-700">Budget / बजट (₹)</label>
                   <Input type="number" defaultValue={campaigns.find(c => c._id === editModal)?.budget ?? ''} />
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">स्थिति</label>
+                  <label className="text-sm font-medium text-gray-700">Status / स्थिति</label>
                   <Select defaultValue={campaigns.find(c => c._id === editModal)?.status ?? ''}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="upcoming">आगामी</SelectItem>
-                      <SelectItem value="ongoing">चल रही</SelectItem>
-                      <SelectItem value="completed">पूर्ण</SelectItem>
-                      <SelectItem value="cancelled">रद्द</SelectItem>
+                      <SelectItem value="upcoming">Upcoming / आगामी</SelectItem>
+                      <SelectItem value="ongoing">Ongoing / चल रही</SelectItem>
+                      <SelectItem value="completed">Completed / पूर्ण</SelectItem>
+                      <SelectItem value="cancelled">Cancelled / रद्द</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">प्राथमिकता</label>
+                  <label className="text-sm font-medium text-gray-700">Priority / प्राथमिकता</label>
                   <Select defaultValue={campaigns.find(c => c._id === editModal)?.priority ?? ''}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="high">उच्च</SelectItem>
-                      <SelectItem value="medium">मध्यम</SelectItem>
-                      <SelectItem value="low">कम</SelectItem>
+                      <SelectItem value="high">High / उच्च</SelectItem>
+                      <SelectItem value="medium">Medium / मध्यम</SelectItem>
+                      <SelectItem value="low">Low / कम</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               
               <div>
-                <label className="text-sm font-medium text-gray-700">Update Image</label>
+                <label className="text-sm font-medium text-gray-700">Images / छवियाँ अपलोड करें (Max 5)</label>
                 <Input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => setEditImageFile(e.target.files?.[0] || null)}
+                  multiple
+                  onChange={handleEditImagesChange}
                 />
+                {/* Show current images */}
+                {editModal && campaigns.find(c => c._id === editModal)?.images && campaigns.find(c => c._id === editModal)!.images!.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-xs text-gray-500 mb-2">Current Images:</p>
+                    <div className="grid grid-cols-5 gap-2">
+                      {campaigns.find(c => c._id === editModal)!.images!.map((img, index) => {
+                        const isKept = existingImagesToKeep.includes(img);
+                        return (
+                          <div key={index} className={`relative group ${!isKept ? 'opacity-50' : ''}`}>
+                            <img
+                              src={img}
+                              alt={`Current ${index + 1}`}
+                              className={`w-full h-20 object-cover rounded-md border-2 ${isKept ? 'border-gray-200' : 'border-red-300'}`}
+                            />
+                            {isKept ? (
+                              <button
+                                type="button"
+                                onClick={() => removeExistingImage(img)}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                ×
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setExistingImagesToKeep(prev => [...prev, img])}
+                                className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                ↻
+                              </button>
+                            )}
+                            {!isKept && (
+                              <span className="absolute bottom-1 left-1 bg-red-500 text-white text-xs px-1 rounded">
+                                Removed
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {/* Show new images */}
+                {editImageFiles.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-xs text-gray-500 mb-2">New Images:</p>
+                    <div className="grid grid-cols-5 gap-2">
+                      {editImageFiles.map((file, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-20 object-cover rounded-md border-2 border-green-300"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeEditImage(index)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
               
               <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setEditModal(null)}>
-                  रद्द करें
+                <Button variant="outline" onClick={() => {
+                  setEditModal(null);
+                  setEditImageFiles([]);
+                  setExistingImagesToKeep([]);
+                }}>
+                  Cancel / रद्द करें
                 </Button>
                 <Button onClick={async () => {
                   if (editModal) {
                     const campaign = campaigns.find(c => c._id === editModal);
                     if (campaign) {
-                      await dispatch(updateRailayan(editModal, { ...campaign, ...editRailayan } as ChunaviRailayan, editImageFile));
+                      // Initialize existing images on first edit
+                      if (existingImagesToKeep.length === 0 && campaign.images) {
+                        setExistingImagesToKeep(campaign.images);
+                      }
+                      const updatedCampaign = {
+                        ...campaign,
+                        ...editRailayan,
+                        existingImages: existingImagesToKeep
+                      };
+                      await dispatch(updateRailayan(editModal, updatedCampaign as ChunaviRailayan, editImageFiles.length > 0 ? editImageFiles : null));
                       setEditModal(null);
                       setEditRailayan({});
-                      setEditImageFile(null);
+                      setEditImageFiles([]);
+                      setExistingImagesToKeep([]);
                       dispatch(fetchRailayan());
                     }
                   }
                 }}>
-                  अपडेट करें
+                  Update / अपडेट करें
                 </Button>
               </div>
             </div>
@@ -637,14 +770,14 @@ export default function ChunaviRailayan() {
       <Dialog open={!!deleteModal} onOpenChange={() => setDeleteModal(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>रैली हटाएं</DialogTitle>
+            <DialogTitle>Delete Rally / रैली हटाएं</DialogTitle>
             <DialogDescription>
-              क्या आप वाकई इस रैली को हटाना चाहते हैं? यह कार्य पूर्ववत नहीं किया जा सकता।
+              Kya aap sach mein is rally ko delete karna chahte hain? Yeh action undo nahi ho sakta.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={() => setDeleteModal(null)}>
-              रद्द करें
+              Cancel / रद्द करें
             </Button>
             <Button variant="destructive" onClick={async () => {
               if (deleteModal) {
@@ -653,7 +786,7 @@ export default function ChunaviRailayan() {
                 dispatch(fetchRailayan());
               }
             }}>
-              हटाएं
+              Delete / हटाएं
             </Button>
           </div>
         </DialogContent>
@@ -661,24 +794,24 @@ export default function ChunaviRailayan() {
 
       {/* Add Modal */}
       <Dialog open={addModal} onOpenChange={setAddModal}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>नई रैली जोड़ें</DialogTitle>
+            <DialogTitle>नई रैली जोड़ें / Add New Rally</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">शीर्षक</label>
+                <label className="text-sm font-medium text-gray-700">Title / शीर्षक</label>
                 <Input 
-                  placeholder="रैली का शीर्षक" 
+                  placeholder="Rally ka title" 
                   value={newRailayan.title || ''}
                   onChange={(e) => setNewRailayan(prev => ({ ...prev, title: e.target.value }))}
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">स्थान</label>
+                <label className="text-sm font-medium text-gray-700">Location / स्थान</label>
                 <Input 
-                  placeholder="रैली का स्थान" 
+                  placeholder="Rally ka location" 
                   value={newRailayan.location || ''}
                   onChange={(e) => setNewRailayan(prev => ({ ...prev, location: e.target.value }))}
                 />
@@ -686,9 +819,9 @@ export default function ChunaviRailayan() {
             </div>
             
             <div>
-              <label className="text-sm font-medium text-gray-700">विवरण</label>
+              <label className="text-sm font-medium text-gray-700">Description / विवरण</label>
               <Input 
-                placeholder="रैली का विवरण" 
+                placeholder="Rally ka description" 
                 value={newRailayan.description || ''}
                 onChange={(e) => setNewRailayan(prev => ({ ...prev, description: e.target.value }))}
               />
@@ -696,7 +829,7 @@ export default function ChunaviRailayan() {
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">तारीख</label>
+                <label className="text-sm font-medium text-gray-700">Date / तारीख</label>
                 <Input 
                   type="date" 
                   value={newRailayan.date || ''}
@@ -704,7 +837,7 @@ export default function ChunaviRailayan() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">समय</label>
+                <label className="text-sm font-medium text-gray-700">Time / समय</label>
                 <Input 
                   type="time" 
                   value={newRailayan.time || ''}
@@ -715,7 +848,7 @@ export default function ChunaviRailayan() {
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">अपेक्षित भीड़</label>
+                <label className="text-sm font-medium text-gray-700">Expected Crowd / अपेक्षित भीड़</label>
                 <Input 
                   type="number" 
                   placeholder="50000" 
@@ -724,7 +857,7 @@ export default function ChunaviRailayan() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">बजट (₹)</label>
+                <label className="text-sm font-medium text-gray-700">Budget / बजट (₹)</label>
                 <Input 
                   type="number" 
                   placeholder="2500000" 
@@ -736,62 +869,91 @@ export default function ChunaviRailayan() {
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">प्रकार</label>
+                <label className="text-sm font-medium text-gray-700">Type / प्रकार</label>
                 <Select 
                   value={newRailayan.campaignType || ''}
                   onValueChange={(value) => setNewRailayan(prev => ({ ...prev, campaignType: value }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="प्रकार चुनें" />
+                    <SelectValue placeholder="Type chunein" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="roadshow">रोड शो</SelectItem>
-                    <SelectItem value="rally">रैली</SelectItem>
-                    <SelectItem value="meeting">बैठक</SelectItem>
-                    <SelectItem value="door-to-door">दर-दर</SelectItem>
-                    <SelectItem value="media">मीडिया</SelectItem>
+                    <SelectItem value="roadshow">Roadshow / रोड शो</SelectItem>
+                    <SelectItem value="rally">Rally / रैली</SelectItem>
+                    <SelectItem value="meeting">Meeting / बैठक</SelectItem>
+                    <SelectItem value="door-to-door">Door-to-Door / घर-घर</SelectItem>
+                    <SelectItem value="media">Media / मीडिया</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">प्राथमिकता</label>
+                <label className="text-sm font-medium text-gray-700">Priority / प्राथमिकता</label>
                 <Select 
                   value={newRailayan.priority || ''}
                   onValueChange={(value) => setNewRailayan(prev => ({ ...prev, priority: value }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="प्राथमिकता चुनें" />
+                    <SelectValue placeholder="Priority chunein" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="high">उच्च</SelectItem>
-                    <SelectItem value="medium">मध्यम</SelectItem>
-                    <SelectItem value="low">कम</SelectItem>
+                    <SelectItem value="high">High / उच्च</SelectItem>
+                    <SelectItem value="medium">Medium / मध्यम</SelectItem>
+                    <SelectItem value="low">Low / कम</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             
             <div>
-              <label className="text-sm font-medium text-gray-700">Event Image</label>
+              <label className="text-sm font-medium text-gray-700">Images / छवियाँ अपलोड करें (Max 5)</label>
               <Input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setNewImageFile(e.target.files?.[0] || null)}
+                multiple
+                onChange={handleNewImagesChange}
               />
+              {newImageFiles.length > 0 && (
+                <div className="mt-3 grid grid-cols-5 gap-2">
+                  {newImageFiles.map((file, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-20 object-cover rounded-md border-2 border-gray-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeNewImage(index)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        ×
+                      </button>
+                      {index === 0 && (
+                        <span className="absolute bottom-1 left-1 bg-blue-500 text-white text-xs px-1 rounded">
+                          Main
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setAddModal(false)}>
-                रद्द करें
+              <Button variant="outline" onClick={() => {
+                setAddModal(false);
+                setNewImageFiles([]);
+              }}>
+                Cancel / रद्द करें
               </Button>
               <Button onClick={async () => {
-                await dispatch(addRailayan(newRailayan as ChunaviRailayan, newImageFile));
+                await dispatch(addRailayan(newRailayan as ChunaviRailayan, newImageFiles.length > 0 ? newImageFiles : null));
                 setAddModal(false);
                 setNewRailayan({});
-                setNewImageFile(null);
+                setNewImageFiles([]);
                 dispatch(fetchRailayan());
               }}>
-                जोड़ें
+                Add / जोड़ें
               </Button>
             </div>
           </div>

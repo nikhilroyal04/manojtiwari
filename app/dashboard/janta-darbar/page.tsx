@@ -62,8 +62,9 @@ export default function JantaDarbarPage() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newImageFile, setNewImageFile] = useState<File | null>(null);
-  const [editImageFile, setEditImageFile] = useState<File | null>(null);
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+  const [editImageFiles, setEditImageFiles] = useState<File[]>([]);
+  const [existingImagesToKeep, setExistingImagesToKeep] = useState<string[]>([]);
 
   // For Add
   const [newJantaDarbar, setNewJantaDarbar] = useState<Partial<JantaDarbar>>({
@@ -127,6 +128,53 @@ export default function JantaDarbarPage() {
 
   const totalAttendees = jantaDarbars.reduce((sum, jd) => sum + (jd.attendees || 0), 0);
 
+  // Handle multiple image selection for Add
+  const handleNewImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const totalImages = newImageFiles.length + files.length;
+    
+    if (totalImages > 5) {
+      alert(`Maximum 5 images allowed / Maximum 5 images hi upload kar sakte hain. Aapne ${totalImages} select kiye hain.`);
+      return;
+    }
+    
+    // Add new files to existing files
+    setNewImageFiles(prev => [...prev, ...files]);
+    // Clear the input so same file can be selected again if needed
+    e.target.value = '';
+  };
+
+  // Handle multiple image selection for Edit
+  const handleEditImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const totalImages = existingImagesToKeep.length + editImageFiles.length + files.length;
+    
+    if (totalImages > 5) {
+      alert(`Maximum 5 images allowed / Maximum 5 images hi upload kar sakte hain. Total images: ${totalImages}`);
+      return;
+    }
+    
+    // Add new files to existing files
+    setEditImageFiles(prev => [...prev, ...files]);
+    // Clear the input so same file can be selected again if needed
+    e.target.value = '';
+  };
+
+  // Remove image from new images
+  const removeNewImage = (index: number) => {
+    setNewImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Remove image from edit images
+  const removeEditImage = (index: number) => {
+    setEditImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Remove existing image (mark for deletion)
+  const removeExistingImage = (imageUrl: string) => {
+    setExistingImagesToKeep(prev => prev.filter(url => url !== imageUrl));
+  };
+
   // Add Janta Darbar
   const handleAddJantaDarbar = async () => {
     // Validate required fields
@@ -135,9 +183,10 @@ export default function JantaDarbarPage() {
       return;
     }
     try {
-      await dispatch(addDarbar(newJantaDarbar as JantaDarbar, newImageFile));
+      // Pass all images array to upload to S3
+      await dispatch(addDarbar(newJantaDarbar as JantaDarbar, newImageFiles.length > 0 ? newImageFiles : null));
       setIsAddModalOpen(false);
-      setNewImageFile(null);
+      setNewImageFiles([]);
       setNewJantaDarbar({
         title: '',
         agenda: '',
@@ -168,6 +217,8 @@ export default function JantaDarbarPage() {
       resolved: jd.resolved,
     });
     setSelectedJantaDarbar(jd);
+    // Initialize existing images to keep with all current images
+    setExistingImagesToKeep(jd.images || []);
     setIsEditModalOpen(true);
   };
 
@@ -175,10 +226,18 @@ export default function JantaDarbarPage() {
   const handleUpdateJantaDarbar = async () => {
     if (!editJantaDarbar._id) return;
     try {
-      await dispatch(updateDarbar(editJantaDarbar._id , editJantaDarbar as JantaDarbar, editImageFile));
+      // Combine existing images to keep with new images
+      const updatedDarbar = {
+        ...editJantaDarbar,
+        existingImages: existingImagesToKeep // Send existing images that should be kept
+      };
+      
+      // Pass all images array to upload to S3
+      await dispatch(updateDarbar(editJantaDarbar._id , updatedDarbar as JantaDarbar, editImageFiles.length > 0 ? editImageFiles : null));
       setIsEditModalOpen(false);
       setSelectedJantaDarbar(null);
-      setEditImageFile(null);
+      setEditImageFiles([]);
+      setExistingImagesToKeep([]);
       setEditJantaDarbar({
         _id: '',
         title: '',
@@ -230,9 +289,9 @@ export default function JantaDarbarPage() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           {[
             { label: 'Total Events', count: jantaDarbars.length, color: 'bg-blue-500', icon: Calendar },
-            { label: 'Scheduled', count: getStatusCount('SCHEDULED'), color: 'bg-blue-500', icon: AlertCircle },
-            { label: 'Completed', count: getStatusCount('COMPLETED'), color: 'bg-gray-500', icon: CheckCircle },
-            { label: 'Cancelled', count: getStatusCount('CANCELLED'), color: 'bg-red-500', icon: XCircle },
+            { label: 'Open', count: getStatusCount('open'), color: 'bg-blue-500', icon: AlertCircle },
+            { label: 'Ongoing', count: getStatusCount('ongoing'), color: 'bg-green-500', icon: CheckCircle },
+            { label: 'Closed', count: getStatusCount('close'), color: 'bg-gray-500', icon: XCircle },
             { label: 'Total Attendees', count: totalAttendees, color: 'bg-purple-500', icon: Users }
           ].map((stat, index) => (
             <motion.div
@@ -278,10 +337,10 @@ export default function JantaDarbarPage() {
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="SCHEDULED">Scheduled</SelectItem>
-                <SelectItem value="COMPLETED">Completed</SelectItem>
-                <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                <SelectItem value="all">All Status / सभी</SelectItem>
+                <SelectItem value="open">Open / खुला</SelectItem>
+                <SelectItem value="ongoing">Ongoing / चल रहा</SelectItem>
+                <SelectItem value="close">Closed / बंद</SelectItem>
               </SelectContent>
             </Select>
 
@@ -293,35 +352,35 @@ export default function JantaDarbarPage() {
                   Add Event
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Add New Janta Darbar Event</DialogTitle>
+                  <DialogTitle>Naya Janta Darbar Event Add Karein / Add New Event</DialogTitle>
                   <DialogDescription>
-                    Create a new janta darbar event with all details.
+                    Janta darbar event ki saari details enter karein.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium">Title</label>
+                    <label className="text-sm font-medium">Title / शीर्षक</label>
                     <Input
                       value={newJantaDarbar.title || ''}
                       onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, title: e.target.value }))}
-                      placeholder="Enter event title"
+                      placeholder="Event ka title likhen"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Description</label>
+                    <label className="text-sm font-medium">Agenda / Description / विवरण</label>
                     <textarea
                       value={newJantaDarbar.agenda || ''}
                       onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, agenda: e.target.value }))}
-                      placeholder="Enter event agenda"
+                      placeholder="Event ka agenda ya description"
                       className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                       rows={3}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium">Date & Time</label>
+                      <label className="text-sm font-medium">Date & Time / तारीख और समय</label>
                       <Input
                         type="datetime-local"
                         value={newJantaDarbar.date || ''}
@@ -329,19 +388,19 @@ export default function JantaDarbarPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Location</label>
+                      <label className="text-sm font-medium">Location / स्थान</label>
                       <Input
                         value={newJantaDarbar.location || ''}
                         onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, location: e.target.value }))}
-                        placeholder="Enter location"
+                        placeholder="Location enter karein"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium">Status</label>
+                      <label className="text-sm font-medium">Status / स्थिति</label>
                       <Select
-                        value={newJantaDarbar.status || 'SCHEDULED'}
+                        value={newJantaDarbar.status || 'open'}
                         onValueChange={(value) =>
                           setNewJantaDarbar((prev) => ({
                             ...prev,
@@ -353,14 +412,14 @@ export default function JantaDarbarPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="open">Open</SelectItem>
-                          <SelectItem value="ongoing">Ongoing</SelectItem>
-                          <SelectItem value="close">Close</SelectItem>
+                          <SelectItem value="open">Open / खुला</SelectItem>
+                          <SelectItem value="ongoing">Ongoing / चल रहा</SelectItem>
+                          <SelectItem value="close">Closed / बंद</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Expected Attendees</label>
+                      <label className="text-sm font-medium">Attendees / उपस्थिति</label>
                       <Input
                         type="number"
                         value={newJantaDarbar.attendees || 0}
@@ -375,38 +434,64 @@ export default function JantaDarbarPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Issues Raised</label>
+                    <label className="text-sm font-medium">Issues Raised / उठाए गए मुद्दे</label>
                     <Input
                       type="number"
                       value={newJantaDarbar.issues || 0}
                       onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, issues: parseInt(e.target.value) || 0 }))}
-                      placeholder="Number of issues raised"
+                      placeholder="Kitne issues raise hue"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Resolved Issues</label>
+                    <label className="text-sm font-medium">Resolved Issues / हल किए गए मुद्दे</label>
                     <Input
                       type="number"
                       value={newJantaDarbar.resolved || 0}
                       onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, resolved: parseInt(e.target.value) || 0 }))}
-                      placeholder="Number of issues resolved"
+                      placeholder="Kitne issues resolve hue"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Event Image</label>
+                    <label className="text-sm font-medium">Images / छवियाँ अपलोड करें (Max 5)</label>
                     <Input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => setNewImageFile(e.target.files?.[0] || null)}
+                      multiple
+                      onChange={handleNewImagesChange}
                     />
+                    {newImageFiles.length > 0 && (
+                      <div className="mt-3 grid grid-cols-5 gap-2">
+                        {newImageFiles.map((file, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-20 object-cover rounded-md border-2 border-gray-200"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeNewImage(index)}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              ×
+                            </button>
+                            {index === 0 && (
+                              <span className="absolute bottom-1 left-1 bg-blue-500 text-white text-xs px-1 rounded">
+                                Main
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setIsAddModalOpen(false)}>
-                    Cancel
+                    Cancel / रद्द करें
                   </Button>
                   <Button onClick={handleAddJantaDarbar} className="bg-orange-500 hover:bg-orange-600">
-                    Add Event
+                    Add Event / जोड़ें
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -439,11 +524,24 @@ export default function JantaDarbarPage() {
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                          <Calendar className="w-6 h-6 text-orange-600" />
-                        </div>
+                        {jd.mainImage ? (
+                          <img
+                            src={jd.mainImage}
+                            alt={jd.title}
+                            className="w-12 h-12 rounded-lg object-cover border border-gray-200"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <Calendar className="w-6 h-6 text-orange-600" />
+                          </div>
+                        )}
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900 max-w-xs truncate">{jd.title}</div>
+                          {jd.images && jd.images.length > 1 && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              📷 {jd.images.length} images
+                            </div>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -490,12 +588,35 @@ export default function JantaDarbarPage() {
                           </DialogTrigger>
                           <DialogContent className="max-w-4xl">
                             <DialogHeader>
-                              <DialogTitle>Janta Darbar Details</DialogTitle>
+                              <DialogTitle>Event Details / विवरण</DialogTitle>
                               <DialogDescription>
-                                Complete information about {jd.title}
+                                {jd.title} ki puri jaankari
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-6">
+                              {/* Images Gallery */}
+                              {jd.images && jd.images.length > 0 && (
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Event Images</label>
+                                  <div className="mt-2 grid grid-cols-4 gap-2">
+                                    {jd.images.map((img, index) => (
+                                      <div key={index} className="relative">
+                                        <img
+                                          src={img}
+                                          alt={`Event ${index + 1}`}
+                                          className="w-full h-24 object-cover rounded-md border-2 border-gray-200"
+                                        />
+                                        {img === jd.mainImage && (
+                                          <span className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                                            Main Image
+                                          </span>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
                                   <label className="text-sm font-medium text-gray-500">Title</label>
@@ -520,17 +641,19 @@ export default function JantaDarbarPage() {
                                 <label className="text-sm font-medium text-gray-500">Description</label>
                                 <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">{jd.agenda}</p>
                               </div>
-                              <div>
-                                <label className="text-sm font-medium text-gray-500">Attendees</label>
-                                <p className="text-sm text-gray-900">{jd.attendees || 0}</p>
-                              </div>
-                              <div>
-                                <label className="text-sm font-medium text-gray-500">Issues Raised</label>
-                                <p className="text-sm text-gray-900">{jd.issues || 0}</p>
-                              </div>
-                              <div>
-                                <label className="text-sm font-medium text-gray-500">Resolved Issues</label>
-                                <p className="text-sm text-gray-900">{jd.resolved || 0}</p>
+                              <div className="grid grid-cols-3 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Attendees</label>
+                                  <p className="text-sm text-gray-900">{jd.attendees || 0}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Issues Raised</label>
+                                  <p className="text-sm text-gray-900">{jd.issues || 0}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-500">Resolved Issues</label>
+                                  <p className="text-sm text-gray-900">{jd.resolved || 0}</p>
+                                </div>
                               </div>
                             </div>
                             <DialogFooter>
@@ -558,35 +681,35 @@ export default function JantaDarbarPage() {
                               <Edit className="w-4 h-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-2xl">
+                          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle>Edit Janta Darbar Event</DialogTitle>
+                              <DialogTitle>Event Edit Karein / Edit Event</DialogTitle>
                               <DialogDescription>
-                                Update the details for {editJantaDarbar.title}
+                                {editJantaDarbar.title} ki details update karein
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                               <div>
-                                <label className="text-sm font-medium">Title</label>
+                                <label className="text-sm font-medium">Title / शीर्षक</label>
                                 <Input
                                   value={editJantaDarbar.title || ''}
                                   onChange={e => setEditJantaDarbar(prev => ({ ...prev, title: e.target.value }))}
-                                  placeholder="Enter event title"
+                                  placeholder="Event ka title"
                                 />
                               </div>
                               <div>
-                                <label className="text-sm font-medium">Description</label>
+                                <label className="text-sm font-medium">Agenda / Description / विवरण</label>
                                 <textarea
                                   value={editJantaDarbar.agenda || ''}
                                   onChange={e => setEditJantaDarbar(prev => ({ ...prev, agenda: e.target.value }))}
-                                  placeholder="Enter event agenda"
+                                  placeholder="Event ka agenda"
                                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                                   rows={3}
                                 />
                               </div>
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                  <label className="text-sm font-medium">Date & Time</label>
+                                  <label className="text-sm font-medium">Date & Time / तारीख और समय</label>
                                   <Input
                                     type="datetime-local"
                                     value={editJantaDarbar.date || ''}
@@ -594,17 +717,17 @@ export default function JantaDarbarPage() {
                                   />
                                 </div>
                                 <div>
-                                  <label className="text-sm font-medium">Location</label>
+                                  <label className="text-sm font-medium">Location / स्थान</label>
                                   <Input
                                     value={editJantaDarbar.location || ''}
                                     onChange={e => setEditJantaDarbar(prev => ({ ...prev, location: e.target.value }))}
-                                    placeholder="Enter location"
+                                    placeholder="Location"
                                   />
                                 </div>
                               </div>
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                  <label className="text-sm font-medium">Status</label>
+                                  <label className="text-sm font-medium">Status / स्थिति</label>
                                   <Select
                                     value={editJantaDarbar.status || 'open'}
                                     onValueChange={value =>
@@ -618,14 +741,14 @@ export default function JantaDarbarPage() {
                                       <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="open">Open</SelectItem>
-                                      <SelectItem value="ongoing">Ongoing</SelectItem>
-                                      <SelectItem value="close">Close</SelectItem>
+                                      <SelectItem value="open">Open / खुला</SelectItem>
+                                      <SelectItem value="ongoing">Ongoing / चल रहा</SelectItem>
+                                      <SelectItem value="close">Closed / बंद</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
                                 <div>
-                                  <label className="text-sm font-medium">Attendees</label>
+                                  <label className="text-sm font-medium">Attendees / उपस्थिति</label>
                                   <Input
                                     type="number"
                                     value={editJantaDarbar.attendees || 0}
@@ -640,41 +763,120 @@ export default function JantaDarbarPage() {
                                 </div>
                               </div>
                               <div>
-                                <label className="text-sm font-medium">Issues Raised</label>
+                                <label className="text-sm font-medium">Issues Raised / उठाए गए मुद्दे</label>
                                 <Input
                                   type="number"
                                   value={editJantaDarbar.issues || 0}
                                   onChange={e => setEditJantaDarbar(prev => ({ ...prev, issues: parseInt(e.target.value) || 0 }))}
-                                  placeholder="Number of issues raised"
+                                  placeholder="Number of issues"
                                 />
                               </div>
                               <div>
-                                <label className="text-sm font-medium">Resolved Issues</label>
+                                <label className="text-sm font-medium">Resolved Issues / हल किए गए मुद्दे</label>
                                 <Input
                                   type="number"
                                   value={editJantaDarbar.resolved || 0}
                                   onChange={e => setEditJantaDarbar(prev => ({ ...prev, resolved: parseInt(e.target.value) || 0 }))}
-                                  placeholder="Number of issues resolved"
+                                  placeholder="Number resolved"
                                 />
                               </div>
                               <div>
-                                <label className="text-sm font-medium">Update Event Image</label>
+                                <label className="text-sm font-medium">Images / छवियाँ अपलोड करें (Max 5)</label>
                                 <Input
                                   type="file"
                                   accept="image/*"
-                                  onChange={(e) => setEditImageFile(e.target.files?.[0] || null)}
+                                  multiple
+                                  onChange={handleEditImagesChange}
                                 />
+                                {/* Show current images */}
+                                {selectedJantaDarbar?.images && selectedJantaDarbar.images.length > 0 && (
+                                  <div className="mt-3">
+                                    <p className="text-xs text-gray-500 mb-2">Current Images / Mujoodah Images:</p>
+                                    <div className="grid grid-cols-5 gap-2">
+                                      {selectedJantaDarbar.images.map((img, index) => {
+                                        const isKept = existingImagesToKeep.includes(img);
+                                        return (
+                                          <div key={index} className={`relative group ${!isKept ? 'opacity-50' : ''}`}>
+                                            <img
+                                              src={img}
+                                              alt={`Current ${index + 1}`}
+                                              className={`w-full h-20 object-cover rounded-md border-2 ${isKept ? 'border-gray-200' : 'border-red-300'}`}
+                                            />
+                                            {isKept ? (
+                                              <button
+                                                type="button"
+                                                onClick={() => removeExistingImage(img)}
+                                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                title="Remove / Hatao"
+                                              >
+                                                ×
+                                              </button>
+                                            ) : (
+                                              <button
+                                                type="button"
+                                                onClick={() => setExistingImagesToKeep(prev => [...prev, img])}
+                                                className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                title="Restore / Wapas lao"
+                                              >
+                                                ↻
+                                              </button>
+                                            )}
+                                            {img === selectedJantaDarbar.mainImage && isKept && (
+                                              <span className="absolute bottom-1 left-1 bg-blue-500 text-white text-xs px-1 rounded">
+                                                Main
+                                              </span>
+                                            )}
+                                            {!isKept && (
+                                              <span className="absolute bottom-1 left-1 bg-red-500 text-white text-xs px-1 rounded">
+                                                Removed
+                                              </span>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+                                {/* Show new images to upload */}
+                                {editImageFiles.length > 0 && (
+                                  <div className="mt-3">
+                                    <p className="text-xs text-gray-500 mb-2">New Images to Upload:</p>
+                                    <div className="grid grid-cols-5 gap-2">
+                                      {editImageFiles.map((file, index) => (
+                                        <div key={index} className="relative group">
+                                          <img
+                                            src={URL.createObjectURL(file)}
+                                            alt={`Preview ${index + 1}`}
+                                            className="w-full h-20 object-cover rounded-md border-2 border-green-300"
+                                          />
+                                          <button
+                                            type="button"
+                                            onClick={() => removeEditImage(index)}
+                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                          >
+                                            ×
+                                          </button>
+                                          {index === 0 && (
+                                            <span className="absolute bottom-1 left-1 bg-blue-500 text-white text-xs px-1 rounded">
+                                              Main
+                                            </span>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
                             <DialogFooter>
                               <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
-                                Cancel
+                                Cancel / रद्द करें
                               </Button>
                               <Button
                                 onClick={handleUpdateJantaDarbar}
                                 className="bg-primary hover:bg-primary/90"
                               >
-                                Update Event
+                                Update / अपडेट करें
                               </Button>
                             </DialogFooter>
                           </DialogContent>
@@ -696,20 +898,20 @@ export default function JantaDarbarPage() {
                           </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
-                              <DialogTitle>Delete Janta Darbar Event</DialogTitle>
+                              <DialogTitle>Delete Event / इवेंट हटाएं</DialogTitle>
                               <DialogDescription>
-                                Are you sure you want to delete &quot;{jd.title}&quot;? This action cannot be undone.
+                                Kya aap sach mein &quot;{jd.title}&quot; ko delete karna chahte hain? Yeh action undo nahi ho sakta.
                               </DialogDescription>
                             </DialogHeader>
                             <DialogFooter>
                               <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
-                                Cancel
+                                Cancel / रद्द करें
                               </Button>
                               <Button
                                 variant="destructive"
                                 onClick={() => handleDeleteJantaDarbar(jd._id)}
                               >
-                                Delete Event
+                                Delete / हटाएं
                               </Button>
                             </DialogFooter>
                           </DialogContent>

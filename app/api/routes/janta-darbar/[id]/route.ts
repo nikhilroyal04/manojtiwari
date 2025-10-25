@@ -29,25 +29,63 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         
         if (contentType.includes('multipart/form-data')) {
             const formData = await request.formData();
-            const file = formData.get('image') as File | null;
-            const formDataObj = Object.fromEntries(formData.entries());
+            
+            // Get all image files (support multiple images)
+            const imageFiles: File[] = [];
+            formData.forEach((value, key) => {
+                if (key.startsWith('image') && value instanceof File) {
+                    imageFiles.push(value);
+                }
+            });
+            
+            // Get other form data (excluding image files)
+            const formDataObj: Record<string, unknown> = {};
+            formData.forEach((value, key) => {
+                if (!key.startsWith('image')) {
+                    formDataObj[key] = value;
+                }
+            });
+            
             jantaDarbarData = { ...formDataObj };
             
-            if (file) {
-                // Convert File to Multer-like file object
-                const buffer = Buffer.from(await file.arrayBuffer());
-                const multerFile = {
-                    fieldname: 'image',
-                    originalname: file.name,
-                    encoding: '7bit',
-                    mimetype: file.type,
-                    buffer: buffer,
-                    size: file.size
-                } as Express.Multer.File;
-                
-                const uploaded = await uploadToS3(multerFile);
-                jantaDarbarData.image = uploaded.url;
+            // Get existing images to keep (sent from frontend)
+            const existingImages = jantaDarbarData.existingImages 
+                ? (typeof jantaDarbarData.existingImages === 'string' 
+                    ? jantaDarbarData.existingImages.split(',').filter((url: string) => url.trim())
+                    : jantaDarbarData.existingImages)
+                : [];
+            
+            // Upload new images to S3
+            const uploadedUrls: string[] = [];
+            if (imageFiles.length > 0) {
+                for (const file of imageFiles) {
+                    // Convert File to Multer-like file object
+                    const buffer = Buffer.from(await file.arrayBuffer());
+                    const multerFile = {
+                        fieldname: 'image',
+                        originalname: file.name,
+                        encoding: '7bit',
+                        mimetype: file.type,
+                        buffer: buffer,
+                        size: file.size
+                    } as Express.Multer.File;
+                    
+                    const uploaded = await uploadToS3(multerFile);
+                    uploadedUrls.push(uploaded.url);
+                }
             }
+            
+            // Combine existing images (that should be kept) + newly uploaded images
+            const finalImages = [...existingImages, ...uploadedUrls];
+            
+            if (finalImages.length > 0) {
+                // First image from final array is mainImage
+                jantaDarbarData.mainImage = finalImages[0];
+                jantaDarbarData.images = finalImages;
+            }
+            
+            // Remove existingImages field as it's not part of the schema
+            delete jantaDarbarData.existingImages;
         } else {
             jantaDarbarData = await request.json();
         }

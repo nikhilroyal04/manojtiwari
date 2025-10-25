@@ -10,7 +10,7 @@ const jantaDarbarSchema = new mongoose.Schema({
     required: true 
   },
   location: { type: String, required: true },
-  images: [{ type: String, required: true }],
+  images: [{ type: String }], // Made optional - array can be empty
   mainImage: { type: String, required: true },
   attendees: { type: Number, default: 0 },
   issues: { type: Number, default: 0 },

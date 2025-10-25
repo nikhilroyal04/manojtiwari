@@ -16,6 +16,7 @@ export interface JantaDarbar {
     attendees?: number;
     issues?: number;
     resolved?: number;
+    existingImages?: string[]; // For edit: existing images to keep
     [key: string]: unknown;
 }
 
@@ -102,21 +103,31 @@ export const fetchDarbars = () => async (dispatch: Dispatch) => {
 };
 
 // Add a new Janta Darbar event
-export const addDarbar = (darbar: JantaDarbar, file?: File | null) => async (dispatch: Dispatch) => {
+export const addDarbar = (darbar: JantaDarbar, files?: File[] | File | null) => async (dispatch: Dispatch) => {
     try {
         dispatch(setLoading(true));
         const formData = new FormData();
+        
+        // Add all form fields
         Object.entries(darbar).forEach(([key, value]) => {
-            if (key === "image" && file) {
-                formData.append("image", file);
-            } else if (typeof value === "string") {
-                formData.append(key, value);
-            } else if (Array.isArray(value)) {
-                formData.append(key, value.join(","));
-            } else if (value != null) {
-                formData.append(key, String(value));
+            if (key !== "image" && key !== "images" && key !== "mainImage") {
+                if (typeof value === "string") {
+                    formData.append(key, value);
+                } else if (Array.isArray(value)) {
+                    formData.append(key, value.join(","));
+                } else if (value != null) {
+                    formData.append(key, String(value));
+                }
             }
         });
+
+        // Add multiple image files
+        if (files) {
+            const fileArray = Array.isArray(files) ? files : [files];
+            fileArray.forEach((file, index) => {
+                formData.append(`image${index}`, file);
+            });
+        }
 
         const response = await axios.post("/api/routes/janta-darbar", formData, {
             headers: {
@@ -144,23 +155,37 @@ export const addDarbar = (darbar: JantaDarbar, file?: File | null) => async (dis
 };
 
 // Update an existing Janta Darbar event
-export const updateDarbar = (id: string, darbar: JantaDarbar, file?: File | null) => async (dispatch: Dispatch) => {
+export const updateDarbar = (id: string, darbar: JantaDarbar, files?: File[] | File | null) => async (dispatch: Dispatch) => {
     try {
         dispatch(setLoading(true));
         let response;
-        if (file) {
+        
+        // Always use FormData if we have files or existingImages to manage
+        if (files || darbar.existingImages) {
             const formData = new FormData();
+            
+            // Add all form fields
             Object.entries(darbar).forEach(([key, value]) => {
-                if (key === "image" && file) {
-                    formData.append("image", file);
-                } else if (typeof value === "string") {
-                    formData.append(key, value);
-                } else if (Array.isArray(value)) {
-                    formData.append(key, value.join(","));
-                } else if (value != null) {
-                    formData.append(key, String(value));
+                if (key !== "image" && key !== "images" && key !== "mainImage") {
+                    if (typeof value === "string") {
+                        formData.append(key, value);
+                    } else if (Array.isArray(value)) {
+                        // Send array as comma-separated string
+                        formData.append(key, value.join(","));
+                    } else if (value != null) {
+                        formData.append(key, String(value));
+                    }
                 }
             });
+
+            // Add multiple image files if provided
+            if (files) {
+                const fileArray = Array.isArray(files) ? files : [files];
+                fileArray.forEach((file, index) => {
+                    formData.append(`image${index}`, file);
+                });
+            }
+
             response = await axios.put(`/api/routes/janta-darbar/${id}`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
