@@ -2,12 +2,9 @@ import connectDatabase from "../../config/db";
 import Gallery from "../../models/galleryModel";
 
 class GalleryServices {
-    constructor() {
-        connectDatabase();
-    }
-
     async createGalleryItem(galleryItem: typeof Gallery) {
         try {
+            await connectDatabase();
             const newGalleryItem = new Gallery(galleryItem);
             await newGalleryItem.save();
             return newGalleryItem;
@@ -18,6 +15,7 @@ class GalleryServices {
 
     async getGalleryItems() {       
         try {
+            await connectDatabase();
             const galleryItems = await Gallery.find();
             return galleryItems;
         } catch (error: unknown) {
@@ -27,6 +25,7 @@ class GalleryServices {
 
     async getGalleryItemById(id: string) {
         try {
+            await connectDatabase();
             const galleryItem = await Gallery.findById(id);
             return galleryItem;
         } catch (error: unknown) {
@@ -36,6 +35,7 @@ class GalleryServices {
 
     async updateGalleryItem(id: string, galleryItem: typeof Gallery) {
         try {
+            await connectDatabase();
             const updatedGalleryItem = await Gallery.findByIdAndUpdate(id, galleryItem, { new: true });
             return updatedGalleryItem;
         } catch (error: unknown) {
@@ -45,6 +45,7 @@ class GalleryServices {
 
     async deleteGalleryItem(id: string) {
         try {
+            await connectDatabase();
             await Gallery.findByIdAndDelete(id);
         } catch (error: unknown) {
             throw new Error((error instanceof Error ? error.message : 'Failed to delete gallery item'));

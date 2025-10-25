@@ -300,46 +300,42 @@ export default function JantaDarbarPostPage() {
 
       {/* Lightbox */}
       {lightboxOpen && post.images && post.images.length > 0 && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
-          <div className="relative w-full max-w-4xl max-h-[80vh]">
-            <button
-              className="absolute top-4 right-4 text-white bg-black/50 p-2 rounded-full hover:bg-black/70"
-              onClick={() => setLightboxOpen(false)}
-            >
-              <X className="w-6 h-6" />
-            </button>
+        <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
+          <button
+            className="absolute top-4 right-4 text-white bg-black/50 p-2 rounded-full hover:bg-black/70 z-50"
+            onClick={() => setLightboxOpen(false)}
+          >
+            <X className="w-6 h-6" />
+          </button>
 
-            <div className="relative h-full w-full flex items-center justify-center">
+          <div className="relative w-full h-full max-w-6xl max-h-[90vh] flex items-center justify-center">
+            <div className="relative w-full h-full">
               <Image
                 src={post.images[currentImageIndex]}
                 alt={`${post.title} - ${currentImageIndex + 1}`}
-                width={1200}
-                height={800}
-                className="max-h-[80vh] w-auto object-contain"
+                fill
+                className="object-contain"
+                unoptimized
               />
             </div>
 
             {post.images.length > 1 && (
               <>
-                <div className="absolute left-0 top-1/2 -translate-y-1/2">
-                  <button
-                    className="bg-black/50 p-3 rounded-full hover:bg-black/70 text-white"
-                    onClick={prevImage}
-                  >
-                    <ChevronLeft className="w-6 h-6" />
-                  </button>
-                </div>
+                <button
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 p-3 rounded-full hover:bg-black/70 text-white z-10"
+                  onClick={prevImage}
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
 
-                <div className="absolute right-0 top-1/2 -translate-y-1/2">
-                  <button
-                    className="bg-black/50 p-3 rounded-full hover:bg-black/70 text-white"
-                    onClick={nextImage}
-                  >
-                    <ChevronRight className="w-6 h-6" />
-                  </button>
-                </div>
+                <button
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 p-3 rounded-full hover:bg-black/70 text-white z-10"
+                  onClick={nextImage}
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
 
-                <div className="absolute bottom-4 left-0 right-0 text-center text-white">
+                <div className="absolute bottom-4 left-0 right-0 text-center text-white text-lg font-semibold bg-black/50 py-2 rounded-full mx-auto w-32">
                   {currentImageIndex + 1} / {post.images.length}
                 </div>
               </>

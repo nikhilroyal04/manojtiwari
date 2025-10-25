@@ -2,12 +2,9 @@ import Lead from '../../models/leadModel';
 import connectDatabase from '../../config/db';
 
 class LeadServices {
-    constructor() {
-        connectDatabase();
-    }
-
     async createLead(lead: typeof Lead) {
         try {
+            await connectDatabase();
             const newLead = new Lead(lead);
             await newLead.save();
             return newLead;
@@ -18,6 +15,7 @@ class LeadServices {
 
     async getLeads() {
         try {
+            await connectDatabase();
             const leads = await Lead.find();
             return leads;
         } catch (error: unknown) {
@@ -27,6 +25,7 @@ class LeadServices {
 
     async getLeadById(id: string) {
         try {
+            await connectDatabase();
             const lead = await Lead.findById(id);
             return lead;
         } catch (error: unknown) {
@@ -36,6 +35,7 @@ class LeadServices {
 
     async updateLead(id: string, lead: typeof Lead) {
         try {
+            await connectDatabase();
             const updatedLead = await Lead.findByIdAndUpdate(id, lead, { new: true });
             return updatedLead;
         } catch (error: unknown) {
@@ -45,6 +45,7 @@ class LeadServices {
 
     async deleteLead(id: string) {
         try {
+            await connectDatabase();
             await Lead.findByIdAndDelete(id);
         } catch (error: unknown) {
             throw new Error((error instanceof Error ? error.message : 'Failed to delete lead'));

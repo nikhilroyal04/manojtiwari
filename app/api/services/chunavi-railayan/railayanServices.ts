@@ -2,12 +2,9 @@ import connectDatabase from "../../config/db";
 import ChunaviRailayan from "../../models/railayan";
 
 class ChunaviRailayanServices {
-    constructor() {
-        connectDatabase();
-    }
-
     async createChunaviRailayan(chunaviRailayan: typeof ChunaviRailayan) {
         try {
+            await connectDatabase();
             const newChunaviRailayan = new ChunaviRailayan(chunaviRailayan);
             await newChunaviRailayan.save();
             return newChunaviRailayan;
@@ -18,6 +15,7 @@ class ChunaviRailayanServices {
 
     async getChunaviRailayan() {
         try {
+            await connectDatabase();
             const chunaviRailayan = await ChunaviRailayan.find();
             return chunaviRailayan;
         } catch (error: unknown) {
@@ -27,6 +25,7 @@ class ChunaviRailayanServices {
 
     async getChunaviRailayanById(id: string) {
         try {
+            await connectDatabase();
             const chunaviRailayan = await ChunaviRailayan.findById(id);
             return chunaviRailayan;
         } catch (error: unknown) {
@@ -36,6 +35,7 @@ class ChunaviRailayanServices {
 
     async updateChunaviRailayan(id: string, chunaviRailayan: typeof ChunaviRailayan) {
         try {
+            await connectDatabase();
             const updatedChunaviRailayan = await ChunaviRailayan.findByIdAndUpdate(id, chunaviRailayan, { new: true });
             return updatedChunaviRailayan;
         } catch (error: unknown) {
@@ -45,6 +45,7 @@ class ChunaviRailayanServices {
 
     async deleteChunaviRailayan(id: string) {
         try {
+            await connectDatabase();
             await ChunaviRailayan.findByIdAndDelete(id);
         } catch (error: unknown) {
             throw new Error((error instanceof Error ? error.message : 'Failed to delete chunavi railayan'));

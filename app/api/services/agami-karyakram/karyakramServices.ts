@@ -2,12 +2,9 @@ import connectDatabase from "../../config/db";
 import Karyakram from "../../models/karyakram";
 
 class KaryakramServices {
-    constructor() {
-        connectDatabase();
-    }
-
     async createKaryakram(karyakram: typeof Karyakram) {
         try {
+            await connectDatabase();
             const newKaryakram = new Karyakram(karyakram);      
             await newKaryakram.save();
             return newKaryakram;
@@ -18,6 +15,7 @@ class KaryakramServices {
 
     async getKaryakram() {
         try {
+            await connectDatabase();
             const karyakram = await Karyakram.find();       
             return karyakram;
         } catch (error: unknown) {
@@ -27,6 +25,7 @@ class KaryakramServices {
 
     async getKaryakramById(id: string) {
         try {
+            await connectDatabase();
             const karyakram = await Karyakram.findById(id);
             return karyakram;   
         } catch (error: unknown) {
@@ -36,6 +35,7 @@ class KaryakramServices {
 
     async updateKaryakram(id: string, karyakram: typeof Karyakram) {
         try {
+            await connectDatabase();
             const updatedKaryakram = await Karyakram.findByIdAndUpdate(id, karyakram, { new: true });
             return updatedKaryakram;    
         } catch (error: unknown) {
@@ -45,6 +45,7 @@ class KaryakramServices {
 
     async deleteKaryakram(id: string) {
         try {
+            await connectDatabase();
             await Karyakram.findByIdAndDelete(id);
         } catch (error: unknown) {  
             throw new Error((error instanceof Error ? error.message : 'Failed to delete karyakram'));
