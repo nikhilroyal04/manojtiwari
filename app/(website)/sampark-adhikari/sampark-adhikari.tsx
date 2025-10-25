@@ -48,7 +48,11 @@
     }
 
     // Get unique departments for filter - now dynamically from database
-    const departments = Array.from(new Set(staffProfiles.map((profile: Adhikari) => profile.department)));
+    const departments = Array.from(new Set(
+      staffProfiles
+        .map((profile: Adhikari) => profile.department)
+        .filter((dept): dept is string => !!dept && dept.trim() !== '')
+    ));
 
     // Filter profiles based on search term and selected department
     const filteredProfiles = staffProfiles.filter((profile: Adhikari) => {
@@ -103,45 +107,47 @@
         />
 
         {/* Filter Section */}
-        <section className="py-6 bg-white shadow-md sticky top-0 z-30">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-wrap justify-between items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-bold">स्टाफ प्रोफाइल</h2>
-              </div>
-              
-              <div className="flex flex-wrap items-center gap-2">
-                {departments.map(department => (
-                  <button
-                    key={department}
-                    onClick={() => setSelectedDepartment(department === selectedDepartment ? null : department as string)}
-                    className={`py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-                      department === selectedDepartment
-                        ? 'bg-primary text-white'
-                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                    }`}
-                  >
-                    {department}
-                  </button>
-                ))}
+        {departments.length > 0 && (
+          <section className="py-6 bg-white shadow-md sticky top-0 z-30">
+            <div className="container mx-auto px-4">
+              <div className="flex flex-wrap justify-between items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-primary" />
+                  <h2 className="text-xl font-bold">स्टाफ प्रोफाइल</h2>
+                </div>
                 
-                {(searchTerm || selectedDepartment) && (
-                  <button
-                    onClick={() => {
-                      setSearchTerm("");
-                      setSelectedDepartment(null);
-                    }}
-                    className="py-2 px-4 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium flex items-center gap-1"
-                  >
-                    <X className="w-4 h-4" />
-                    फ़िल्टर हटाएं
-                  </button>
-                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  {departments.map(department => (
+                    <button
+                      key={department}
+                      onClick={() => setSelectedDepartment(department === selectedDepartment ? null : department as string)}
+                      className={`py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+                        department === selectedDepartment
+                          ? 'bg-primary text-white'
+                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                      }`}
+                    >
+                      {department}
+                    </button>
+                  ))}
+                  
+                  {(searchTerm || selectedDepartment) && (
+                    <button
+                      onClick={() => {
+                        setSearchTerm("");
+                        setSelectedDepartment(null);
+                      }}
+                      className="py-2 px-4 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium flex items-center gap-1"
+                    >
+                      <X className="w-4 h-4" />
+                      फ़िल्टर हटाएं
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Staff Profiles Section */}
         <section className="py-12">
@@ -169,9 +175,11 @@
                             className="object-cover"
                           />
                         </div>
-                        <div className="absolute top-4 right-4 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">
-                          {profile.department}
-                        </div>
+                        {profile.department && profile.department.trim() !== '' && (
+                          <div className="absolute top-4 right-4 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">
+                            {profile.department}
+                          </div>
+                        )}
                       </div>
                       
                       <div className="p-6 flex-grow">
@@ -204,15 +212,27 @@
                             </div>
                           </div>
                           
-                          <div className="flex items-start gap-3">
-                            <UserPlus className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                            <div>
-                              <div className="text-sm text-gray-500">पद:</div>
-                              <div className="text-sm">{profile.designation}</div>
+                          {profile.qualification && profile.qualification.trim() !== '' && (
+                            <div className="flex items-start gap-3">
+                              <UserPlus className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                              <div>
+                                <div className="text-sm text-gray-500">योग्यता:</div>
+                                <div className="text-sm">{profile.qualification}</div>
+                              </div>
                             </div>
-                          </div>
+                          )}
                           
-                          {profile.additionalInfo && (
+                          {profile.designation && profile.designation.trim() !== '' && (
+                            <div className="flex items-start gap-3">
+                              <UserPlus className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                              <div>
+                                <div className="text-sm text-gray-500">पद:</div>
+                                <div className="text-sm">{profile.designation}</div>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {profile.additionalInfo && profile.additionalInfo.trim() !== '' && (
                             <div className="flex items-start gap-3">
                               <UserPlus className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                               <div>
