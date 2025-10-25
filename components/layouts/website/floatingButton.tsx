@@ -1,30 +1,22 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ChevronUp, MessageCircle, Facebook, Twitter, Youtube, Instagram, X } from 'lucide-react';
+import { ChevronUp, MessageCircle, Facebook, Twitter, Youtube, X } from 'lucide-react';
 
 const socialLinks = [
   {
     icon: Facebook,
-    href: 'https://www.facebook.com/manojtiwari',
-    label: 'Facebook'
+    href: 'https://www.facebook.com/manojtiwariofficial/',
   },
   {
     icon: Twitter,
-    href: 'https://www.twitter.com/manojtiwari',
-    label: 'Twitter'
+    href: 'https://x.com/ManojTiwariMP',
   },
   {
     icon: Youtube,
-    href: 'https://www.youtube.com/manojtiwari',
-    label: 'YouTube'
+    href: 'https://www.youtube.com/channel/UC_-IuOPhiusA_gknYjMI1ig',
   },
-  {
-    icon: Instagram,
-    href: 'https://www.instagram.com/manojtiwari',
-    label: 'Instagram'
-  }
-];
+]; 
 
 export default function FloatingButton() {
   const [isVisible, setIsVisible] = useState(false);
@@ -70,7 +62,7 @@ export default function FloatingButton() {
               backgroundColor: 'var(--primary)',
               animationDelay: `${index * 100}ms`
             }}
-            title={link.label}
+            title={link.icon.name}
           >
             <link.icon className="w-6 h-6 text-white" />
           </a>
