@@ -207,8 +207,8 @@ export default function Posts() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
-      <div className="flex-shrink-0 p-8 overflow-y-auto">
+    <div className="flex flex-col overflow-y-auto">
+      <div className="flex-shrink-0 ">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             पोस्ट प्रबंधन
