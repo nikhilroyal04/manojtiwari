@@ -226,9 +226,10 @@ export default function ChunaviRailayanPage() {
                 >
                   <Link href={`/chunavi-railayan/${post._id}`}>
                     <div className="relative h-56 overflow-hidden">
-                      <img
+                      <Image
                         src={post.mainImage || '/images/chunavi-railayan/default-rally.jpg'}
                         alt={post.title}
+                        fill
                         className="object-cover hover:scale-105 transition-transform duration-500"
                       />
                     </div>
@@ -250,9 +251,10 @@ export default function ChunaviRailayanPage() {
                         <div className="mt-4 flex gap-2">
                           {post.images.slice(0, 3).map((image, i) => (
                             <div key={i} className="w-12 h-12 relative rounded-md overflow-hidden">
-                              <img
+                              <Image
                                 src={image}
                                 alt={`${post.title} - ${i+1}`}
+                                fill
                                 className="object-cover"
                               />
                             </div>

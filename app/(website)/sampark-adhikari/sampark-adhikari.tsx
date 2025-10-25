@@ -162,9 +162,10 @@ export default function SamparkAdhikari() {
                   <div className="flex flex-col h-full">
                     <div className="relative bg-gradient-to-r from-orange-100 to-red-100 p-6">
                       <div className="relative h-64 w-64 mx-auto rounded-full overflow-hidden border-4 border-white shadow-lg">
-                        <img
+                        <Image
                           src={profile.image || '/images/staff/default-avatar.jpg'}
                           alt={profile.name}
+                          fill
                           className="object-cover"
                         />
                       </div>

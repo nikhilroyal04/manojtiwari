@@ -92,9 +92,10 @@ export default function ChunaviRailayanPostPage() {
       <section className="relative bg-gradient-to-r from-orange-600 to-red-600 py-16">
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="absolute inset-0 overflow-hidden">
-          <img
+          <Image
             src={post.mainImage || '/images/chunavi-railayan/default-rally.jpg'} 
-            alt={post.title} 
+            alt={post.title}
+            fill
             className="object-cover"
           />
         </div>
@@ -180,9 +181,10 @@ export default function ChunaviRailayanPostPage() {
                           setLightboxOpen(true);
                         }}
                       >
-                        <img
+                        <Image
                           src={image}
                           alt={`${post.title} - ${index + 1}`}
+                          fill
                           className="object-cover hover:scale-110 transition-transform duration-300"
                         />
                       </div>

@@ -290,12 +290,13 @@ export default function JantaDarbar() {
                 >
                   <Link href={`/janta-darbar/${post._id}`}>
                     <div className="relative h-56 overflow-hidden">
-                      <img
+                      <Image
                         src={
                           post.mainImage ||
                           "/images/janta-darbar/default-darbar.jpg"
                         }
                         alt={post.title}
+                        fill
                         className="object-cover hover:scale-105 transition-transform duration-500"
                       />
                     </div>
@@ -347,9 +348,10 @@ export default function JantaDarbar() {
                               key={i}
                               className="w-12 h-12 relative rounded-md overflow-hidden"
                             >
-                              <img
+                              <Image
                                 src={image}
                                 alt={`${post.title} - ${i + 1}`}
+                                fill
                                 className="object-cover"
                               />
                             </div>

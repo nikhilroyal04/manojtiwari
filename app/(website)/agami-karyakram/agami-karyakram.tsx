@@ -290,13 +290,12 @@ export default function AgamiKaryakram() {
                   }`}
                 >
                   <div className="flex flex-col md:flex-row">
-                    <div className="md:w-1/3 relative">
-                      <img
+                    <div className="md:w-1/3 relative h-64">
+                      <Image
                         src={event.image || '/images/events/default-event.jpg'}
                         alt={event.title}
-                        width={400}
-                        height={300}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                       <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold ${
                         isUpcoming(event.date) ? 'bg-primary text-white' : 'bg-gray-500 text-white'
