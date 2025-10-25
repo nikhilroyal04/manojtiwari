@@ -273,11 +273,21 @@ export default function ChunaviRailayanPage() {
                   <Link href={`/chunavi-railayan/${post._id}`}>
                     <div className="relative h-56 overflow-hidden">
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                       <Image
                         src={post.mainImage || '/images/chunavi-railayan/default-rally.jpg'}
                         alt={post.title}
                         fill
                         className="object-cover hover:scale-105 transition-transform duration-500"
+=======
+                      <img
+                        src={
+                          post.mainImage ||
+                          "/images/chunavi-railayan/default-rally.jpg"
+                        }
+                        alt={post.title}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+>>>>>>> Stashed changes
 =======
                       <img
                         src={
@@ -319,12 +329,23 @@ export default function ChunaviRailayanPage() {
                         <div className="mt-4 flex gap-2">
                           {post.images.slice(0, 3).map((image, i) => (
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                             <div key={i} className="w-12 h-12 relative rounded-md overflow-hidden">
                               <Image
                                 src={image}
                                 alt={`${post.title} - ${i+1}`}
                                 fill
                                 className="object-cover"
+=======
+                            <div
+                              key={i}
+                              className="w-12 h-12 relative rounded-md overflow-hidden"
+                            >
+                              <img
+                                src={image}
+                                alt={`${post.title} - ${i + 1}`}
+                                className="w-full h-full object-cover"
+>>>>>>> Stashed changes
 =======
                             <div
                               key={i}
