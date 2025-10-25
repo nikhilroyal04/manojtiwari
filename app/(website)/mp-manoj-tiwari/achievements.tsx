@@ -495,12 +495,6 @@ export default function Achievements() {
                                     In 2008, the Dutch government issued a 44 Euro-cent postal stamp on singer-actor Manoj Tiwari.
                                 </p>
 
-                                <div className="mt-8 text-center">
-                                    <Link href="/mp-manoj-tiwari/filmography" className="inline-flex items-center px-8 py-4 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                                        View Complete Filmography
-                                        <ChevronRight className="w-5 h-5 ml-2" />
-                                    </Link>
-                                </div>
                             </motion.div>
                         ) : (
                             <motion.div
