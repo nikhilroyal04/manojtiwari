@@ -254,7 +254,7 @@ export default function AboutSection() {
                 whileTap={{ scale: 0.95 }}
                 transition={{ duration: 0.2 }}
               >
-                <Link href="/about" className="inline-flex items-center px-4 text-primary hover:text-primary/80 transition-all duration-300">
+                <Link href="/mp-manoj-tiwari" className="inline-flex items-center px-4 text-primary hover:text-primary/80 transition-all duration-300">
                   Read More
                   <motion.div
                     animate={{ x: [0, 3, 0] }}

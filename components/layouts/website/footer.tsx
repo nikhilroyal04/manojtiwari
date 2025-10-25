@@ -6,15 +6,15 @@ import { Facebook, Twitter, Youtube } from 'lucide-react';
 const socialLinks = [
   {
     icon: Facebook,
-    href: 'https://www.facebook.com/manojtiwari',
+    href: 'https://www.facebook.com/manojtiwariofficial/',
   },
   {
     icon: Twitter,
-    href: 'https://www.twitter.com/manojtiwari',
+    href: 'https://x.com/ManojTiwariMP',
   },
   {
     icon: Youtube,
-    href: 'https://www.youtube.com/manojtiwari',
+    href: 'https://www.youtube.com/channel/UC_-IuOPhiusA_gknYjMI1ig',
   },
 ];  
 
@@ -45,12 +45,12 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/manoj-tiwari" className="text-gray-600 hover:text-gray-900 transition-colors">
+                <Link href="/mp-manoj-tiwari" className="text-gray-600 hover:text-gray-900 transition-colors">
                   मनोज तिवारी
                 </Link>
               </li>
               <li>
-                <Link href="/janata-darbar" className="text-gray-600 hover:text-gray-900 transition-colors">
+                <Link href="/janta-darbar" className="text-gray-600 hover:text-gray-900 transition-colors">
                   जनता दरबार
                 </Link>
               </li>
@@ -102,7 +102,7 @@ export default function Footer() {
             </h3>
             <div className="flex space-x-4">
               {socialLinks.map((link, index) => (
-                <Link key={index} href={link.href} className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
+                <Link key={index} href={link.href} target="_blank" className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
                   <link.icon className="w-5 h-5 text-gray-600" />
                 </Link>
               ))}

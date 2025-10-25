@@ -2,12 +2,9 @@ import connectDatabase from "../../config/db";
 import Adhikari from "../../models/adhikariModel";
 
 class AdhikariServices {
-    constructor() {
-        connectDatabase();
-    }
-
     async createAdhikari(adhikari: typeof Adhikari) {
         try {
+            await connectDatabase();
             const newAdhikari = new Adhikari(adhikari);
             await newAdhikari.save();
             return newAdhikari;
@@ -18,6 +15,7 @@ class AdhikariServices {
 
     async getAdhikari() {       
         try {
+            await connectDatabase();
             const adhikari = await Adhikari.find();
             return adhikari;
         } catch (error: unknown) {
@@ -27,6 +25,7 @@ class AdhikariServices {
 
     async getAdhikariById(id: string) {
         try {
+            await connectDatabase();
             const adhikari = await Adhikari.findById(id);
             return adhikari;
         } catch (error: unknown) {
@@ -36,6 +35,7 @@ class AdhikariServices {
 
     async updateAdhikari(id: string, adhikari: typeof Adhikari) {
         try {
+            await connectDatabase();
             const updatedAdhikari = await Adhikari.findByIdAndUpdate(id, adhikari, { new: true });
             return updatedAdhikari;
         } catch (error: unknown) {
@@ -45,6 +45,7 @@ class AdhikariServices {
 
     async deleteAdhikari(id: string) {
         try {
+            await connectDatabase();
             await Adhikari.findByIdAndDelete(id);
         } catch (error: unknown) {
             throw new Error((error instanceof Error ? error.message : 'Failed to delete adhikari'));

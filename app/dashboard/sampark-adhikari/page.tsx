@@ -95,9 +95,9 @@ export default function SamparkAdhikari() {
   const filteredOfficers = adhikaris.filter(officer => {
     const matchesSearch = 
       officer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      officer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      officer.workArea.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      officer.department.toLowerCase().includes(searchTerm.toLowerCase());
+      (officer.email && officer.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (officer.workArea && officer.workArea.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (officer.department && officer.department.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesStatus = statusFilter === 'all' || officer.status === statusFilter;
     const matchesDepartment = departmentFilter === 'all' || officer.department === departmentFilter;
@@ -180,7 +180,7 @@ export default function SamparkAdhikari() {
   };
 
   const totalExperience = adhikaris.reduce((sum, officer) => sum + (officer?.experience || 0), 0);
-  const departments = Array.from(new Set(adhikaris.map(officer => officer?.department)));
+  const departments = Array.from(new Set(adhikaris.map(officer => officer?.department).filter((dept): dept is string => !!dept && dept.trim() !== '')));
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div></div>;
@@ -242,14 +242,18 @@ export default function SamparkAdhikari() {
               <BarChart3 className="w-6 h-6 text-blue-500" />
             </div>
             <div className="space-y-3">
-              {departments.map(dept => (
-                <div key={dept} className="flex justify-between">
-                  <span className="text-gray-600">{dept}:</span>
-                  <span className="font-semibold">
-                    {getDepartmentCount(dept)}
-                  </span>
-                </div>
-              ))}
+              {departments.length > 0 ? (
+                departments.map(dept => (
+                  <div key={dept} className="flex justify-between">
+                    <span className="text-gray-600">{dept}:</span>
+                    <span className="font-semibold">
+                      {getDepartmentCount(dept)}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No departments available</p>
+              )}
             </div>
           </motion.div>
 
@@ -325,9 +329,13 @@ export default function SamparkAdhikari() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Departments</SelectItem>
-                {departments.map(dept => (
-                  <SelectItem key={dept} value={dept}>{dept}</SelectItem>
-                ))}
+                {departments.length > 0 ? (
+                  departments.map(dept => (
+                    <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                  ))
+                ) : (
+                  <div className="px-2 py-1.5 text-sm text-gray-500">No departments</div>
+                )}
               </SelectContent>
             </Select>
 
@@ -471,11 +479,22 @@ export default function SamparkAdhikari() {
                   </div>
                   <div>
                     <label className="text-sm font-medium">Image</label>
+                    {newImageFile && (
+                      <div className="mb-2">
+                        <img 
+                          src={URL.createObjectURL(newImageFile)} 
+                          alt="Preview" 
+                          className="w-24 h-24 object-cover rounded-lg border"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Image Preview</p>
+                      </div>
+                    )}
                     <Input
                       type="file"
                       accept="image/*"
                       onChange={(e) => setNewImageFile(e.target.files?.[0] || null)}
                     />
+                    <p className="text-xs text-gray-500 mt-1">Upload officer profile image</p>
                   </div>
                 </div>
                 <DialogFooter>
@@ -516,9 +535,19 @@ export default function SamparkAdhikari() {
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                          <User className="w-6 h-6 text-orange-600" />
-                        </div>
+                        {officer.image ? (
+                          <div className="w-12 h-12 rounded-lg overflow-hidden">
+                            <img 
+                              src={officer.image} 
+                              alt={officer.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <User className="w-6 h-6 text-orange-600" />
+                          </div>
+                        )}
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{officer.name}</div>
                           <div className="text-sm text-gray-500">{officer.designation}</div>
@@ -540,7 +569,9 @@ export default function SamparkAdhikari() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{officer.experience || 0} years</div>
-                      <div className="text-sm text-gray-500">Since {new Date(officer.joiningDate).getFullYear()}</div>
+                      {officer.joiningDate && (
+                        <div className="text-sm text-gray-500">Since {new Date(officer.joiningDate).getFullYear()}</div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center gap-2">
@@ -563,6 +594,15 @@ export default function SamparkAdhikari() {
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-6">
+                              {officer.image && (
+                                <div className="flex justify-center">
+                                  <img 
+                                    src={officer.image} 
+                                    alt={officer.name}
+                                    className="w-32 h-32 rounded-full object-cover border-4 border-orange-100"
+                                  />
+                                </div>
+                              )}
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
                                   <label className="text-sm font-medium text-gray-500">Name</label>
@@ -596,10 +636,12 @@ export default function SamparkAdhikari() {
                                     <p className="text-sm text-gray-900">{officer.officeNumber}</p>
                                   </div>
                                 )}
-                                <div>
-                                  <label className="text-sm font-medium text-gray-500">Joining Date</label>
-                                  <p className="text-sm text-gray-900">{new Date(officer.joiningDate).toLocaleDateString()}</p>
-                                </div>
+                                {officer.joiningDate && (
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-500">Joining Date</label>
+                                    <p className="text-sm text-gray-900">{new Date(officer.joiningDate).toLocaleDateString()}</p>
+                                  </div>
+                                )}
                               </div>
                               <div>
                                 <label className="text-sm font-medium text-gray-500">Work Area</label>
@@ -661,7 +703,7 @@ export default function SamparkAdhikari() {
                               <Edit className="w-4 h-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-2xl">
+                          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
                               <DialogTitle>Edit Officer</DialogTitle>
                               <DialogDescription>
@@ -669,18 +711,98 @@ export default function SamparkAdhikari() {
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
-                              <div>
-                                <label className="text-sm font-medium">Name</label>
-                                <Input
-                                  value={selectedOfficer?.name || ''}
-                                  onChange={(e) => {
-                                    if (selectedOfficer) {
-                                      setSelectedOfficer({ ...selectedOfficer, name: e.target.value });
-                                    }
-                                  }}
-                                />
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium">Name</label>
+                                  <Input
+                                    value={selectedOfficer?.name || ''}
+                                    onChange={(e) => {
+                                      if (selectedOfficer) {
+                                        setSelectedOfficer({ ...selectedOfficer, name: e.target.value });
+                                      }
+                                    }}
+                                    placeholder="Enter officer name"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium">Email</label>
+                                  <Input
+                                    type="email"
+                                    value={selectedOfficer?.email || ''}
+                                    onChange={(e) => {
+                                      if (selectedOfficer) {
+                                        setSelectedOfficer({ ...selectedOfficer, email: e.target.value });
+                                      }
+                                    }}
+                                    placeholder="Enter email"
+                                  />
+                                </div>
                               </div>
                               <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium">Phone Number</label>
+                                  <Input
+                                    value={selectedOfficer?.number || ''}
+                                    onChange={(e) => {
+                                      if (selectedOfficer) {
+                                        setSelectedOfficer({ ...selectedOfficer, number: e.target.value });
+                                      }
+                                    }}
+                                    placeholder="Enter phone number"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium">Office Number</label>
+                                  <Input
+                                    value={selectedOfficer?.officeNumber || ''}
+                                    onChange={(e) => {
+                                      if (selectedOfficer) {
+                                        setSelectedOfficer({ ...selectedOfficer, officeNumber: e.target.value });
+                                      }
+                                    }}
+                                    placeholder="Enter office number"
+                                  />
+                                </div>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Work Area</label>
+                                <textarea
+                                  value={selectedOfficer?.workArea || ''}
+                                  onChange={(e) => {
+                                    if (selectedOfficer) {
+                                      setSelectedOfficer({ ...selectedOfficer, workArea: e.target.value });
+                                    }
+                                  }}
+                                  placeholder="Enter work area description"
+                                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                  rows={3}
+                                />
+                              </div>
+                              <div className="grid grid-cols-3 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium">Department</label>
+                                  <Input
+                                    value={selectedOfficer?.department || ''}
+                                    onChange={(e) => {
+                                      if (selectedOfficer) {
+                                        setSelectedOfficer({ ...selectedOfficer, department: e.target.value });
+                                      }
+                                    }}
+                                    placeholder="Enter department"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium">Designation</label>
+                                  <Input
+                                    value={selectedOfficer?.designation || ''}
+                                    onChange={(e) => {
+                                      if (selectedOfficer) {
+                                        setSelectedOfficer({ ...selectedOfficer, designation: e.target.value });
+                                      }
+                                    }}
+                                    placeholder="Enter designation"
+                                  />
+                                </div>
                                 <div>
                                   <label className="text-sm font-medium">Status</label>
                                   <Select 
@@ -702,19 +824,20 @@ export default function SamparkAdhikari() {
                                     </SelectContent>
                                   </Select>
                                 </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                  <label className="text-sm font-medium">Department</label>
+                                  <label className="text-sm font-medium">Joining Date</label>
                                   <Input
-                                    value={selectedOfficer?.department || ''}
+                                    type="date"
+                                    value={selectedOfficer?.joiningDate || ''}
                                     onChange={(e) => {
                                       if (selectedOfficer) {
-                                        setSelectedOfficer({ ...selectedOfficer, department: e.target.value });
+                                        setSelectedOfficer({ ...selectedOfficer, joiningDate: e.target.value });
                                       }
                                     }}
                                   />
                                 </div>
-                              </div>
-                              <div className="grid grid-cols-2 gap-4">
                                 <div>
                                   <label className="text-sm font-medium">Experience (Years)</label>
                                   <Input
@@ -725,27 +848,78 @@ export default function SamparkAdhikari() {
                                         setSelectedOfficer({ ...selectedOfficer, experience: parseInt(e.target.value) || 0 });
                                       }
                                     }}
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium">Designation</label>
-                                  <Input
-                                    value={selectedOfficer?.designation || ''}
-                                    onChange={(e) => {
-                                      if (selectedOfficer) {
-                                        setSelectedOfficer({ ...selectedOfficer, designation: e.target.value });
-                                      }
-                                    }}
+                                    placeholder="0"
                                   />
                                 </div>
                               </div>
                               <div>
+                                <label className="text-sm font-medium">Qualification</label>
+                                <Input
+                                  value={selectedOfficer?.qualification || ''}
+                                  onChange={(e) => {
+                                    if (selectedOfficer) {
+                                      setSelectedOfficer({ ...selectedOfficer, qualification: e.target.value });
+                                    }
+                                  }}
+                                  placeholder="Enter qualification"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Address</label>
+                                <Input
+                                  value={selectedOfficer?.address || ''}
+                                  onChange={(e) => {
+                                    if (selectedOfficer) {
+                                      setSelectedOfficer({ ...selectedOfficer, address: e.target.value });
+                                    }
+                                  }}
+                                  placeholder="Enter address"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Emergency Contact</label>
+                                <Input
+                                  value={selectedOfficer?.emergencyContact || ''}
+                                  onChange={(e) => {
+                                    if (selectedOfficer) {
+                                      setSelectedOfficer({ ...selectedOfficer, emergencyContact: e.target.value });
+                                    }
+                                  }}
+                                  placeholder="Enter emergency contact"
+                                />
+                              </div>
+                              <div>
                                 <label className="text-sm font-medium">Update Image</label>
+                                <div className="flex gap-4 mb-2">
+                                  {selectedOfficer?.image && (
+                                    <div>
+                                      <img 
+                                        src={selectedOfficer.image} 
+                                        alt="Current" 
+                                        className="w-24 h-24 object-cover rounded-lg border"
+                                      />
+                                      <p className="text-xs text-gray-500 mt-1">Current Image</p>
+                                    </div>
+                                  )}
+                                  {editImageFile && (
+                                    <div>
+                                      <img 
+                                        src={URL.createObjectURL(editImageFile)} 
+                                        alt="New preview" 
+                                        className="w-24 h-24 object-cover rounded-lg border border-green-500"
+                                      />
+                                      <p className="text-xs text-green-600 mt-1">New Image</p>
+                                    </div>
+                                  )}
+                                </div>
                                 <Input
                                   type="file"
                                   accept="image/*"
                                   onChange={(e) => setEditImageFile(e.target.files?.[0] || null)}
                                 />
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Upload a new image to replace the current one
+                                </p>
                               </div>
                             </div>
                             <DialogFooter>
