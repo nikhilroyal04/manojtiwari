@@ -91,17 +91,15 @@ export default function JantaDarbarPostPage() {
       <section className="relative bg-gradient-to-r from-orange-600 to-red-600 py-16">
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="absolute inset-0 overflow-hidden">
-          <Image 
-            src={post.mainImage || '/images/janta-darbar/default-darbar.jpg'} 
-            alt={post.title} 
-            fill 
+          <img
+            src={post.mainImage || "/images/janta-darbar/default-darbar.jpg"}
+            alt={post.title}
             className="object-cover"
-            priority
           />
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <Link 
-            href="/janta-darbar" 
+          <Link
+            href="/janta-darbar"
             className="inline-flex items-center text-white/80 hover:text-white mb-6 bg-black/20 px-4 py-2 rounded-full"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -114,19 +112,35 @@ export default function JantaDarbarPostPage() {
             className="max-w-4xl"
           >
             <div className="flex items-center gap-3 mb-4">
-              <h1 className="text-3xl md:text-5xl font-bold text-white flex-1">{post.title}</h1>
-              <span className={`px-4 py-2 text-sm font-bold rounded-full ${
-                post.status === 'open' ? 'bg-green-500 text-white' :
-                post.status === 'ongoing' ? 'bg-blue-500 text-white' :
-                'bg-gray-500 text-white'
-              }`}>
-                {post.status === 'open' ? '✓ खुला' : post.status === 'ongoing' ? '⟳ चल रहा है' : '✕ बंद'}
+              <h1 className="text-3xl md:text-5xl font-bold text-white flex-1">
+                {post.title}
+              </h1>
+              <span
+                className={`px-4 py-2 text-sm font-bold rounded-full ${
+                  post.status === "open"
+                    ? "bg-green-500 text-white"
+                    : post.status === "ongoing"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-500 text-white"
+                }`}
+              >
+                {post.status === "open"
+                  ? "✓ खुला"
+                  : post.status === "ongoing"
+                    ? "⟳ चल रहा है"
+                    : "✕ बंद"}
               </span>
             </div>
             <div className="flex flex-wrap gap-4 text-white/90">
               <div className="flex items-center">
                 <Calendar className="w-5 h-5 mr-2" />
-                <span>{new Date(post.date).toLocaleDateString('hi-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                <span>
+                  {new Date(post.date).toLocaleDateString("hi-IN", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </span>
               </div>
               <div className="flex items-center">
                 <MapPin className="w-5 h-5 mr-2" />
@@ -144,7 +158,7 @@ export default function JantaDarbarPostPage() {
             <div className="p-6 md:p-8">
               <h2 className="text-2xl font-bold mb-4">जनता दरबार एजेंडा:</h2>
               <p className="text-gray-700 mb-8 text-lg">{post.agenda}</p>
-              
+
               {/* Stats Section */}
               {(post.attendees || post.issues || post.resolved) && (
                 <div className="grid grid-cols-3 gap-4 mb-8">
@@ -154,7 +168,9 @@ export default function JantaDarbarPostPage() {
                         <Users className="w-5 h-5 text-blue-600" />
                         <h3 className="font-bold text-blue-900">उपस्थिति</h3>
                       </div>
-                      <p className="text-2xl font-bold text-blue-600">{post.attendees.toLocaleString('hi-IN')}</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {post.attendees.toLocaleString("hi-IN")}
+                      </p>
                     </div>
                   )}
                   {post.issues && post.issues > 0 && (
@@ -163,7 +179,9 @@ export default function JantaDarbarPostPage() {
                         <AlertCircle className="w-5 h-5 text-orange-600" />
                         <h3 className="font-bold text-orange-900">समस्याएं</h3>
                       </div>
-                      <p className="text-2xl font-bold text-orange-600">{post.issues.toLocaleString('hi-IN')}</p>
+                      <p className="text-2xl font-bold text-orange-600">
+                        {post.issues.toLocaleString("hi-IN")}
+                      </p>
                     </div>
                   )}
                   {post.resolved && post.resolved > 0 && (
@@ -172,18 +190,20 @@ export default function JantaDarbarPostPage() {
                         <CheckCircle className="w-5 h-5 text-green-600" />
                         <h3 className="font-bold text-green-900">हल किए गए</h3>
                       </div>
-                      <p className="text-2xl font-bold text-green-600">{post.resolved.toLocaleString('hi-IN')}</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {post.resolved.toLocaleString("hi-IN")}
+                      </p>
                     </div>
                   )}
                 </div>
               )}
-              
+
               {post.images && post.images.length > 0 && (
                 <>
                   <h2 className="text-2xl font-bold mb-4">फोटो गैलरी:</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
                     {post.images.map((image: string, index: number) => (
-                      <div 
+                      <div
                         key={index}
                         className="aspect-square relative rounded-lg overflow-hidden cursor-pointer"
                         onClick={() => {
@@ -191,10 +211,9 @@ export default function JantaDarbarPostPage() {
                           setLightboxOpen(true);
                         }}
                       >
-                        <Image
+                        <img
                           src={image}
                           alt={`${post.title} - ${index + 1}`}
-                          fill
                           className="object-cover hover:scale-110 transition-transform duration-300"
                         />
                       </div>
@@ -202,15 +221,24 @@ export default function JantaDarbarPostPage() {
                   </div>
                 </>
               )}
-              
+
               <div className="flex justify-between items-center border-t pt-6">
                 <div className="text-gray-500">
-                  स्थिति: <span className={`font-medium ${
-                    post.status === 'open' ? 'text-green-600' :
-                    post.status === 'ongoing' ? 'text-blue-600' :
-                    'text-gray-600'
-                  }`}>
-                    {post.status === 'open' ? 'खुला' : post.status === 'ongoing' ? 'चल रहा है' : 'बंद'}
+                  स्थिति:{" "}
+                  <span
+                    className={`font-medium ${
+                      post.status === "open"
+                        ? "text-green-600"
+                        : post.status === "ongoing"
+                          ? "text-blue-600"
+                          : "text-gray-600"
+                    }`}
+                  >
+                    {post.status === "open"
+                      ? "खुला"
+                      : post.status === "ongoing"
+                        ? "चल रहा है"
+                        : "बंद"}
                   </span>
                 </div>
                 <button className="flex items-center gap-2 text-primary hover:text-primary/80">
@@ -226,29 +254,40 @@ export default function JantaDarbarPostPage() {
       {/* Related Posts Section */}
       <section className="py-12 bg-gray-100">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold mb-8 text-center">अन्य जनता दरबार</h2>
+          <h2 className="text-2xl font-bold mb-8 text-center">
+            अन्य जनता दरबार
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {jantaDarbarPosts
               .filter((p: JantaDarbar) => p._id !== post?._id)
               .slice(0, 3)
               .map((relatedPost: JantaDarbar) => (
-                <Link 
-                  href={`/janta-darbar/${relatedPost._id}`} 
+                <Link
+                  href={`/janta-darbar/${relatedPost._id}`}
                   key={relatedPost._id}
                   className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
                 >
                   <div className="relative h-48">
                     <Image
-                      src={relatedPost.mainImage || '/images/janta-darbar/default-darbar.jpg'}
+                      src={
+                        relatedPost.mainImage ||
+                        "/images/janta-darbar/default-darbar.jpg"
+                      }
                       alt={relatedPost.title}
                       fill
                       className="object-cover"
                     />
                   </div>
                   <div className="p-4">
-                    <h3 className="font-bold mb-2 line-clamp-2">{relatedPost.title}</h3>
+                    <h3 className="font-bold mb-2 line-clamp-2">
+                      {relatedPost.title}
+                    </h3>
                     <div className="text-sm text-gray-500">
-                      {new Date(relatedPost.date).toLocaleDateString('hi-IN', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      {new Date(relatedPost.date).toLocaleDateString("hi-IN", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     </div>
                   </div>
                 </Link>
@@ -261,13 +300,13 @@ export default function JantaDarbarPostPage() {
       {lightboxOpen && post.images && post.images.length > 0 && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
           <div className="relative w-full max-w-4xl max-h-[80vh]">
-            <button 
+            <button
               className="absolute top-4 right-4 text-white bg-black/50 p-2 rounded-full hover:bg-black/70"
               onClick={() => setLightboxOpen(false)}
             >
               <X className="w-6 h-6" />
             </button>
-            
+
             <div className="relative h-full w-full flex items-center justify-center">
               <Image
                 src={post.images[currentImageIndex]}
@@ -277,27 +316,27 @@ export default function JantaDarbarPostPage() {
                 className="max-h-[80vh] w-auto object-contain"
               />
             </div>
-            
+
             {post.images.length > 1 && (
               <>
                 <div className="absolute left-0 top-1/2 -translate-y-1/2">
-                  <button 
+                  <button
                     className="bg-black/50 p-3 rounded-full hover:bg-black/70 text-white"
                     onClick={prevImage}
                   >
                     <ChevronLeft className="w-6 h-6" />
                   </button>
                 </div>
-                
+
                 <div className="absolute right-0 top-1/2 -translate-y-1/2">
-                  <button 
+                  <button
                     className="bg-black/50 p-3 rounded-full hover:bg-black/70 text-white"
                     onClick={nextImage}
                   >
                     <ChevronRight className="w-6 h-6" />
                   </button>
                 </div>
-                
+
                 <div className="absolute bottom-4 left-0 right-0 text-center text-white">
                   {currentImageIndex + 1} / {post.images.length}
                 </div>

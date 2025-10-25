@@ -291,7 +291,7 @@ export default function AgamiKaryakram() {
                 >
                   <div className="flex flex-col md:flex-row">
                     <div className="md:w-1/3 relative">
-                      <Image
+                      <img
                         src={event.image || '/images/events/default-event.jpg'}
                         alt={event.title}
                         width={400}

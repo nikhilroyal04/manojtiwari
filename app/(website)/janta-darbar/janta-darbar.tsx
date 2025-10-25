@@ -111,7 +111,7 @@ export default function JantaDarbar() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <CTA 
+      <CTA
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         title="जनता दरबार"
@@ -127,19 +127,21 @@ export default function JantaDarbar() {
               <Calendar className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-bold">जनता दरबार अभिलेख</h2>
             </div>
-            
+
             <div className="flex items-center gap-4">
-              <button 
+              <button
                 onClick={() => setFilterOpen(!filterOpen)}
                 className="flex items-center gap-2 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <Filter className="w-4 h-4" />
                 फ़िल्टर
-                <ChevronDown className={`w-4 h-4 transition-transform ${filterOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform ${filterOpen ? "rotate-180" : ""}`}
+                />
               </button>
-              
+
               {searchTerm && (
-                <button 
+                <button
                   onClick={() => setSearchTerm("")}
                   className="flex items-center gap-1 py-2 px-4 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
                 >
@@ -147,9 +149,9 @@ export default function JantaDarbar() {
                   <X className="w-4 h-4" />
                 </button>
               )}
-              
+
               {selectedYear && (
-                <button 
+                <button
                   onClick={() => setSelectedYear(null)}
                   className="flex items-center gap-1 py-2 px-4 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
                 >
@@ -157,49 +159,57 @@ export default function JantaDarbar() {
                   <X className="w-4 h-4" />
                 </button>
               )}
-              
+
               {selectedMonth !== null && (
-                <button 
+                <button
                   onClick={() => setSelectedMonth(null)}
                   className="flex items-center gap-1 py-2 px-4 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
                 >
-                  <span>{months.find(m => m.value === selectedMonth)?.label}</span>
+                  <span>
+                    {months.find((m) => m.value === selectedMonth)?.label}
+                  </span>
                   <X className="w-4 h-4" />
                 </button>
               )}
-              
+
               {selectedStatus && (
-                <button 
+                <button
                   onClick={() => setSelectedStatus(null)}
                   className="flex items-center gap-1 py-2 px-4 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
                 >
-                  <span>{statuses.find(s => s.value === selectedStatus)?.label}</span>
+                  <span>
+                    {statuses.find((s) => s.value === selectedStatus)?.label}
+                  </span>
                   <X className="w-4 h-4" />
                 </button>
               )}
             </div>
           </div>
-          
+
           {/* Filter Options */}
           {filterOpen && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
+              animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               className="mt-4 border-t pt-4"
             >
               <div className="flex flex-wrap gap-4">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">वर्ष</h3>
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">
+                    वर्ष
+                  </h3>
                   <div className="flex flex-wrap gap-2">
-                    {years.map(year => (
+                    {years.map((year) => (
                       <button
                         key={year}
-                        onClick={() => setSelectedYear(year === selectedYear ? null : year)}
+                        onClick={() =>
+                          setSelectedYear(year === selectedYear ? null : year)
+                        }
                         className={`py-1 px-3 rounded-full text-sm ${
-                          year === selectedYear 
-                            ? 'bg-primary text-white' 
-                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                          year === selectedYear
+                            ? "bg-primary text-white"
+                            : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                         }`}
                       >
                         {year}
@@ -207,18 +217,24 @@ export default function JantaDarbar() {
                     ))}
                   </div>
                 </div>
-                
+
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">महीना</h3>
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">
+                    महीना
+                  </h3>
                   <div className="flex flex-wrap gap-2">
-                    {months.map(month => (
+                    {months.map((month) => (
                       <button
                         key={month.value}
-                        onClick={() => setSelectedMonth(month.value === selectedMonth ? null : month.value)}
+                        onClick={() =>
+                          setSelectedMonth(
+                            month.value === selectedMonth ? null : month.value
+                          )
+                        }
                         className={`py-1 px-3 rounded-full text-sm ${
-                          month.value === selectedMonth 
-                            ? 'bg-primary text-white' 
-                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                          month.value === selectedMonth
+                            ? "bg-primary text-white"
+                            : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                         }`}
                       >
                         {month.label}
@@ -226,18 +242,26 @@ export default function JantaDarbar() {
                     ))}
                   </div>
                 </div>
-                
+
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">स्थिति</h3>
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">
+                    स्थिति
+                  </h3>
                   <div className="flex flex-wrap gap-2">
-                    {statuses.map(status => (
+                    {statuses.map((status) => (
                       <button
                         key={status.value}
-                        onClick={() => setSelectedStatus(status.value === selectedStatus ? null : status.value)}
+                        onClick={() =>
+                          setSelectedStatus(
+                            status.value === selectedStatus
+                              ? null
+                              : status.value
+                          )
+                        }
                         className={`py-1 px-3 rounded-full text-sm ${
-                          status.value === selectedStatus 
-                            ? 'bg-primary text-white' 
-                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                          status.value === selectedStatus
+                            ? "bg-primary text-white"
+                            : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                         }`}
                       >
                         {status.label}
@@ -266,44 +290,66 @@ export default function JantaDarbar() {
                 >
                   <Link href={`/janta-darbar/${post._id}`}>
                     <div className="relative h-56 overflow-hidden">
-                      <Image
-                        src={post.mainImage || '/images/janta-darbar/default-darbar.jpg'}
+                      <img
+                        src={
+                          post.mainImage ||
+                          "/images/janta-darbar/default-darbar.jpg"
+                        }
                         alt={post.title}
-                        fill
                         className="object-cover hover:scale-105 transition-transform duration-500"
                       />
                     </div>
                     <div className="p-6">
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-xl font-bold line-clamp-2 flex-1">{post.title}</h3>
-                        <span className={`ml-2 px-2 py-1 text-xs font-bold rounded-full whitespace-nowrap ${
-                          post.status === 'open' ? 'bg-green-100 text-green-600' :
-                          post.status === 'ongoing' ? 'bg-blue-100 text-blue-600' :
-                          'bg-gray-100 text-gray-600'
-                        }`}>
-                          {post.status === 'open' ? 'खुला' : post.status === 'ongoing' ? 'चल रहा है' : 'बंद'}
+                        <h3 className="text-xl font-bold line-clamp-2 flex-1">
+                          {post.title}
+                        </h3>
+                        <span
+                          className={`ml-2 px-2 py-1 text-xs font-bold rounded-full whitespace-nowrap ${
+                            post.status === "open"
+                              ? "bg-green-100 text-green-600"
+                              : post.status === "ongoing"
+                                ? "bg-blue-100 text-blue-600"
+                                : "bg-gray-100 text-gray-600"
+                          }`}
+                        >
+                          {post.status === "open"
+                            ? "खुला"
+                            : post.status === "ongoing"
+                              ? "चल रहा है"
+                              : "बंद"}
                         </span>
                       </div>
-                      <p className="text-gray-600 mb-4 line-clamp-3">{post.agenda}</p>
-                      
+                      <p className="text-gray-600 mb-4 line-clamp-3">
+                        {post.agenda}
+                      </p>
+
                       <div className="flex items-center text-gray-500 text-sm mb-2">
                         <Calendar className="w-4 h-4 mr-2" />
-                        <span>{new Date(post.date).toLocaleDateString('hi-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                        <span>
+                          {new Date(post.date).toLocaleDateString("hi-IN", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </span>
                       </div>
-                      
+
                       <div className="flex items-center text-gray-500 text-sm mb-3">
                         <MapPin className="w-4 h-4 mr-2" />
                         <span>{post.location}</span>
                       </div>
-                      
+
                       {post.images && post.images.length > 0 && (
                         <div className="mt-4 flex gap-2">
                           {post.images.slice(0, 3).map((image, i) => (
-                            <div key={i} className="w-12 h-12 relative rounded-md overflow-hidden">
-                              <Image
+                            <div
+                              key={i}
+                              className="w-12 h-12 relative rounded-md overflow-hidden"
+                            >
+                              <img
                                 src={image}
-                                alt={`${post.title} - ${i+1}`}
-                                fill
+                                alt={`${post.title} - ${i + 1}`}
                                 className="object-cover"
                               />
                             </div>
@@ -324,8 +370,10 @@ export default function JantaDarbar() {
             <div className="text-center py-20">
               <div className="text-6xl mb-4">🔍</div>
               <h3 className="text-2xl font-bold mb-2">कोई परिणाम नहीं मिला</h3>
-              <p className="text-gray-600 mb-6">अपनी खोज या फ़िल्टर को बदलकर पुनः प्रयास करें</p>
-              <button 
+              <p className="text-gray-600 mb-6">
+                अपनी खोज या फ़िल्टर को बदलकर पुनः प्रयास करें
+              </p>
+              <button
                 onClick={() => {
                   setSearchTerm("");
                   setSelectedYear(null);
