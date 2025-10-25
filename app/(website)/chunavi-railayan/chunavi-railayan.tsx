@@ -61,13 +61,24 @@ export default function ChunaviRailayanPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <CTA 
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          title="चुनावी रैलियां अभिलेख"
-          description="मनोज तिवारी जी द्वारा आयोजित चुनावी रैलियां और जनसभाओं का संग्रह"
-          placeholder="रैलियां खोजें..."
-        />
+        <div className="relative min-h-[500px]">
+          <div className="absolute inset-0 z-0 h-full">
+            <img
+              src="https://www.livemint.com/lm-img/img/2024/05/01/960x540/Manoj_Tiwari_1714565180951_1714565188431.jpg"
+              alt="Background"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </div>
+          <div className="relative z-10">
+            <CTA
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              title="चुनावी रैलियां अभिलेख"
+              description="मनोज तिवारी जी द्वारा आयोजित चुनावी रैलियां और जनसभाओं का संग्रह"
+              placeholder="रैलियां खोजें..."
+            />
+          </div>
+        </div>
         <div className="flex justify-center items-center h-96">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
         </div>
@@ -79,13 +90,25 @@ export default function ChunaviRailayanPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <CTA 
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          title="चुनावी रैलियां अभिलेख"
-          description="मनोज तिवारी जी द्वारा आयोजित चुनावी रैलियां और जनसभाओं का संग्रह"
-          placeholder="रैलियां खोजें..."
-        />
+        <div className="relative min-h-[500px]">
+          <div className="absolute inset-0 z-0 h-full">
+            <img
+              src="https://www.livemint.com/lm-img/img/2024/05/01/960x540/Manoj_Tiwari_1714565180951_1714565188431.jpg"
+              alt="Background"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+            <div className="absolute inset-0 bg-black/40"></div>
+          </div>
+          <div className="relative z-10">
+            <CTA
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              title="चुनावी रैलियां अभिलेख"
+              description="मनोज तिवारी जी द्वारा आयोजित चुनावी रैलियां और जनसभाओं का संग्रह"
+              placeholder="रैलियां खोजें..."
+            />
+          </div>
+        </div>
         <div className="flex justify-center items-center h-96">
           <div className="text-center">
             <div className="text-6xl mb-4">⚠️</div>
@@ -99,14 +122,25 @@ export default function ChunaviRailayanPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <CTA 
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        title="चुनावी रैलियां अभिलेख"
-        description="मनोज तिवारी जी द्वारा आयोजित चुनावी रैलियां और जनसभाओं का संग्रह"
-        placeholder="रैलियां खोजें..."
-      />
+      {/* Hero Section with Background Image */}
+      <div className="relative min-h-[500px]">
+        <div className="absolute inset-0 z-0 h-full">
+          <img
+            src="https://www.livemint.com/lm-img/img/2024/05/01/960x540/Manoj_Tiwari_1714565180951_1714565188431.jpg"
+            alt="Background"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </div>
+        <div className="relative z-10">
+          <CTA
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            title="चुनावी रैलियां अभिलेख"
+            description="मनोज तिवारी जी द्वारा आयोजित चुनावी रैलियां और जनसभाओं का संग्रह"
+            placeholder="रैलियां खोजें..."
+          />
+        </div>
+      </div>
 
       {/* Filter Section */}
       <section className="py-6 bg-white shadow-md sticky top-0 z-30">
@@ -116,19 +150,21 @@ export default function ChunaviRailayanPage() {
               <Calendar className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-bold">चुनावी रैलियां अभिलेख</h2>
             </div>
-            
+
             <div className="flex items-center gap-4">
-              <button 
+              <button
                 onClick={() => setFilterOpen(!filterOpen)}
                 className="flex items-center gap-2 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <Filter className="w-4 h-4" />
                 फ़िल्टर
-                <ChevronDown className={`w-4 h-4 transition-transform ${filterOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform ${filterOpen ? "rotate-180" : ""}`}
+                />
               </button>
-              
+
               {searchTerm && (
-                <button 
+                <button
                   onClick={() => setSearchTerm("")}
                   className="flex items-center gap-1 py-2 px-4 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
                 >
@@ -136,9 +172,9 @@ export default function ChunaviRailayanPage() {
                   <X className="w-4 h-4" />
                 </button>
               )}
-              
+
               {selectedYear && (
-                <button 
+                <button
                   onClick={() => setSelectedYear(null)}
                   className="flex items-center gap-1 py-2 px-4 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
                 >
@@ -146,9 +182,9 @@ export default function ChunaviRailayanPage() {
                   <X className="w-4 h-4" />
                 </button>
               )}
-              
+
               {selectedState && (
-                <button 
+                <button
                   onClick={() => setSelectedState(null)}
                   className="flex items-center gap-1 py-2 px-4 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
                 >
@@ -158,27 +194,31 @@ export default function ChunaviRailayanPage() {
               )}
             </div>
           </div>
-          
+
           {/* Filter Options */}
           {filterOpen && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
+              animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               className="mt-4 border-t pt-4"
             >
               <div className="flex flex-wrap gap-4">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">वर्ष</h3>
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">
+                    वर्ष
+                  </h3>
                   <div className="flex flex-wrap gap-2">
-                    {years.map(year => (
+                    {years.map((year) => (
                       <button
                         key={year}
-                        onClick={() => setSelectedYear(year === selectedYear ? null : year)}
+                        onClick={() =>
+                          setSelectedYear(year === selectedYear ? null : year)
+                        }
                         className={`py-1 px-3 rounded-full text-sm ${
-                          year === selectedYear 
-                            ? 'bg-primary text-white' 
-                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                          year === selectedYear
+                            ? "bg-primary text-white"
+                            : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                         }`}
                       >
                         {year}
@@ -186,18 +226,24 @@ export default function ChunaviRailayanPage() {
                     ))}
                   </div>
                 </div>
-                
+
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">राज्य</h3>
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">
+                    राज्य
+                  </h3>
                   <div className="flex flex-wrap gap-2">
-                    {states.map(state => (
+                    {states.map((state) => (
                       <button
                         key={state}
-                        onClick={() => setSelectedState(state === selectedState ? null : state)}
+                        onClick={() =>
+                          setSelectedState(
+                            state === selectedState ? null : state
+                          )
+                        }
                         className={`py-1 px-3 rounded-full text-sm ${
-                          state === selectedState 
-                            ? 'bg-primary text-white' 
-                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                          state === selectedState
+                            ? "bg-primary text-white"
+                            : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                         }`}
                       >
                         {state}
@@ -226,36 +272,69 @@ export default function ChunaviRailayanPage() {
                 >
                   <Link href={`/chunavi-railayan/${post._id}`}>
                     <div className="relative h-56 overflow-hidden">
+<<<<<<< Updated upstream
                       <Image
                         src={post.mainImage || '/images/chunavi-railayan/default-rally.jpg'}
                         alt={post.title}
                         fill
                         className="object-cover hover:scale-105 transition-transform duration-500"
+=======
+                      <img
+                        src={
+                          post.mainImage ||
+                          "/images/chunavi-railayan/default-rally.jpg"
+                        }
+                        alt={post.title}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+>>>>>>> Stashed changes
                       />
                     </div>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold mb-3 line-clamp-2">{post.title}</h3>
-                      <p className="text-gray-600 mb-4 line-clamp-3">{post.description}</p>
-                      
+                      <h3 className="text-xl font-bold mb-3 line-clamp-2">
+                        {post.title}
+                      </h3>
+                      <p className="text-gray-600 mb-4 line-clamp-3">
+                        {post.description}
+                      </p>
+
                       <div className="flex items-center text-gray-500 text-sm mb-2">
                         <Calendar className="w-4 h-4 mr-2" />
-                        <span>{new Date(post.date).toLocaleDateString('hi-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                        <span>
+                          {new Date(post.date).toLocaleDateString("hi-IN", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </span>
                       </div>
-                      
+
                       <div className="flex items-center text-gray-500 text-sm">
                         <MapPin className="w-4 h-4 mr-2" />
-                        <span>{post.location}, {post.state}</span>
+                        <span>
+                          {post.location}, {post.state}
+                        </span>
                       </div>
-                      
+
                       {post.images && post.images.length > 0 && (
                         <div className="mt-4 flex gap-2">
                           {post.images.slice(0, 3).map((image, i) => (
+<<<<<<< Updated upstream
                             <div key={i} className="w-12 h-12 relative rounded-md overflow-hidden">
                               <Image
                                 src={image}
                                 alt={`${post.title} - ${i+1}`}
                                 fill
                                 className="object-cover"
+=======
+                            <div
+                              key={i}
+                              className="w-12 h-12 relative rounded-md overflow-hidden"
+                            >
+                              <img
+                                src={image}
+                                alt={`${post.title} - ${i + 1}`}
+                                className="w-full h-full object-cover"
+>>>>>>> Stashed changes
                               />
                             </div>
                           ))}
@@ -275,8 +354,10 @@ export default function ChunaviRailayanPage() {
             <div className="text-center py-20">
               <div className="text-6xl mb-4">🔍</div>
               <h3 className="text-2xl font-bold mb-2">कोई परिणाम नहीं मिला</h3>
-              <p className="text-gray-600 mb-6">अपनी खोज या फ़िल्टर को बदलकर पुनः प्रयास करें</p>
-              <button 
+              <p className="text-gray-600 mb-6">
+                अपनी खोज या फ़िल्टर को बदलकर पुनः प्रयास करें
+              </p>
+              <button
                 onClick={() => {
                   setSearchTerm("");
                   setSelectedYear(null);
