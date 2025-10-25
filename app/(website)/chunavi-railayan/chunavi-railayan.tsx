@@ -123,8 +123,8 @@ export default function ChunaviRailayanPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section with Background Image */}
-      <div className="relative min-h-[500px]">
-        <div className="absolute inset-0 z-0 h-full">
+      <div className="relative h-auto">
+        <div className="absolute inset-0 h-full">
           <img
             src="https://www.livemint.com/lm-img/img/2024/05/01/960x540/Manoj_Tiwari_1714565180951_1714565188431.jpg"
             alt="Background"

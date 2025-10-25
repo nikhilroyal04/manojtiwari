@@ -16,11 +16,11 @@ export default function CTA({ searchTerm, setSearchTerm, title, description, pla
     
     return (
         <div>
-            <section className="relative bg-gradient-to-r from-orange-600 to-red-600 py-20">
-                <div className="absolute inset-0 bg-black/30"></div>
+            <section className="relative py-20 h-auto min-h-[500px]">
+                <div className="absolute h-full w-full inset-0 bg-black/30"></div>
                 <div className="absolute inset-0 overflow-hidden">
                     <Image
-                        src="/images/agami-karyakram-bg.jpg"
+                        src="/images/cta-bg.jpg"
                         alt="आगामी कार्यक्रम"
                         fill
                         className="object-cover opacity-40"
