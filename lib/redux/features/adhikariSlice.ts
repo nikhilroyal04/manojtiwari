@@ -105,14 +105,27 @@ export const fetchAdhikari = () => async (dispatch: Dispatch) => {
     }
 };
 
-export const addAdhikari = (adhikari: Adhikari) => async (dispatch: Dispatch) => {
+export const addAdhikari = (adhikari: Adhikari, file?: File | null) => async (dispatch: Dispatch) => {
     try {
         dispatch(setLoading(true));
         console.log('Adding new adhikari:', adhikari);
 
-        const response = await axios.post("/api/routes/sampark-adhikari", adhikari, {
+        const formData = new FormData();
+        Object.entries(adhikari).forEach(([key, value]) => {
+            if (key === "image" && file) {
+                formData.append("image", file);
+            } else if (typeof value === "string") {
+                formData.append(key, value);
+            } else if (Array.isArray(value)) {
+                formData.append(key, value.join(","));
+            } else if (value != null) {
+                formData.append(key, String(value));
+            }
+        });
+
+        const response = await axios.post("/api/routes/sampark-adhikari", formData, {
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "multipart/form-data",
             },
         });
 
@@ -139,16 +152,33 @@ export const addAdhikari = (adhikari: Adhikari) => async (dispatch: Dispatch) =>
     }
 };
 
-export const updateAdhikari = (id: string, adhikari: Adhikari) => async (dispatch: Dispatch) => {
+export const updateAdhikari = (id: string, adhikari: Adhikari, file?: File | null) => async (dispatch: Dispatch) => {
     try {
         dispatch(setLoading(true));
         console.log('Updating adhikari with ID:', id, 'Data:', adhikari);
 
-        const response = await axios.put(`/api/routes/sampark-adhikari/${id}`, adhikari, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        let response;
+        if (file) {
+            const formData = new FormData();
+            Object.entries(adhikari).forEach(([key, value]) => {
+                if (key === "image" && file) {
+                    formData.append("image", file);
+                } else if (typeof value === "string") {
+                    formData.append(key, value);
+                } else if (Array.isArray(value)) {
+                    formData.append(key, value.join(","));
+                } else if (value != null) {
+                    formData.append(key, String(value));
+                }
+            });
+            response = await axios.put(`/api/routes/sampark-adhikari/${id}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+        } else {
+            response = await axios.put(`/api/routes/sampark-adhikari/${id}`, adhikari, {
+                headers: { "Content-Type": "application/json" },
+            });
+        }
 
         if (response.status < 200 || response.status >= 300) {
             throw new Error(response.data?.message || "Failed to update adhikari");

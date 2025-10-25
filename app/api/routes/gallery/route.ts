@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import GalleryServices from '../../services/gallery/galleryServices';
 import Gallery from '../../models/galleryModel';
+import { uploadToS3 } from '../../controller/imageController';
 
 const galleryServices = new GalleryServices();
 
@@ -19,13 +20,24 @@ export async function GET() {
 export async function POST(request: NextRequest) {
     try {
         const formData = await request.formData();
-        const file = formData.get('url') as File;
+        const file = formData.get('url') as File | null;
         
         if (!file) {
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
         }
-        
-        
+
+        // Convert File to Multer-like file object
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const multerFile = {
+            fieldname: 'url',
+            originalname: file.name,
+            encoding: '7bit',
+            mimetype: file.type,
+            buffer: buffer,
+            size: file.size
+        } as Express.Multer.File;
+
+        const uploaded = await uploadToS3(multerFile);
         // Extract form data and provide defaults for required fields
         const formDataObj = Object.fromEntries(formData.entries());
         const galleryData = {
@@ -35,7 +47,9 @@ export async function POST(request: NextRequest) {
             category: String(formDataObj.category || 'general'),
             tags: formDataObj.tags ? String(formDataObj.tags).split(',') : [],
             uploadDate: new Date(),
-            size: file.size || 0,
+            url: uploaded.url,
+            thumbnail: uploaded.url,
+            size: uploaded.size,
             dimensions: String(formDataObj.dimensions || 'unknown'),
             location: String(formDataObj.location || ''),
             event: String(formDataObj.event || ''),

@@ -193,6 +193,7 @@ export default function Posts() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newImageFile, setNewImageFile] = useState<File | null>(null);
   const [newPost, setNewPost] = useState<Partial<Post>>({
     title: '',
     content: '',
@@ -249,7 +250,7 @@ export default function Posts() {
       tags: newPost.tags || [],
       status: newPost.status || 'DRAFT',
       publishDate: newPost.publishDate || new Date().toISOString().split('T')[0],
-      featuredImage: newPost.featuredImage || '',
+      featuredImage: newImageFile ? URL.createObjectURL(newImageFile) : newPost.featuredImage || '',
       readTime: newPost.readTime || 5,
       views: 0,
       likes: 0,
@@ -276,6 +277,7 @@ export default function Posts() {
       seoDescription: '',
       slug: ''
     });
+    setNewImageFile(null);
     setIsCreateModalOpen(false);
   };
 
@@ -560,11 +562,11 @@ export default function Posts() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Featured Image URL</label>
+                    <label className="text-sm font-medium">Featured Image</label>
                     <Input
-                      value={newPost.featuredImage}
-                      onChange={(e) => setNewPost(prev => ({ ...prev, featuredImage: e.target.value }))}
-                      placeholder="Enter featured image URL"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setNewImageFile(e.target.files?.[0] || null)}
                     />
                   </div>
                   <div>

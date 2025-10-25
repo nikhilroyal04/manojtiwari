@@ -106,14 +106,27 @@ export const fetchKaryakram = () => async (dispatch: Dispatch) => {
     }
 };
 
-export const addKaryakram = (karyakram: Karyakram) => async (dispatch: Dispatch) => {
+export const addKaryakram = (karyakram: Karyakram, file?: File | null) => async (dispatch: Dispatch) => {
     try {
         dispatch(setLoading(true));
         console.log('Adding new karyakram:', karyakram);
 
-        const response = await axios.post("/api/routes/agami-karyakram", karyakram, {
+        const formData = new FormData();
+        Object.entries(karyakram).forEach(([key, value]) => {
+            if (key === "image" && file) {
+                formData.append("image", file);
+            } else if (typeof value === "string") {
+                formData.append(key, value);
+            } else if (Array.isArray(value)) {
+                formData.append(key, value.join(","));
+            } else if (value != null) {
+                formData.append(key, String(value));
+            }
+        });
+
+        const response = await axios.post("/api/routes/agami-karyakram", formData, {
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "multipart/form-data",
             },
         });
 
@@ -140,16 +153,33 @@ export const addKaryakram = (karyakram: Karyakram) => async (dispatch: Dispatch)
     }
 };
 
-export const updateKaryakram = (id: string, karyakram: Karyakram) => async (dispatch: Dispatch) => {
+export const updateKaryakram = (id: string, karyakram: Karyakram, file?: File | null) => async (dispatch: Dispatch) => {
     try {
         dispatch(setLoading(true));
         console.log('Updating karyakram with ID:', id, 'Data:', karyakram);
 
-        const response = await axios.put(`/api/routes/agami-karyakram/${id}`, karyakram, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        let response;
+        if (file) {
+            const formData = new FormData();
+            Object.entries(karyakram).forEach(([key, value]) => {
+                if (key === "image" && file) {
+                    formData.append("image", file);
+                } else if (typeof value === "string") {
+                    formData.append(key, value);
+                } else if (Array.isArray(value)) {
+                    formData.append(key, value.join(","));
+                } else if (value != null) {
+                    formData.append(key, String(value));
+                }
+            });
+            response = await axios.put(`/api/routes/agami-karyakram/${id}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+        } else {
+            response = await axios.put(`/api/routes/agami-karyakram/${id}`, karyakram, {
+                headers: { "Content-Type": "application/json" },
+            });
+        }
 
         if (response.status < 200 || response.status >= 300) {
             throw new Error(response.data?.message || "Failed to update karyakram");

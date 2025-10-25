@@ -112,12 +112,25 @@ export const fetchRailayan = () => async (dispatch: Dispatch) => {
 };
 
 // Add a new Chunavi Railayan post
-export const addRailayan = (railayan: ChunaviRailayan) => async (dispatch: Dispatch) => {
+export const addRailayan = (railayan: ChunaviRailayan, file?: File | null) => async (dispatch: Dispatch) => {
   try {
     dispatch(setLoading(true));
-    const response = await axios.post("/api/routes/chunavi-railayan", railayan, {
+    const formData = new FormData();
+    Object.entries(railayan).forEach(([key, value]) => {
+      if (key === "image" && file) {
+        formData.append("image", file);
+      } else if (typeof value === "string") {
+        formData.append(key, value);
+      } else if (Array.isArray(value)) {
+        formData.append(key, value.join(","));
+      } else if (value != null) {
+        formData.append(key, String(value));
+      }
+    });
+
+    const response = await axios.post("/api/routes/chunavi-railayan", formData, {
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "multipart/form-data",
       },
     });
     if (response.status < 200 || response.status >= 300) {
@@ -138,14 +151,31 @@ export const addRailayan = (railayan: ChunaviRailayan) => async (dispatch: Dispa
 };
 
 // Update a Chunavi Railayan post
-export const updateRailayan = (id: string, railayan: ChunaviRailayan) => async (dispatch: Dispatch) => {
+export const updateRailayan = (id: string, railayan: ChunaviRailayan, file?: File | null) => async (dispatch: Dispatch) => {
   try {
     dispatch(setLoading(true));
-    const response = await axios.put(`/api/routes/chunavi-railayan/${id}`, railayan, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    let response;
+    if (file) {
+      const formData = new FormData();
+      Object.entries(railayan).forEach(([key, value]) => {
+        if (key === "image" && file) {
+          formData.append("image", file);
+        } else if (typeof value === "string") {
+          formData.append(key, value);
+        } else if (Array.isArray(value)) {
+          formData.append(key, value.join(","));
+        } else if (value != null) {
+          formData.append(key, String(value));
+        }
+      });
+      response = await axios.put(`/api/routes/chunavi-railayan/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+    } else {
+      response = await axios.put(`/api/routes/chunavi-railayan/${id}`, railayan, {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     if (response.status < 200 || response.status >= 300) {
       throw new Error(response.data?.message || "Failed to update Chunavi Railayan");
     }

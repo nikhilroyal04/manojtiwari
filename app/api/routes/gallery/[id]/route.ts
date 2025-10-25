@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import GalleryServices from '../../../services/gallery/galleryServices';
+import { uploadToS3 } from '../../../controller/imageController';
 
 const galleryServices = new GalleryServices();
 
@@ -19,8 +20,38 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params;
-        const galleryItemData = await request.json();  
-        const galleryItem = await galleryServices.updateGalleryItem(id, galleryItemData);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let body: any;
+        const contentType = request.headers.get('content-type') || '';
+        if (contentType.includes('multipart/form-data')) {
+            const formData = await request.formData();
+            const file = formData.get('url') as File | null;
+            const formDataObj = Object.fromEntries(formData.entries());
+            body = {
+                ...formDataObj,
+                tags: formDataObj.tags ? String(formDataObj.tags).split(',') : [],
+            };
+            if (file) {
+                // Convert File to Multer-like file object
+                const buffer = Buffer.from(await file.arrayBuffer());
+                const multerFile = {
+                    fieldname: 'url',
+                    originalname: file.name,
+                    encoding: '7bit',
+                    mimetype: file.type,
+                    buffer: buffer,
+                    size: file.size
+                } as Express.Multer.File;
+
+                const uploaded = await uploadToS3(multerFile);
+                body.url = uploaded.url;
+                body.thumbnail = uploaded.url;
+                body.size = uploaded.size;
+            }
+        } else {
+            body = await request.json();
+        }
+        const galleryItem = await galleryServices.updateGalleryItem(id, body);
         return NextResponse.json(galleryItem);
     } catch (error: unknown) {
         if (error instanceof Error) {

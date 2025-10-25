@@ -86,9 +86,11 @@ export default function Gallery() {
     event: '',
     photographer: '',
   });
+  const [newFile, setNewFile] = useState<File | null>(null);
 
   // For edit
   const [editItem, setEditItem] = useState<Partial<GalleryItem>>({});
+  const [editFile, setEditFile] = useState<File | null>(null);
 
   const statusColors: Record<string, string> = {
     public: 'bg-green-100 text-green-800 border-green-200',
@@ -175,7 +177,7 @@ export default function Gallery() {
     }
     // Dispatch addGalleryItem
     try {
-      await dispatch(addGalleryItem(newItem as GalleryItem));
+      await dispatch(addGalleryItem(newItem as GalleryItem, newFile));
       setIsUploadModalOpen(false);
       setNewItem({
         title: '',
@@ -190,6 +192,7 @@ export default function Gallery() {
         event: '',
         photographer: '',
       });
+      setNewFile(null);
     } catch (err) {
       console.log(err,'Failed to add item.');
     }
@@ -218,10 +221,11 @@ export default function Gallery() {
       return;
     }
     try {
-      await dispatch(updateGalleryItem(selectedItem._id, editItem as GalleryItem));
+      await dispatch(updateGalleryItem(selectedItem._id, editItem as GalleryItem, editFile));
       setIsEditModalOpen(false);
       setSelectedItem(null);
       setEditItem({});
+      setEditFile(null);
     } catch (err) {
       console.log(err,'Failed to update item.');
     }
@@ -549,6 +553,15 @@ export default function Gallery() {
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">Choose File</label>
+                      <input
+                        type="file"
+                        accept="image/*,video/*"
+                        onChange={(e) => setNewFile(e.target.files?.[0] || null)}
+                        className="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
                     <div>
                       <label className="text-sm font-medium">Media URL</label>
                       <Input
@@ -1007,6 +1020,15 @@ export default function Gallery() {
                               />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="text-sm font-medium">Replace File</label>
+                                <input
+                                  type="file"
+                                  accept="image/*,video/*"
+                                  onChange={(e) => setEditFile(e.target.files?.[0] || null)}
+                                  className="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                />
+                              </div>
                               <div>
                                 <label className="text-sm font-medium">
                                   Media URL

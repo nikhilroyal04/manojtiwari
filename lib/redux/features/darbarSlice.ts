@@ -99,12 +99,25 @@ export const fetchDarbars = () => async (dispatch: Dispatch) => {
 };
 
 // Add a new Janta Darbar event
-export const addDarbar = (darbar: JantaDarbar) => async (dispatch: Dispatch) => {
+export const addDarbar = (darbar: JantaDarbar, file?: File | null) => async (dispatch: Dispatch) => {
     try {
         dispatch(setLoading(true));
-        const response = await axios.post("/api/routes/janta-darbar", darbar, {
+        const formData = new FormData();
+        Object.entries(darbar).forEach(([key, value]) => {
+            if (key === "image" && file) {
+                formData.append("image", file);
+            } else if (typeof value === "string") {
+                formData.append(key, value);
+            } else if (Array.isArray(value)) {
+                formData.append(key, value.join(","));
+            } else if (value != null) {
+                formData.append(key, String(value));
+            }
+        });
+
+        const response = await axios.post("/api/routes/janta-darbar", formData, {
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "multipart/form-data",
             },
         });
 
@@ -128,14 +141,31 @@ export const addDarbar = (darbar: JantaDarbar) => async (dispatch: Dispatch) => 
 };
 
 // Update an existing Janta Darbar event
-export const updateDarbar = (id: string, darbar: JantaDarbar) => async (dispatch: Dispatch) => {
+export const updateDarbar = (id: string, darbar: JantaDarbar, file?: File | null) => async (dispatch: Dispatch) => {
     try {
         dispatch(setLoading(true));
-        const response = await axios.put(`/api/routes/janta-darbar/${id}`, darbar, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        let response;
+        if (file) {
+            const formData = new FormData();
+            Object.entries(darbar).forEach(([key, value]) => {
+                if (key === "image" && file) {
+                    formData.append("image", file);
+                } else if (typeof value === "string") {
+                    formData.append(key, value);
+                } else if (Array.isArray(value)) {
+                    formData.append(key, value.join(","));
+                } else if (value != null) {
+                    formData.append(key, String(value));
+                }
+            });
+            response = await axios.put(`/api/routes/janta-darbar/${id}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+        } else {
+            response = await axios.put(`/api/routes/janta-darbar/${id}`, darbar, {
+                headers: { "Content-Type": "application/json" },
+            });
+        }
 
         if (response.status < 200 || response.status >= 300) {
             throw new Error(response.data?.error || "Failed to update Janta Darbar event");

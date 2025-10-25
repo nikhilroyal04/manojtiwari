@@ -62,6 +62,8 @@ export default function JantaDarbarPage() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newImageFile, setNewImageFile] = useState<File | null>(null);
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
 
   // For Add
   const [newJantaDarbar, setNewJantaDarbar] = useState<Partial<JantaDarbar>>({
@@ -131,8 +133,9 @@ export default function JantaDarbarPage() {
       return;
     }
     try {
-      await dispatch(addDarbar(newJantaDarbar as JantaDarbar));
+      await dispatch(addDarbar(newJantaDarbar as JantaDarbar, newImageFile));
       setIsAddModalOpen(false);
+      setNewImageFile(null);
       setNewJantaDarbar({
         title: '',
         description: '',
@@ -168,9 +171,10 @@ export default function JantaDarbarPage() {
   const handleUpdateJantaDarbar = async () => {
     if (!editJantaDarbar._id) return;
     try {
-      await dispatch(updateDarbar(editJantaDarbar._id , editJantaDarbar as JantaDarbar));
+      await dispatch(updateDarbar(editJantaDarbar._id , editJantaDarbar as JantaDarbar, editImageFile));
       setIsEditModalOpen(false);
       setSelectedJantaDarbar(null);
+      setEditImageFile(null);
       setEditJantaDarbar({
         _id: '',
         title: '',
@@ -371,6 +375,14 @@ export default function JantaDarbarPage() {
                       value={newJantaDarbar.notes || ''}
                       onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, notes: e.target.value }))}
                       placeholder="Any notes"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Event Image</label>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setNewImageFile(e.target.files?.[0] || null)}
                     />
                   </div>
                 </div>
@@ -614,6 +626,14 @@ export default function JantaDarbarPage() {
                                   value={editJantaDarbar.notes || ''}
                                   onChange={e => setEditJantaDarbar(prev => ({ ...prev, notes: e.target.value }))}
                                   placeholder="Any notes"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Update Event Image</label>
+                                <Input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => setEditImageFile(e.target.files?.[0] || null)}
                                 />
                               </div>
                             </div>

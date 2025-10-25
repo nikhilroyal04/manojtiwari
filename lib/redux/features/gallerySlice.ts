@@ -109,12 +109,20 @@ export const fetchGallery = () => async (dispatch: Dispatch) => {
     }
 };
 
-export const addGalleryItem = (galleryItem: GalleryItem) => async (dispatch: Dispatch) => {
+export const addGalleryItem = (galleryItem: GalleryItem, file?: File | null) => async (dispatch: Dispatch) => {
     try {
         dispatch(setLoading(true));
         const formData = new FormData();
         Object.entries(galleryItem).forEach(([key, value]) => {
-            formData.append(key, value as string);
+            if (key === "url" && file) {
+                formData.append("url", file);
+            } else if (typeof value === "string") {
+                formData.append(key, value);
+            } else if (Array.isArray(value)) {
+                formData.append(key, value.join(","));
+            } else if (value != null) {
+                formData.append(key, String(value));
+            }
         });
         const response = await axios.post("/api/routes/gallery", formData, {
             headers: {
@@ -141,14 +149,31 @@ export const addGalleryItem = (galleryItem: GalleryItem) => async (dispatch: Dis
     }
 };
 
-export const updateGalleryItem = (id: string, galleryItem: GalleryItem) => async (dispatch: Dispatch) => {
+export const updateGalleryItem = (id: string, galleryItem: GalleryItem, file?: File | null) => async (dispatch: Dispatch) => {
     try {
         dispatch(setLoading(true));
-        const response = await axios.put(`/api/routes/gallery/${id}`, galleryItem, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        let response;
+        if (file) {
+            const formData = new FormData();
+            Object.entries(galleryItem).forEach(([key, value]) => {
+                if (key === "url" && file) {
+                    formData.append("url", file);
+                } else if (typeof value === "string") {
+                    formData.append(key, value);
+                } else if (Array.isArray(value)) {
+                    formData.append(key, value.join(","));
+                } else if (value != null) {
+                    formData.append(key, String(value));
+                }
+            });
+            response = await axios.put(`/api/routes/gallery/${id}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+        } else {
+            response = await axios.put(`/api/routes/gallery/${id}`, galleryItem, {
+                headers: { "Content-Type": "application/json" },
+            });
+        }
 
         if (response.status < 200 || response.status >= 300) {
             throw new Error(response.data?.message || "Failed to update gallery item");

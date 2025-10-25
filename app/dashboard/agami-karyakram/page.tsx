@@ -60,6 +60,8 @@ export default function AgamiKaryakram() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editEvent, setEditEvent] = useState<Partial<Karyakram>>({});
+  const [newImageFile, setNewImageFile] = useState<File | null>(null);
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
     const [newEvent, setNewEvent] = useState<Partial<Karyakram>>({
     title: '',
     description: '',
@@ -140,7 +142,7 @@ export default function AgamiKaryakram() {
       contactNumber: newEvent.contactNumber || ''
     };
     
-    dispatch(addKaryakram(event));
+    dispatch(addKaryakram(event, newImageFile));
     setNewEvent({
       title: '',
       description: '',
@@ -156,6 +158,7 @@ export default function AgamiKaryakram() {
       contactPerson: '',
       contactNumber: ''
     });
+    setNewImageFile(null);
     setIsAddModalOpen(false);
   };
 
@@ -450,11 +453,11 @@ export default function AgamiKaryakram() {
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Image URL</label>
+                      <label className="text-sm font-medium">Event Image</label>
                       <Input
-                        value={newEvent.image}
-                        onChange={(e) => setNewEvent(prev => ({ ...prev, image: e.target.value }))}
-                        placeholder="Enter image URL"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setNewImageFile(e.target.files?.[0] || null)}
                       />
                     </div>
                   </div>
@@ -754,6 +757,14 @@ export default function AgamiKaryakram() {
                                   />
                                 </div>
                               </div>
+                              <div>
+                                <label className="text-sm font-medium">Update Event Image</label>
+                                <Input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => setEditImageFile(e.target.files?.[0] || null)}
+                                />
+                              </div>
                             </div>
                             <DialogFooter>
                               <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
@@ -766,11 +777,12 @@ export default function AgamiKaryakram() {
                                       ...selectedEvent,
                                       ...editEvent,
                                     } as Karyakram;
-                                    dispatch(updateKaryakram(selectedEvent._id, payload));
+                                    dispatch(updateKaryakram(selectedEvent._id, payload, editImageFile));
                                   }
                                   setIsEditModalOpen(false);
                                   setSelectedEvent(null);
                                   setEditEvent({});
+                                  setEditImageFile(null);
                                 }}
                                 className="bg-primary hover:bg-primary/90"
                               >

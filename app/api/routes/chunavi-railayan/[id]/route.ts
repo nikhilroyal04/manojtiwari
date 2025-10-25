@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import ChunaviRailayanServices from '../../../services/chunavi-railayan/railayanServices';
+import { uploadToS3 } from '../../../controller/imageController';
 
 const chunaviRailayanServices = new ChunaviRailayanServices();
 
@@ -20,7 +21,35 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params;
-        const chunaviRailayanData = await request.json();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let chunaviRailayanData: any;
+        const contentType = request.headers.get('content-type') || '';
+        
+        if (contentType.includes('multipart/form-data')) {
+            const formData = await request.formData();
+            const file = formData.get('image') as File | null;
+            const formDataObj = Object.fromEntries(formData.entries());
+            chunaviRailayanData = { ...formDataObj };
+            
+            if (file) {
+                // Convert File to Multer-like file object
+                const buffer = Buffer.from(await file.arrayBuffer());
+                const multerFile = {
+                    fieldname: 'image',
+                    originalname: file.name,
+                    encoding: '7bit',
+                    mimetype: file.type,
+                    buffer: buffer,
+                    size: file.size
+                } as Express.Multer.File;
+                
+                const uploaded = await uploadToS3(multerFile);
+                chunaviRailayanData.image = uploaded.url;
+            }
+        } else {
+            chunaviRailayanData = await request.json();
+        }
+        
         const chunaviRailayan = await chunaviRailayanServices.updateChunaviRailayan(id, chunaviRailayanData);
         return NextResponse.json(chunaviRailayan);
     }

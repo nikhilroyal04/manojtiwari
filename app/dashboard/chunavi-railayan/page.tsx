@@ -36,7 +36,7 @@ import {
 } from '@/components/ui/select'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch } from '@/lib/redux/store'
-import { fetchRailayan, selectRailayan, selectRailayanError, selectRailayanLoading } from '@/lib/redux/features/railayanSlice'
+import { fetchRailayan, selectRailayan, selectRailayanError, selectRailayanLoading, addRailayan, updateRailayan, deleteRailayan } from '@/lib/redux/features/railayanSlice'
 import type { ChunaviRailayan } from '@/lib/redux/features/railayanSlice'
 
 export default function ChunaviRailayan() {
@@ -57,6 +57,10 @@ export default function ChunaviRailayan() {
   const [editModal, setEditModal] = useState<string | null>(null)
   const [deleteModal, setDeleteModal] = useState<string | null>(null)
   const [addModal, setAddModal] = useState(false)
+  const [newImageFile, setNewImageFile] = useState<File | null>(null)
+  const [editImageFile, setEditImageFile] = useState<File | null>(null)
+  const [newRailayan, setNewRailayan] = useState<Partial<ChunaviRailayan>>({})
+  const [editRailayan, setEditRailayan] = useState<Partial<ChunaviRailayan>>({})
 
   // Filter campaigns based on search and filters
   const filteredData = campaigns.filter((campaign: ChunaviRailayan) => {
@@ -596,11 +600,31 @@ export default function ChunaviRailayan() {
                 </div>
               </div>
               
+              <div>
+                <label className="text-sm font-medium text-gray-700">Update Image</label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setEditImageFile(e.target.files?.[0] || null)}
+                />
+              </div>
+              
               <div className="flex justify-end space-x-2">
                 <Button variant="outline" onClick={() => setEditModal(null)}>
                   रद्द करें
                 </Button>
-                <Button onClick={() => setEditModal(null)}>
+                <Button onClick={async () => {
+                  if (editModal) {
+                    const campaign = campaigns.find(c => c._id === editModal);
+                    if (campaign) {
+                      await dispatch(updateRailayan(editModal, { ...campaign, ...editRailayan } as ChunaviRailayan, editImageFile));
+                      setEditModal(null);
+                      setEditRailayan({});
+                      setEditImageFile(null);
+                      dispatch(fetchRailayan());
+                    }
+                  }
+                }}>
                   अपडेट करें
                 </Button>
               </div>
@@ -622,7 +646,13 @@ export default function ChunaviRailayan() {
             <Button variant="outline" onClick={() => setDeleteModal(null)}>
               रद्द करें
             </Button>
-            <Button variant="destructive" onClick={() => setDeleteModal(null)}>
+            <Button variant="destructive" onClick={async () => {
+              if (deleteModal) {
+                await dispatch(deleteRailayan(deleteModal));
+                setDeleteModal(null);
+                dispatch(fetchRailayan());
+              }
+            }}>
               हटाएं
             </Button>
           </div>
@@ -639,45 +669,78 @@ export default function ChunaviRailayan() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-700">शीर्षक</label>
-                <Input placeholder="रैली का शीर्षक" />
+                <Input 
+                  placeholder="रैली का शीर्षक" 
+                  value={newRailayan.title || ''}
+                  onChange={(e) => setNewRailayan(prev => ({ ...prev, title: e.target.value }))}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">स्थान</label>
-                <Input placeholder="रैली का स्थान" />
+                <Input 
+                  placeholder="रैली का स्थान" 
+                  value={newRailayan.location || ''}
+                  onChange={(e) => setNewRailayan(prev => ({ ...prev, location: e.target.value }))}
+                />
               </div>
             </div>
             
             <div>
               <label className="text-sm font-medium text-gray-700">विवरण</label>
-              <Input placeholder="रैली का विवरण" />
+              <Input 
+                placeholder="रैली का विवरण" 
+                value={newRailayan.description || ''}
+                onChange={(e) => setNewRailayan(prev => ({ ...prev, description: e.target.value }))}
+              />
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-700">तारीख</label>
-                <Input type="date" />
+                <Input 
+                  type="date" 
+                  value={newRailayan.date || ''}
+                  onChange={(e) => setNewRailayan(prev => ({ ...prev, date: e.target.value }))}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">समय</label>
-                <Input type="time" />
+                <Input 
+                  type="time" 
+                  value={newRailayan.time || ''}
+                  onChange={(e) => setNewRailayan(prev => ({ ...prev, time: e.target.value }))}
+                />
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-700">अपेक्षित भीड़</label>
-                <Input type="number" placeholder="50000" />
+                <Input 
+                  type="number" 
+                  placeholder="50000" 
+                  value={newRailayan.expectedCrowd || ''}
+                  onChange={(e) => setNewRailayan(prev => ({ ...prev, expectedCrowd: parseInt(e.target.value) || 0 }))}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">बजट (₹)</label>
-                <Input type="number" placeholder="2500000" />
+                <Input 
+                  type="number" 
+                  placeholder="2500000" 
+                  value={newRailayan.budget || ''}
+                  onChange={(e) => setNewRailayan(prev => ({ ...prev, budget: parseInt(e.target.value) || 0 }))}
+                />
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-700">प्रकार</label>
-                <Select>
+                <Select 
+                  value={newRailayan.campaignType || ''}
+                  onValueChange={(value) => setNewRailayan(prev => ({ ...prev, campaignType: value }))}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="प्रकार चुनें" />
                   </SelectTrigger>
@@ -692,7 +755,10 @@ export default function ChunaviRailayan() {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">प्राथमिकता</label>
-                <Select>
+                <Select 
+                  value={newRailayan.priority || ''}
+                  onValueChange={(value) => setNewRailayan(prev => ({ ...prev, priority: value }))}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="प्राथमिकता चुनें" />
                   </SelectTrigger>
@@ -705,11 +771,26 @@ export default function ChunaviRailayan() {
               </div>
             </div>
             
+            <div>
+              <label className="text-sm font-medium text-gray-700">Event Image</label>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setNewImageFile(e.target.files?.[0] || null)}
+              />
+            </div>
+            
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={() => setAddModal(false)}>
                 रद्द करें
               </Button>
-              <Button onClick={() => setAddModal(false)}>
+              <Button onClick={async () => {
+                await dispatch(addRailayan(newRailayan as ChunaviRailayan, newImageFile));
+                setAddModal(false);
+                setNewRailayan({});
+                setNewImageFile(null);
+                dispatch(fetchRailayan());
+              }}>
                 जोड़ें
               </Button>
             </div>

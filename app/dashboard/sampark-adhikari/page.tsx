@@ -59,6 +59,8 @@ export default function SamparkAdhikari() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newImageFile, setNewImageFile] = useState<File | null>(null);
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
   const [newOfficer, setNewOfficer] = useState<Partial<Adhikari>>({
     name: '',
     email: '',
@@ -122,7 +124,7 @@ export default function SamparkAdhikari() {
       emergencyContact: newOfficer.emergencyContact || ''
     };
     
-    dispatch(addAdhikari(officer));
+    dispatch(addAdhikari(officer, newImageFile));
     setNewOfficer({
       name: '',
       email: '',
@@ -139,6 +141,7 @@ export default function SamparkAdhikari() {
       address: '',
       emergencyContact: ''
     });
+    setNewImageFile(null);
     setIsAddModalOpen(false);
   };
 
@@ -162,8 +165,9 @@ export default function SamparkAdhikari() {
       ...officer,
     };
     
-    dispatch(updateAdhikari(officer._id, updatedOfficer as Adhikari));
+    dispatch(updateAdhikari(officer._id, updatedOfficer as Adhikari, editImageFile));
     setIsEditModalOpen(false);
+    setEditImageFile(null);
     setSelectedOfficer(null);
   };
 
@@ -466,11 +470,11 @@ export default function SamparkAdhikari() {
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Image URL</label>
+                    <label className="text-sm font-medium">Image</label>
                     <Input
-                      value={newOfficer.image}
-                      onChange={(e) => setNewOfficer(prev => ({ ...prev, image: e.target.value }))}
-                      placeholder="Enter image URL"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setNewImageFile(e.target.files?.[0] || null)}
                     />
                   </div>
                 </div>
@@ -734,6 +738,14 @@ export default function SamparkAdhikari() {
                                     }}
                                   />
                                 </div>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Update Image</label>
+                                <Input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => setEditImageFile(e.target.files?.[0] || null)}
+                                />
                               </div>
                             </div>
                             <DialogFooter>
