@@ -21,35 +21,39 @@ export default function PostsPage() {
   const loading = useSelector(selectPostsLoading);
   const error = useSelector(selectPostsError);
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   useEffect(() => {
     dispatch(fetchPosts());
   }, [dispatch]);
 
   // Filter only published posts
-  const publishedPosts = allPosts.filter(post => post.status === 'PUBLISHED');
+  const publishedPosts = allPosts.filter((post) => post.status === "PUBLISHED");
 
   // Get unique categories
-  const categories = Array.from(new Set(publishedPosts.map(post => post.category)));
+  const categories = Array.from(
+    new Set(publishedPosts.map((post) => post.category))
+  );
 
   // Filter posts based on search and category
-  const filteredPosts = publishedPosts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || post.category === selectedCategory;
+  const filteredPosts = publishedPosts.filter((post) => {
+    const matchesSearch =
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "all" || post.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   // Format date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('hi-IN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return date.toLocaleDateString("hi-IN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -78,20 +82,25 @@ export default function PostsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-r from-orange-600 to-orange-500">
-        <div className="absolute inset-0 bg-black/10"></div>
+      <section className="relative py-20 text-white">
+        <div className="absolute inset-0 z-0">
+          <img
+            src="https://cbeditz.com/public/cbeditz/preview/new-bjp-with-logo-background-hd-images-download-cktims8q50.webp"
+            alt="ब्लॉग बैकग्राउंड"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/50"></div>
+        </div>
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center text-white"
+            className="text-center"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-4">
-              ब्लॉग पोस्ट
-            </h1>
+            <h1 className="text-5xl md:text-6xl font-bold mb-4">ब्लॉग पोस्ट</h1>
             <p className="text-xl md:text-2xl text-orange-100">
               ताज़ा खबरें, विचार और अपडेट
             </p>
@@ -118,23 +127,23 @@ export default function PostsPage() {
             {/* Category Filter */}
             <div className="flex gap-2 flex-wrap">
               <button
-                onClick={() => setSelectedCategory('all')}
+                onClick={() => setSelectedCategory("all")}
                 className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                  selectedCategory === 'all'
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  selectedCategory === "all"
+                    ? "bg-orange-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 सभी
               </button>
-              {categories.map(category => (
+              {categories.map((category) => (
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
                   className={`px-4 py-2 rounded-lg font-medium transition-all ${
                     selectedCategory === category
-                      ? 'bg-orange-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? "bg-orange-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
                   {category}
@@ -172,14 +181,16 @@ export default function PostsPage() {
                   <Link href={`/posts/${post.slug || post._id}`}>
                     <div className="relative h-64 overflow-hidden group">
                       <Image
-                        src={post.featuredImage || '/images/posts/default-post.jpg'}
+                        src={
+                          post.featuredImage || "/images/posts/default-post.jpg"
+                        }
                         alt={post.title}
                         fill
                         className="object-cover group-hover:scale-110 transition-transform duration-500"
                         unoptimized
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                      
+
                       {/* Category Badge */}
                       <div className="absolute top-4 left-4">
                         <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium">
@@ -221,17 +232,19 @@ export default function PostsPage() {
                         <User className="w-4 h-4" />
                         <span>{post.author}</span>
                       </div>
-                      
+
                       {post.tags && post.tags.length > 0 && (
                         <div className="flex items-center gap-1">
                           <Tag className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm text-gray-500">{post.tags.length}</span>
+                          <span className="text-sm text-gray-500">
+                            {post.tags.length}
+                          </span>
                         </div>
                       )}
                     </div>
 
                     {/* Read More Link */}
-                    <Link 
+                    <Link
                       href={`/posts/${post.slug || post._id}`}
                       className="inline-flex items-center gap-2 mt-4 text-orange-500 font-medium hover:gap-3 transition-all"
                     >
@@ -248,4 +261,3 @@ export default function PostsPage() {
     </div>
   );
 }
-

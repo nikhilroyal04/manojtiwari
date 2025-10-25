@@ -18,7 +18,7 @@ export default function CTA({ searchTerm, setSearchTerm, title, description, pla
         <div>
             <section className="relative py-20 h-auto min-h-[500px]">
                 <div className="absolute h-full w-full inset-0 bg-black/30"></div>
-                <div className="absolute inset-0 overflow-hidden">
+                {/* <div className="absolute inset-0 overflow-hidden">
                     <Image
                         src="/images/cta-bg.jpg"
                         alt="आगामी कार्यक्रम"
@@ -26,7 +26,7 @@ export default function CTA({ searchTerm, setSearchTerm, title, description, pla
                         className="object-cover opacity-40"
                         priority
                     />
-                </div>
+                </div> */}
                 <div className="container mx-auto px-4 relative z-10">
                     <div className="max-w-4xl mx-auto text-center text-white">
                         <motion.div
