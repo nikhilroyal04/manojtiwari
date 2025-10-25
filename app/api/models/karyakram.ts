@@ -14,6 +14,7 @@ const karyakramSchema = new mongoose.Schema({
     default: 'upcoming'
   },
   expectedAttendees: { type: Number, default: 0 },
+  actualAttendees: { type: Number, default: 0 },
   priority: {
     type: String,
     enum: ['low', 'medium', 'high', 'urgent'],
@@ -21,7 +22,8 @@ const karyakramSchema = new mongoose.Schema({
   },
   organizer: { type: String, required: false, default: null },
   contactPerson: { type: String, required: false, default: null },
-  contactNumber: { type: String, required: false, default: null }
+  contactNumber: { type: String, required: false, default: null },
+  notes: { type: String, required: false, default: null }
 }, {
   timestamps: true // createdAt, updatedAt auto add kar dega
 });

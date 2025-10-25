@@ -68,24 +68,26 @@ export default function JantaDarbarPage() {
   // For Add
   const [newJantaDarbar, setNewJantaDarbar] = useState<Partial<JantaDarbar>>({
     title: '',
-    description: '',
+    agenda: '',
     date: '',
     location: 'North East Delhi',
-    status: 'scheduled',
+    status: 'open',
     attendees: 0,
-    notes: '',
+    issues: 0,
+    resolved: 0,
   });
 
   // For Edit
   const [editJantaDarbar, setEditJantaDarbar] = useState<Partial<JantaDarbar>>({
     _id: '',
     title: '',
-    description: '',
+    agenda: '',
     date: '',
     location: '',
-    status: 'scheduled',
+    status: 'open',
     attendees: 0,
-    notes: '',
+    issues: 0,
+    resolved: 0,
   });
 
   useEffect(() => {
@@ -94,22 +96,22 @@ export default function JantaDarbarPage() {
 
   // Status color and icon mapping
   const statusColors: Record<string, string> = {
-    scheduled: 'bg-blue-100 text-blue-800 border-blue-200',
-    completed: 'bg-gray-100 text-gray-800 border-gray-200',
-    cancelled: 'bg-red-100 text-red-800 border-red-200',
+    open: 'bg-blue-100 text-blue-800 border-blue-200',
+    ongoing: 'bg-green-100 text-green-800 border-green-200',
+    close: 'bg-gray-100 text-gray-800 border-gray-200',
   };
 
   const statusIcons: Record<string, React.ElementType> = {
-    scheduled: AlertCircle,
-    completed: CheckCircle,
-    cancelled: XCircle,
+    open: AlertCircle,
+    ongoing: CheckCircle,
+    close: XCircle,
   };
 
   // Filtered list
   const filteredJantaDarbars = jantaDarbars.filter((jd) => {
     const matchesSearch =
       (jd.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-      (jd.description?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (jd.agenda?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
       (jd.location?.toLowerCase() || '').includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === 'all' || jd.status === statusFilter;
@@ -138,12 +140,13 @@ export default function JantaDarbarPage() {
       setNewImageFile(null);
       setNewJantaDarbar({
         title: '',
-        description: '',
+        agenda: '',
         date: '',
         location: 'North East Delhi',
-        status: 'scheduled',
+        status: 'open',
         attendees: 0,
-        notes: '',
+        issues: 0,
+        resolved: 0,
       });
       dispatch(fetchDarbars());
     } catch (err) {
@@ -156,12 +159,13 @@ export default function JantaDarbarPage() {
     setEditJantaDarbar({
       _id: jd._id,
       title: jd.title,
-      description: jd.description,
+      agenda: jd.agenda,
       date: jd.date,
       location: jd.location,
       status: jd.status,
       attendees: jd.attendees,
-      notes: jd.notes,
+      issues: jd.issues,
+      resolved: jd.resolved,
     });
     setSelectedJantaDarbar(jd);
     setIsEditModalOpen(true);
@@ -178,12 +182,13 @@ export default function JantaDarbarPage() {
       setEditJantaDarbar({
         _id: '',
         title: '',
-        description: '',
+        agenda: '',
         date: '',
         location: '',
-        status: 'scheduled',
+        status: 'open',
         attendees: 0,
-        notes: '',
+        issues: 0,
+        resolved: 0,
       });
       dispatch(fetchDarbars());
     } catch (err) {
@@ -259,7 +264,7 @@ export default function JantaDarbarPage() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <Input
                   type="text"
-                  placeholder="Search janta darbar by title, description, or location..."
+                  placeholder="Search janta darbar by title, agenda, or location..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -307,9 +312,9 @@ export default function JantaDarbarPage() {
                   <div>
                     <label className="text-sm font-medium">Description</label>
                     <textarea
-                      value={newJantaDarbar.description || ''}
-                      onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, description: e.target.value }))}
-                      placeholder="Enter event description"
+                      value={newJantaDarbar.agenda || ''}
+                      onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, agenda: e.target.value }))}
+                      placeholder="Enter event agenda"
                       className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                       rows={3}
                     />
@@ -348,9 +353,9 @@ export default function JantaDarbarPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="scheduled">Scheduled</SelectItem>
-                          <SelectItem value="completed">Completed</SelectItem>
-                          <SelectItem value="cancelled">Cancelled</SelectItem>
+                          <SelectItem value="open">Open</SelectItem>
+                          <SelectItem value="ongoing">Ongoing</SelectItem>
+                          <SelectItem value="close">Close</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -370,11 +375,21 @@ export default function JantaDarbarPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Notes</label>
+                    <label className="text-sm font-medium">Issues Raised</label>
                     <Input
-                      value={newJantaDarbar.notes || ''}
-                      onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, notes: e.target.value }))}
-                      placeholder="Any notes"
+                      type="number"
+                      value={newJantaDarbar.issues || 0}
+                      onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, issues: parseInt(e.target.value) || 0 }))}
+                      placeholder="Number of issues raised"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Resolved Issues</label>
+                    <Input
+                      type="number"
+                      value={newJantaDarbar.resolved || 0}
+                      onChange={(e) => setNewJantaDarbar((prev) => ({ ...prev, resolved: parseInt(e.target.value) || 0 }))}
+                      placeholder="Number of issues resolved"
                     />
                   </div>
                   <div>
@@ -433,7 +448,7 @@ export default function JantaDarbarPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900 max-w-xs truncate">{jd.description}</div>
+                      <div className="text-sm text-gray-900 max-w-xs truncate">{jd.agenda}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{jd.date}</div>
@@ -503,15 +518,19 @@ export default function JantaDarbarPage() {
                               </div>
                               <div>
                                 <label className="text-sm font-medium text-gray-500">Description</label>
-                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">{jd.description}</p>
+                                <p className="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">{jd.agenda}</p>
                               </div>
                               <div>
                                 <label className="text-sm font-medium text-gray-500">Attendees</label>
                                 <p className="text-sm text-gray-900">{jd.attendees || 0}</p>
                               </div>
                               <div>
-                                <label className="text-sm font-medium text-gray-500">Notes</label>
-                                <p className="text-sm text-gray-900">{jd.notes || '-'}</p>
+                                <label className="text-sm font-medium text-gray-500">Issues Raised</label>
+                                <p className="text-sm text-gray-900">{jd.issues || 0}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Resolved Issues</label>
+                                <p className="text-sm text-gray-900">{jd.resolved || 0}</p>
                               </div>
                             </div>
                             <DialogFooter>
@@ -558,9 +577,9 @@ export default function JantaDarbarPage() {
                               <div>
                                 <label className="text-sm font-medium">Description</label>
                                 <textarea
-                                  value={editJantaDarbar.description || ''}
-                                  onChange={e => setEditJantaDarbar(prev => ({ ...prev, description: e.target.value }))}
-                                  placeholder="Enter event description"
+                                  value={editJantaDarbar.agenda || ''}
+                                  onChange={e => setEditJantaDarbar(prev => ({ ...prev, agenda: e.target.value }))}
+                                  placeholder="Enter event agenda"
                                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                                   rows={3}
                                 />
@@ -587,7 +606,7 @@ export default function JantaDarbarPage() {
                                 <div>
                                   <label className="text-sm font-medium">Status</label>
                                   <Select
-                                    value={editJantaDarbar.status || 'scheduled'}
+                                    value={editJantaDarbar.status || 'open'}
                                     onValueChange={value =>
                                       setEditJantaDarbar(prev => ({
                                         ...prev,
@@ -599,9 +618,9 @@ export default function JantaDarbarPage() {
                                       <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="scheduled">Scheduled</SelectItem>
-                                      <SelectItem value="completed">Completed</SelectItem>
-                                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                                      <SelectItem value="open">Open</SelectItem>
+                                      <SelectItem value="ongoing">Ongoing</SelectItem>
+                                      <SelectItem value="close">Close</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
@@ -621,11 +640,21 @@ export default function JantaDarbarPage() {
                                 </div>
                               </div>
                               <div>
-                                <label className="text-sm font-medium">Notes</label>
+                                <label className="text-sm font-medium">Issues Raised</label>
                                 <Input
-                                  value={editJantaDarbar.notes || ''}
-                                  onChange={e => setEditJantaDarbar(prev => ({ ...prev, notes: e.target.value }))}
-                                  placeholder="Any notes"
+                                  type="number"
+                                  value={editJantaDarbar.issues || 0}
+                                  onChange={e => setEditJantaDarbar(prev => ({ ...prev, issues: parseInt(e.target.value) || 0 }))}
+                                  placeholder="Number of issues raised"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Resolved Issues</label>
+                                <Input
+                                  type="number"
+                                  value={editJantaDarbar.resolved || 0}
+                                  onChange={e => setEditJantaDarbar(prev => ({ ...prev, resolved: parseInt(e.target.value) || 0 }))}
+                                  placeholder="Number of issues resolved"
                                 />
                               </div>
                               <div>

@@ -1,92 +1,37 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Calendar, MapPin, Filter, ChevronDown, X } from "lucide-react";
 import Link from "next/link";
 import CTA from '@/components/all/cta-section';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '@/lib/redux/store';
+import { fetchRailayan, selectRailayan, selectRailayanLoading, selectRailayanError } from '@/lib/redux/features/railayanSlice';
+import type { ChunaviRailayan } from '@/lib/redux/features/railayanSlice';
 
-export default function ChunaviRailayan() {
+export default function ChunaviRailayanPage() {
+  const dispatch = useDispatch<AppDispatch>();
+  const rallyPosts = useSelector(selectRailayan);
+  const loading = useSelector(selectRailayanLoading);
+  const error = useSelector(selectRailayanError);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const [selectedState, setSelectedState] = useState<string | null>(null);
 
-  // Sample rally posts
-  const rallyPosts = [
-    {
-      id: 1,
-      title: "सेयदराजा विधानसभा भाजपा प्रत्याशी श्री सुशील सिंह जी के लिए रोड शो",
-      description: "सेयदराजा विधानसभा भाजपा प्रत्याशी श्री सुशील सिंह जी के लिए रोड शो कर भाजपा के पक्ष में मतदान करने का आग्रह करते हैं",
-      date: "2022-06-25",
-      location: "सेयदराजा विधानसभा",
-      state: "उत्तर प्रदेश",
-      images: [
-        "/images/chunavi-railayan/rally1-1.jpg",
-        "/images/chunavi-railayan/rally1-2.jpg",
-        "/images/chunavi-railayan/rally1-3.jpg"
-      ],
-      mainImage: "/images/chunavi-railayan/rally1-main.jpg"
-    },
-    {
-      id: 2,
-      title: "आसनसोल लोकसभा उपनिर्वाचन बिजेपि मनोनीत प्रार्थी श्रीमती",
-      description: "आसनसोल लोकसभा उपनिर्वाचन बिजेपि मनोनीत प्रार्थी श्रीमती paulagnimitra1 'র প্রচারে উপস্থিত ছিলেন সাংসদ ও বিজেপি নেতা",
-      date: "2022-04-04",
-      location: "आसनसोल",
-      state: "पश्चिम बंगाल",
-      images: [
-        "/images/chunavi-railayan/rally2-1.jpg",
-        "/images/chunavi-railayan/rally2-2.jpg"
-      ],
-      mainImage: "/images/chunavi-railayan/rally2-main.jpg"
-    },
-    {
-      id: 3,
-      title: "श्री मनोज तिवारी जी का सोनभद्र में विशाल जनसभा!",
-      description: "सोनभद्र में आयोजित विशाल जनसभा में मनोज तिवारी जी ने भाजपा के विकास कार्यों पर प्रकाश डाला और क्षेत्र के विकास के लिए नई योजनाओं की घोषणा की।",
-      date: "2022-03-15",
-      location: "सोनभद्र",
-      state: "उत्तर प्रदेश",
-      images: [
-        "/images/chunavi-railayan/rally3-1.jpg",
-        "/images/chunavi-railayan/rally3-2.jpg",
-        "/images/chunavi-railayan/rally3-3.jpg"
-      ],
-      mainImage: "/images/chunavi-railayan/rally3-main.jpg"
-    },
-    {
-      id: 4,
-      title: "गोरखपुर में भव्य रोड शो",
-      description: "गोरखपुर में आयोजित भव्य रोड शो में हजारों लोगों ने भाग लिया। मनोज तिवारी जी ने भाजपा के विकास एजेंडे पर जोर दिया और क्षेत्र के विकास के लिए अपनी प्रतिबद्धता दोहराई।",
-      date: "2022-02-20",
-      location: "गोरखपुर",
-      state: "उत्तर प्रदेश",
-      images: [
-        "/images/chunavi-railayan/rally4-1.jpg",
-        "/images/chunavi-railayan/rally4-2.jpg"
-      ],
-      mainImage: "/images/chunavi-railayan/rally4-main.jpg"
-    },
-    {
-      id: 5,
-      title: "पूर्वांचल के विकास के लिए जनसभा",
-      description: "पूर्वांचल के विकास के लिए आयोजित जनसभा में मनोज तिवारी जी ने क्षेत्र के लिए विशेष पैकेज की मांग की और स्थानीय समस्याओं के समाधान के लिए केंद्र सरकार की योजनाओं पर प्रकाश डाला।",
-      date: "2022-01-10",
-      location: "वाराणसी",
-      state: "उत्तर प्रदेश",
-      images: [
-        "/images/chunavi-railayan/rally5-1.jpg",
-        "/images/chunavi-railayan/rally5-2.jpg",
-        "/images/chunavi-railayan/rally5-3.jpg"
-      ],
-      mainImage: "/images/chunavi-railayan/rally5-main.jpg"
-    }
-  ];
+  // Fetch rallies on component mount
+  useEffect(() => {
+    dispatch(fetchRailayan());
+  }, [dispatch]);
+
+  // Get unique states for filter
+  const states = Array.from(new Set(rallyPosts.map((post: ChunaviRailayan) => post.state)));
 
   // Filter posts based on search term and filters
-  const filteredPosts = rallyPosts.filter(post => {
+  const filteredPosts = rallyPosts.filter((post: ChunaviRailayan) => {
     let matchesSearch = true;
     let matchesYear = true;
     let matchesState = true;
@@ -110,17 +55,47 @@ export default function ChunaviRailayan() {
   });
 
   // Years for filter
-  const years = ["2019", "2020", "2021", "2022", "2023"];
-  
-  // States for filter
-  const states = [
-    "उत्तर प्रदेश",
-    "बिहार",
-    "दिल्ली",
-    "पश्चिम बंगाल",
-    "महाराष्ट्र",
-    "गुजरात"
-  ];
+  const years = ["2019", "2020", "2021", "2022", "2023", "2024"];
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <CTA 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          title="चुनावी रैलियां अभिलेख"
+          description="मनोज तिवारी जी द्वारा आयोजित चुनावी रैलियां और जनसभाओं का संग्रह"
+          placeholder="रैलियां खोजें..."
+        />
+        <div className="flex justify-center items-center h-96">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <CTA 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          title="चुनावी रैलियां अभिलेख"
+          description="मनोज तिवारी जी द्वारा आयोजित चुनावी रैलियां और जनसभाओं का संग्रह"
+          placeholder="रैलियां खोजें..."
+        />
+        <div className="flex justify-center items-center h-96">
+          <div className="text-center">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h3 className="text-2xl font-bold mb-2 text-red-600">त्रुटि</h3>
+            <p className="text-gray-600">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -243,16 +218,16 @@ export default function ChunaviRailayan() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredPosts.map((post, index) => (
                 <motion.div
-                  key={post.id}
+                  key={post._id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
                 >
-                  <Link href={`/chunavi-railayan/${post.id}`}>
+                  <Link href={`/chunavi-railayan/${post._id}`}>
                     <div className="relative h-56 overflow-hidden">
                       <Image
-                        src={post.mainImage}
+                        src={post.mainImage || '/images/chunavi-railayan/default-rally.jpg'}
                         alt={post.title}
                         fill
                         className="object-cover hover:scale-105 transition-transform duration-500"
@@ -272,23 +247,25 @@ export default function ChunaviRailayan() {
                         <span>{post.location}, {post.state}</span>
                       </div>
                       
-                      <div className="mt-4 flex gap-2">
-                        {post.images.slice(0, 3).map((image, i) => (
-                          <div key={i} className="w-12 h-12 relative rounded-md overflow-hidden">
-                            <Image
-                              src={image}
-                              alt={`${post.title} - ${i+1}`}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        ))}
-                        {post.images.length > 3 && (
-                          <div className="w-12 h-12 bg-gray-100 rounded-md flex items-center justify-center text-sm font-medium text-gray-600">
-                            +{post.images.length - 3}
-                          </div>
-                        )}
-                      </div>
+                      {post.images && post.images.length > 0 && (
+                        <div className="mt-4 flex gap-2">
+                          {post.images.slice(0, 3).map((image, i) => (
+                            <div key={i} className="w-12 h-12 relative rounded-md overflow-hidden">
+                              <Image
+                                src={image}
+                                alt={`${post.title} - ${i+1}`}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          ))}
+                          {post.images.length > 3 && (
+                            <div className="w-12 h-12 bg-gray-100 rounded-md flex items-center justify-center text-sm font-medium text-gray-600">
+                              +{post.images.length - 3}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </Link>
                 </motion.div>

@@ -1,85 +1,35 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, MapPin, Filter, ChevronDown, X, ArrowRight, Users } from 'lucide-react';
 import Link from 'next/link';
 import CTA from '@/components/all/cta-section';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '@/lib/redux/store';
+import { fetchKaryakram, selectKaryakram, selectLoading, selectError } from '@/lib/redux/features/karyakramSlice';
+import type { Karyakram } from '@/lib/redux/features/karyakramSlice';
 
 export default function AgamiKaryakram() {
+  const dispatch = useDispatch<AppDispatch>();
+  const karyakrams = useSelector(selectKaryakram);
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [currentDate] = useState(new Date());
 
-  // Upcoming events data
-  const events = [
-    {
-      id: 1,
-      title: "सांसद श्री मनोज तिवारी जी पार्क का लोकार्पण और मिशन अनिवार्य के तहत जरूरतमंद महिलाओं को सैनेटरी नैपकिन वितरण",
-      description: "पार्क का लोकार्पण और मिशन अनिवार्य के तहत जरूरतमंद महिलाओं को सैनेटरी नैपकिन वितरण",
-      date: "2022-06-26",
-      time: "11:00 AM",
-      location: "DDA द्वारा निर्मित खजूर पार्क, सेयदराजा विधानसभा",
-      type: "लोकार्पण",
-      image: "/images/events/park-inauguration.jpg"
-    },
-    {
-      id: 2,
-      title: "जनता दरबार - समस्याओं का समाधान",
-      description: "सांसद श्री मनोज तिवारी जी द्वारा आयोजित जनता दरबार में क्षेत्र के नागरिकों की समस्याओं का समाधान किया जाएगा। सभी नागरिक अपनी समस्याओं के साथ आमंत्रित हैं।",
-      date: "2022-07-15",
-      time: "10:00 AM",
-      location: "कार्यालय, उत्तर पूर्वी दिल्ली",
-      type: "जनता दरबार",
-      image: "/images/events/janta-darbar.jpg"
-    },
-    {
-      id: 3,
-      title: "स्वच्छता अभियान - स्वच्छ भारत मिशन",
-      description: "स्वच्छ भारत मिशन के अंतर्गत स्वच्छता अभियान का आयोजन किया जाएगा। सभी नागरिकों से अनुरोध है कि इस अभियान में बढ़-चढ़कर हिस्सा लें।",
-      date: "2022-07-22",
-      time: "09:00 AM",
-      location: "यमुना घाट, उत्तर पूर्वी दिल्ली",
-      type: "अभियान",
-      image: "/images/events/swachhta-abhiyan.jpg"
-    },
-    {
-      id: 4,
-      title: "वृक्षारोपण अभियान",
-      description: "पर्यावरण संरक्षण के लिए वृक्षारोपण अभियान का आयोजन किया जाएगा। सभी नागरिकों से अनुरोध है कि इस अभियान में भाग लें और अपने क्षेत्र को हरा-भरा बनाएं।",
-      date: "2022-08-05",
-      time: "08:30 AM",
-      location: "यमुना खादर क्षेत्र, उत्तर पूर्वी दिल्ली",
-      type: "अभियान",
-      image: "/images/events/tree-plantation.jpg"
-    },
-    {
-      id: 5,
-      title: "स्वास्थ्य शिविर",
-      description: "निःशुल्क स्वास्थ्य जांच शिविर का आयोजन किया जाएगा। इस शिविर में विभिन्न बीमारियों की जांच और परामर्श दिया जाएगा।",
-      date: "2022-08-15",
-      time: "10:00 AM",
-      location: "सामुदायिक भवन, उत्तर पूर्वी दिल्ली",
-      type: "शिविर",
-      image: "/images/events/health-camp.jpg"
-    },
-    {
-      id: 6,
-      title: "स्वतंत्रता दिवस समारोह",
-      description: "75वें स्वतंत्रता दिवस के उपलक्ष्य में विशेष समारोह का आयोजन किया जाएगा। इस अवसर पर ध्वजारोहण और सांस्कृतिक कार्यक्रम होंगे।",
-      date: "2022-08-15",
-      time: "08:00 AM",
-      location: "डीडीए मैदान, उत्तर पूर्वी दिल्ली",
-      type: "समारोह",
-      image: "/images/events/independence-day.jpg"
-    }
-  ];
+  // Fetch events on component mount
+  useEffect(() => {
+    dispatch(fetchKaryakram());
+  }, [dispatch]);
 
   // Get unique event types for filter
-  const eventTypes = Array.from(new Set(events.map(event => event.type)));
+  const eventTypes = Array.from(new Set(karyakrams.map((event: Karyakram) => event.type)));
 
   // Get unique months for filter
   const months = [
@@ -98,7 +48,7 @@ export default function AgamiKaryakram() {
   ];
 
   // Filter events based on search term and filters
-  const filteredEvents = events.filter(event => {
+  const filteredEvents = karyakrams.filter((event: Karyakram) => {
     let matchesSearch = true;
     let matchesMonth = true;
     let matchesType = true;
@@ -111,7 +61,8 @@ export default function AgamiKaryakram() {
     }
 
     if (selectedMonth) {
-      const eventMonth = event.date.split('-')[1];
+      const eventDate = new Date(event.date);
+      const eventMonth = String(eventDate.getMonth() + 1).padStart(2, '0');
       matchesMonth = eventMonth === selectedMonth;
     }
 
@@ -165,6 +116,46 @@ export default function AgamiKaryakram() {
     const eventDate = new Date(dateString);
     return eventDate >= currentDate;
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <CTA 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          title="आगामी कार्यक्रम"
+          description="मनोज तिवारी जी के आगामी कार्यक्रमों की जानकारी"
+          placeholder="कार्यक्रम खोजें..."
+        />
+        <div className="flex justify-center items-center h-96">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <CTA 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          title="आगामी कार्यक्रम"
+          description="मनोज तिवारी जी के आगामी कार्यक्रमों की जानकारी"
+          placeholder="कार्यक्रम खोजें..."
+        />
+        <div className="flex justify-center items-center h-96">
+          <div className="text-center">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h3 className="text-2xl font-bold mb-2 text-red-600">त्रुटि</h3>
+            <p className="text-gray-600">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -290,9 +281,9 @@ export default function AgamiKaryakram() {
               initial="hidden"
               animate="visible"
             >
-              {sortedEvents.map((event) => (
+              {sortedEvents.map((event: Karyakram) => (
                 <motion.div
-                  key={event.id}
+                  key={event._id}
                   variants={itemVariants}
                   className={`bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all ${
                     isUpcoming(event.date) ? 'border-l-4 border-primary' : 'border-l-4 border-gray-300'
@@ -301,7 +292,7 @@ export default function AgamiKaryakram() {
                   <div className="flex flex-col md:flex-row">
                     <div className="md:w-1/3 relative">
                       <Image
-                        src={event.image}
+                        src={event.image || '/images/events/default-event.jpg'}
                         alt={event.title}
                         width={400}
                         height={300}
@@ -315,6 +306,21 @@ export default function AgamiKaryakram() {
                       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary">
                         {event.type}
                       </div>
+                      {event.status && (
+                        <div className={`absolute bottom-4 left-4 px-3 py-1 rounded-full text-xs font-bold ${
+                          event.status === 'upcoming' ? 'bg-blue-500 text-white' :
+                          event.status === 'ongoing' ? 'bg-green-500 text-white' :
+                          event.status === 'completed' ? 'bg-gray-500 text-white' :
+                          event.status === 'cancelled' ? 'bg-red-500 text-white' :
+                          'bg-yellow-500 text-white'
+                        }`}>
+                          {event.status === 'upcoming' ? 'आगामी' :
+                           event.status === 'ongoing' ? 'चल रहा' :
+                           event.status === 'completed' ? 'संपन्न' :
+                           event.status === 'cancelled' ? 'रद्द' :
+                           'स्थगित'}
+                        </div>
+                      )}
                     </div>
                     
                     <div className="p-6 md:w-2/3">
@@ -345,12 +351,22 @@ export default function AgamiKaryakram() {
                             <div>{event.location}</div>
                           </div>
                         </div>
+
+                        {event.expectedAttendees && event.expectedAttendees > 0 && (
+                          <div className="flex items-start gap-3">
+                            <Users className="w-5 h-5 text-primary mt-1" />
+                            <div>
+                              <div className="text-sm text-gray-500">अपेक्षित उपस्थिति:</div>
+                              <div>{event.expectedAttendees} लोग</div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       
-                      {isUpcoming(event.date) && (
+                      {isUpcoming(event.date) && event.status !== 'cancelled' && (
                         <div className="flex justify-end">
                           <Link 
-                            href={`/agami-karyakram/${event.id}`}
+                            href={`/agami-karyakram/${event._id}`}
                             className="inline-flex items-center gap-1 py-2 px-4 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
                           >
                             विस्तृत जानकारी
@@ -406,10 +422,10 @@ export default function AgamiKaryakram() {
               
               <div className="space-y-4">
                 {sortedEvents
-                  .filter(event => isUpcoming(event.date))
+                  .filter((event: Karyakram) => isUpcoming(event.date))
                   .slice(0, 3)
-                  .map((event) => (
-                    <div key={event.id} className="flex items-center gap-4 bg-white/5 p-4 rounded-lg">
+                  .map((event: Karyakram) => (
+                    <div key={event._id} className="flex items-center gap-4 bg-white/5 p-4 rounded-lg">
                       <div className="bg-white text-primary rounded-lg p-3 text-center min-w-[70px]">
                         <div className="text-sm font-bold">{new Date(event.date).toLocaleDateString('hi-IN', { month: 'short' })}</div>
                         <div className="text-2xl font-bold">{new Date(event.date).getDate()}</div>

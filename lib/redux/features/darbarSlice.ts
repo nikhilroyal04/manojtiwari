@@ -7,12 +7,15 @@ import axios from "axios";
 export interface JantaDarbar {
     _id?: string;
     title: string;
-    description: string;
+    agenda: string;
     date: string;
     location: string;
-    status: "scheduled" | "completed" | "cancelled";
+    status: "open" | "close" | "ongoing";
+    images?: string[];
+    mainImage?: string;
     attendees?: number;
-    notes?: string;
+    issues?: number;
+    resolved?: number;
     [key: string]: unknown;
 }
 
