@@ -31,8 +31,28 @@ export default function JantaDarbar() {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="relative min-h-[500px]">
+          <div className="absolute inset-0 z-0 h-full">
+            <img
+              src="https://manojtiwari.in/sites/default/files/WhatsApp%20Image%202019-07-27%20at%207.13.48%20PM.jpeg"
+              alt="Background"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </div>
+          <div className="relative z-10">
+            <CTA
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              title="जनता दरबार"
+              description="मनोज तिवारी जी द्वारा आयोजित जनता दरबार में लोगों की समस्याओं का समाधान और विकास कार्यों की समीक्षा"
+              placeholder="जनता दरबार खोजें..."
+            />
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-96">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        </div>
       </div>
     );
   }
@@ -40,25 +60,49 @@ export default function JantaDarbar() {
   // Show error state
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold mb-4 text-red-600">त्रुटि</h1>
-          <p className="text-gray-600 mb-4">{error}</p>
+      <div className="min-h-screen bg-gray-50">
+        <div className="relative min-h-[500px]">
+          <div className="absolute inset-0 z-0 h-full">
+            <img
+              src="https://manojtiwari.in/sites/default/files/WhatsApp%20Image%202019-07-27%20at%207.13.48%20PM.jpeg"
+              alt="Background"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </div>
+          <div className="relative z-10">
+            <CTA
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              title="जनता दरबार"
+              description="मनोज तिवारी जी द्वारा आयोजित जनता दरबार में लोगों की समस्याओं का समाधान और विकास कार्यों की समीक्षा"
+              placeholder="जनता दरबार खोजें..."
+            />
+          </div>
+        </div>
+        <div className="flex justify-center items-center h-96">
+          <div className="text-center">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h1 className="text-2xl font-bold mb-4 text-red-600">त्रुटि</h1>
+            <p className="text-gray-600 mb-4">{error}</p>
+          </div>
         </div>
       </div>
     );
   }
 
   // Get unique years and statuses for filters
-  const years = Array.from(new Set(jantaDarbarPosts.map((post: JantaDarbarType) => 
-    new Date(post.date).getFullYear().toString()
-  ))).sort((a, b) => parseInt(b) - parseInt(a));
+  const years = Array.from(
+    new Set(
+      jantaDarbarPosts.map((post: JantaDarbarType) =>
+        new Date(post.date).getFullYear().toString()
+      )
+    )
+  ).sort((a, b) => parseInt(b) - parseInt(a));
 
   const statuses = [
     { value: "open", label: "खुला" },
     { value: "ongoing", label: "चल रहा है" },
-    { value: "close", label: "बंद" }
+    { value: "close", label: "बंद" },
   ];
 
   // Filter posts based on search term and filters
@@ -70,9 +114,10 @@ export default function JantaDarbar() {
     let matchesStatus = true;
 
     if (searchTerm) {
-      matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                     post.agenda.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                     post.location.toLowerCase().includes(searchTerm.toLowerCase());
+      matchesSearch =
+        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.agenda.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.location.toLowerCase().includes(searchTerm.toLowerCase());
     }
 
     if (selectedYear) {
@@ -91,7 +136,7 @@ export default function JantaDarbar() {
 
     return matchesSearch && matchesYear && matchesMonth && matchesStatus;
   });
-  
+
   // Months for filter
   const months = [
     { value: "0", label: "जनवरी" },
@@ -105,19 +150,30 @@ export default function JantaDarbar() {
     { value: "8", label: "सितंबर" },
     { value: "9", label: "अक्टूबर" },
     { value: "10", label: "नवंबर" },
-    { value: "11", label: "दिसंबर" }
+    { value: "11", label: "दिसंबर" },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <CTA
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        title="जनता दरबार"
-        description="मनोज तिवारी जी द्वारा आयोजित जनता दरबार में लोगों की समस्याओं का समाधान और विकास कार्यों की समीक्षा"
-        placeholder="जनता दरबार खोजें..."
-      />
+      {/* Hero Section with Background Image */}
+      <div className="relative min-h-[500px]">
+        <div className="absolute inset-0 z-0 h-full">
+          <img
+            src="https://manojtiwari.in/sites/default/files/WhatsApp%20Image%202019-07-27%20at%207.13.48%20PM.jpeg"
+            alt="Background"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </div>
+        <div className="relative z-10">
+          <CTA
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            title="जनता दरबार"
+            description="मनोज तिवारी जी द्वारा आयोजित जनता दरबार में लोगों की समस्याओं का समाधान और विकास कार्यों की समीक्षा"
+            placeholder="जनता दरबार खोजें..."
+          />
+        </div>
+      </div>
 
       {/* Filter Section */}
       <section className="py-6 bg-white shadow-md sticky top-0 z-30">
@@ -417,4 +473,3 @@ export default function JantaDarbar() {
     </div>
   );
 }
-    
