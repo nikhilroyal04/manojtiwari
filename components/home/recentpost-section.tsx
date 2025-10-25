@@ -1,36 +1,31 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '@/lib/redux/store';
+import {
+  fetchRecentPosts,
+  selectRecentPosts,
+  selectRecentPostsLoading,
+  selectPostsError,
+} from '@/lib/redux/features/postSlice';
+import type { Post } from '@/lib/redux/features/postSlice';
 
 export default function RecentPostSection() {
+  const dispatch = useDispatch<AppDispatch>();
+  const posts = useSelector(selectRecentPosts);
+  const loading = useSelector(selectRecentPostsLoading);
+  const error = useSelector(selectPostsError);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const posts = [
-    {
-      id: 1,
-      image: "/post-1.jpg",
-      headline: "दिल्ली में सीलिंग एक उद्योग बन गया है: मनोज तिवारी",
-      description: "दिल्ली बीजेपी अध्यक्ष मनोज तिवारी ने कहा है कि दिल्ली में सीलिंग एक उद्योग बन गया है. भ्रष्ट अधिकारियों के साथ मिलकर मॉनिटरिंग कमिटी 2006 से लेकर 2018 तक भय में दिल्ली के लोगों को रखा है.",
-      hasButton: false
-    },
-    {
-      id: 2,
-      image: "/post-2.jpeg",
-      headline: "दिल्ली की जनता को सस्ती बिजली देने के लिए ही केंद्र सरकार ला ...",
-      description: "दिल्ली भाजपा अध्यक्ष मनोज तिवारी ने दिल्ली के मुख्यमंत्री अरविंद केजरीवाल सरकार पर एक बार फिर हमला बोला है.",
-      hasButton: true
-    },
-    {
-      id: 3,
-      image: "/post-3.jpeg",
-      headline: "मनोज तिवारी ने गृहमंत्री से की अपील, दिल्ली में घुसपैठियों की जांच ...",
-      description: "भाजपा सांसद मनोज तिवारी ने गृहमंत्री राजनाथ सिंह को पत्र लिखकर दिल्ली में मौजूद रोहिंग्या घुसपैठियों को हटाने की मांग की है.",
-      hasButton: false
-    }
-  ];
+  // Fetch recent posts on mount
+  useEffect(() => {
+    dispatch(fetchRecentPosts());
+  }, [dispatch]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -62,6 +57,46 @@ export default function RecentPostSection() {
     setCurrentSlide((prev) => (prev - 1 + posts.length) % posts.length);
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading recent posts...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center text-red-500">
+            <p>Error loading posts: {error}</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // No posts state
+  if (posts.length === 0) {
+    return (
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center text-gray-600">
+            <p>No recent posts available.</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
@@ -80,7 +115,7 @@ export default function RecentPostSection() {
           <div className="w-16 h-1 bg-secondary mx-auto mt-2"></div>
         </motion.div>
 
-        {/* Posts Grid */}
+        {/* Posts Grid - Show first 3 posts */}
         <motion.div 
           className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8"
           variants={containerVariants}
@@ -88,9 +123,9 @@ export default function RecentPostSection() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
         >
-          {posts.map((post) => (
+          {posts.slice(0, 3).map((post: Post, index: number) => (
             <motion.div
-              key={post.id}
+              key={post._id || index}
               className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100"
               variants={itemVariants}
               whileHover={{ 
@@ -102,35 +137,32 @@ export default function RecentPostSection() {
               {/* Post Image */}
               <div className="relative h-48 overflow-hidden">
                 <Image
-                  src={post.image}
-                  alt={post.headline}
+                  src={post.featuredImage || '/images/posts/default-post.jpg'}
+                  alt={post.title}
                   fill
                   className="object-cover"
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-black/10"></div>
               </div>
 
               {/* Post Content */}
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-primary mb-3 leading-tight">
-                  {post.headline}
+                <h3 className="text-lg font-semibold text-primary mb-3 leading-tight line-clamp-2">
+                  {post.title}
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                  {post.description}
+                <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">
+                  {post.excerpt}
                 </p>
                 
-                {/* View Details Link/Button */}
-                {post.hasButton ? (
-                  <button className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium">
-                    View Details
-                    <ExternalLink className="w-4 h-4 ml-2" />
-                  </button>
-                ) : (
-                  <a href="#" className="inline-flex items-center text-gray-700 hover:text-primary transition-colors text-sm font-medium">
-                    View Details
-                    <ExternalLink className="w-4 h-4 ml-2" />
-                  </a>
-                )}
+                {/* View Details Link */}
+                <Link 
+                  href={`/posts/${post.slug || post._id}`}
+                  className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
+                >
+                  View Details
+                  <ExternalLink className="w-4 h-4 ml-2" />
+                </Link>
               </div>
             </motion.div>
           ))}

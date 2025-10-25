@@ -23,6 +23,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'randomuser.me',
       },
+      {
+        protocol: 'https',
+        hostname: 'manojtiwari123.s3.ap-southeast-2.amazonaws.com',
+      },
     ],
   },
 } 

@@ -5,6 +5,7 @@ import karyakramReducer from "./features/karyakramSlice";
 import railayanReducer from "./features/railayanSlice";
 import galleryReducer from "./features/gallerySlice";
 import jantaDarbarReducer from "./features/darbarSlice";
+import postReducer from "./features/postSlice";
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     railayan: railayanReducer,
     gallery: galleryReducer,
     jantaDarbar : jantaDarbarReducer,
+    posts: postReducer,
   },
 });
 

@@ -1,12 +1,24 @@
 "use client";
 
-import React, { useState, useEffect } from "react"; // useEffect import karein
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '@/lib/redux/store';
 import {
-  Search,
-  Plus,
-  Edit,
-  Eye,
+  fetchPosts,
+  createPost,
+  updatePost,
+  deletePost,
+  selectPosts,
+  selectPostsLoading,
+  selectPostsError,
+} from '@/lib/redux/features/postSlice';
+import type { Post } from '@/lib/redux/features/postSlice';
+import { 
+  Search, 
+  Plus, 
+  Edit, 
+  Eye, 
   FileText,
   Trash2,
   MoreVertical,
@@ -22,117 +34,32 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle, 
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
   SelectValue,
 } from "@/components/ui/select";
 
-interface Post {
-  id: number;
-  title: string;
-  content: string;
-  excerpt: string;
-  author: string;
-  category: string;
-  tags: string[];
-  status: "DRAFT" | "PUBLISHED" | "ARCHIVED" | "SCHEDULED";
-  publishDate: string;
-  featuredImage?: string;
-  readTime: number;
-  views: number;
-  likes: number;
-  comments: number;
-  seoTitle?: string;
-  seoDescription?: string;
-  slug: string;
-  lastModified: string;
-}
-
-// Initial data ko ek alag variable mein rakhein
-const initialPostsData: Post[] = [
-  {
-    id: 1,
-    title: "मनोज तिवारी जी का जनता दरबार में लोगों से मुलाकात",
-    content:
-      "सांसद श्री मनोज तिवारी जी ने आज जनता दरबार में लोगों की समस्याओं को सुना और उनके निराकरण के लिए तत्काल कार्रवाई का आश्वासन दिया। इस कार्यक्रम में सैकड़ों लोगों ने भाग लिया और अपनी समस्याएं रखीं।",
-    excerpt:
-      "सांसद श्री मनोज तिवारी जी द्वारा जनता दरबार का आयोजन और लोगों की समस्याओं का समाधान।",
-    author: "राजेश कुमार",
-    category: "जनता दरबार",
-    tags: ["जनता दरबार", "मनोज तिवारी", "समस्याएं", "समाधान"],
-    status: "PUBLISHED",
-    publishDate: "2024-01-15",
-    featuredImage: "/images/posts/janta-darbar.jpg",
-    readTime: 5,
-    views: 1250,
-    likes: 89,
-    comments: 23,
-    seoTitle: "मनोज तिवारी जी का जनता दरबार - लोगों की समस्याओं का समाधान",
-    seoDescription:
-      "सांसद श्री मनोज तिवारी जी द्वारा जनता दरबार में लोगों की समस्याओं का समाधान",
-    slug: "manoj-tiwari-janta-darbar",
-    lastModified: "2024-01-15",
-  },
-  {
-    id: 2,
-    title: "स्वच्छता अभियान: स्वच्छ भारत मिशन की ओर एक कदम",
-    content:
-      "स्वच्छ भारत मिशन के तहत आज यमुना घाट पर विशाल स्वच्छता अभियान का आयोजन किया गया। इस अभियान में सैकड़ों स्वयंसेवकों ने भाग लिया और क्षेत्र को स्वच्छ बनाने में योगदान दिया।",
-    excerpt: "स्वच्छ भारत मिशन के तहत यमुना घाट पर स्वच्छता अभियान का आयोजन।",
-    author: "प्रिया शर्मा",
-    category: "स्वच्छता",
-    tags: ["स्वच्छता", "स्वच्छ भारत", "अभियान", "यमुना घाट"],
-    status: "PUBLISHED",
-    publishDate: "2024-01-20",
-    featuredImage: "/images/posts/swachhta-abhiyan.jpg",
-    readTime: 7,
-    views: 890,
-    likes: 67,
-    comments: 15,
-    seoTitle: "स्वच्छता अभियान - स्वच्छ भारत मिशन",
-    seoDescription: "यमुना घाट पर स्वच्छता अभियान का आयोजन",
-    slug: "swachhta-abhiyan-swachh-bharat",
-    lastModified: "2024-01-20",
-  },
-];
-
 export default function Posts() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
+  const posts = useSelector(selectPosts);
+  const loading = useSelector(selectPostsLoading);
+  const error = useSelector(selectPostsError);
 
-  // ===== YEH NAYA CODE HAI (localStorage se data load karne ke liye) =====
+  // Fetch posts on mount
   useEffect(() => {
-    try {
-      const savedPosts = localStorage.getItem("blogPosts");
-      if (savedPosts) {
-        setPosts(JSON.parse(savedPosts));
-      } else {
-        // Agar localStorage khaali hai, to initial data set karein
-        setPosts(initialPostsData);
-      }
-    } catch (error) {
-      console.error("Failed to parse posts from localStorage", error);
-      setPosts(initialPostsData);
-    }
-  }, []); // [] ka matlab yeh sirf ek baar chalega jab component load hoga
-
-  // ===== YEH BHI NAYA CODE HAI (localStorage mein data save karne ke liye) =====
-  useEffect(() => {
-    // Shuruaati render par save na karein jab tak posts load na ho jayein
-    if (posts.length > 0) {
-      localStorage.setItem("blogPosts", JSON.stringify(posts));
-    }
-  }, [posts]); // Yeh tab chalega jab bhi 'posts' state mein badlav hoga
+    dispatch(fetchPosts());
+  }, [dispatch]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -143,6 +70,7 @@ export default function Posts() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newImageFile, setNewImageFile] = useState<File | null>(null);
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
   const [newPost, setNewPost] = useState<Partial<Post>>({
     title: "",
     content: "",
@@ -173,7 +101,7 @@ export default function Posts() {
   };
 
   const filteredPosts = posts.filter((post) => {
-    const matchesSearch =
+    const matchesSearch = 
       post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
       post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -189,54 +117,61 @@ export default function Posts() {
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
-  const handleCreatePost = () => {
+  const handleCreatePost = async () => {
+    try {
     const post: Post = {
-      id: Date.now(),
-      title: newPost.title || "",
-      content: newPost.content || "",
-      excerpt: newPost.excerpt || "",
-      author: newPost.author || "",
-      category: newPost.category || "",
+        title: newPost.title || "",
+        content: newPost.content || "",
+        excerpt: newPost.excerpt || "",
+        author: newPost.author || "",
+        category: newPost.category || "",
       tags: newPost.tags || [],
-      status: newPost.status || "DRAFT",
-      publishDate:
-        newPost.publishDate || new Date().toISOString().split("T")[0],
-      featuredImage: newImageFile
-        ? URL.createObjectURL(newImageFile)
-        : newPost.featuredImage || "",
+        status: newPost.status || "DRAFT",
+        publishDate:
+          newPost.publishDate || new Date().toISOString().split("T")[0],
       readTime: newPost.readTime || 5,
       views: 0,
       likes: 0,
       comments: 0,
-      seoTitle: newPost.seoTitle || "",
-      seoDescription: newPost.seoDescription || "",
-      slug: newPost.slug || "",
-      lastModified: new Date().toISOString().split("T")[0],
-    };
-    setPosts((prev) => [post, ...prev]);
+        seoTitle: newPost.seoTitle || "",
+        seoDescription: newPost.seoDescription || "",
+        slug: newPost.slug || newPost.title?.toLowerCase().replace(/\s+/g, '-') || `post-${Date.now()}`,
+        lastModified: new Date().toISOString().split("T")[0],
+      };
+      
+      await dispatch(createPost(post, newImageFile));
+      
     setNewPost({
-      title: "",
-      content: "",
-      excerpt: "",
-      author: "",
-      category: "",
+        title: "",
+        content: "",
+        excerpt: "",
+        author: "",
+        category: "",
       tags: [],
-      status: "DRAFT",
-      publishDate: "",
-      featuredImage: "",
+        status: "DRAFT",
+        publishDate: "",
+        featuredImage: "",
       readTime: 5,
-      seoTitle: "",
-      seoDescription: "",
-      slug: "",
-    });
-    setNewImageFile(null);
+        seoTitle: "",
+        seoDescription: "",
+        slug: "",
+      });
+      setNewImageFile(null);
     setIsCreateModalOpen(false);
+    } catch (err) {
+      console.error('Failed to create post:', err);
+    }
   };
 
-  const handleDeletePost = (id: number) => {
-    setPosts((prev) => prev.filter((post) => post.id !== id));
+  const handleDeletePost = async (id?: string) => {
+    if (!id) return;
+    try {
+      await dispatch(deletePost(id));
     setIsDeleteModalOpen(false);
     setSelectedPost(null);
+    } catch (err) {
+      console.error('Failed to delete post:', err);
+    }
   };
 
   const getStatusCount = (status: string) =>
@@ -250,6 +185,22 @@ export default function Posts() {
   const totalLikes = posts.reduce((sum, post) => sum + post.likes, 0);
   const totalComments = posts.reduce((sum, post) => sum + post.comments, 0);
   const categories = Array.from(new Set(posts.map((post) => post.category)));
+
+  if (loading) {
+  return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
+        </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen text-red-500">
+        Error: {error}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
@@ -517,7 +468,7 @@ export default function Posts() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredPosts.map((post, index) => (
                   <motion.tr
-                    key={post.id}
+                    key={post._id || index}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
@@ -525,10 +476,20 @@ export default function Posts() {
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          {" "}
-                          <FileText className="w-6 h-6 text-orange-600" />{" "}
-                        </div>
+                        {post.featuredImage ? (
+                          <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                            <img
+                              src={post.featuredImage}
+                              alt={post.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            {" "}
+                            <FileText className="w-6 h-6 text-orange-600" />{" "}
+                          </div>
+                        )}
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
                             {post.title}
@@ -594,6 +555,7 @@ export default function Posts() {
                           size="icon"
                           onClick={() => {
                             setSelectedPost(post);
+                            setEditImageFile(null);
                             setIsEditModalOpen(true);
                           }}
                         >
@@ -621,80 +583,80 @@ export default function Posts() {
         </div>
       </div>
 
-      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
+            <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
             {" "}
             <DialogTitle>Create New Post</DialogTitle>{" "}
-            <DialogDescription>
-              Create a new blog post with all details.
+                  <DialogDescription>
+                    Create a new blog post with all details.
             </DialogDescription>{" "}
-          </DialogHeader>
+                </DialogHeader>
           <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-6">
-            <div>
+                  <div>
               {" "}
               <label className="text-sm font-medium">Title</label>{" "}
-              <Input
-                value={newPost.title}
+                    <Input
+                      value={newPost.title}
                 onChange={(e) =>
                   setNewPost((prev) => ({ ...prev, title: e.target.value }))
                 }
-                placeholder="Enter post title"
+                      placeholder="Enter post title"
               />{" "}
-            </div>
-            <div>
+                  </div>
+                  <div>
               {" "}
               <label className="text-sm font-medium">Excerpt</label>{" "}
-              <textarea
-                value={newPost.excerpt}
+                    <textarea
+                      value={newPost.excerpt}
                 onChange={(e) =>
                   setNewPost((prev) => ({ ...prev, excerpt: e.target.value }))
                 }
-                placeholder="Enter post excerpt"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                rows={3}
+                      placeholder="Enter post excerpt"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      rows={3}
               />{" "}
-            </div>
-            <div>
+                  </div>
+                  <div>
               {" "}
               <label className="text-sm font-medium">Content</label>{" "}
-              <textarea
-                value={newPost.content}
+                    <textarea
+                      value={newPost.content}
                 onChange={(e) =>
                   setNewPost((prev) => ({ ...prev, content: e.target.value }))
                 }
-                placeholder="Enter post content"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                rows={8}
+                      placeholder="Enter post content"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      rows={8}
               />{" "}
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
                 {" "}
                 <label className="text-sm font-medium">Author</label>{" "}
-                <Input
-                  value={newPost.author}
+                      <Input
+                        value={newPost.author}
                   onChange={(e) =>
                     setNewPost((prev) => ({ ...prev, author: e.target.value }))
                   }
-                  placeholder="Enter author name"
+                        placeholder="Enter author name"
                 />{" "}
-              </div>
-              <div>
+                    </div>
+                    <div>
                 {" "}
                 <label className="text-sm font-medium">Category</label>{" "}
-                <Input
-                  value={newPost.category}
+                      <Input
+                        value={newPost.category}
                   onChange={(e) =>
                     setNewPost((prev) => ({
                       ...prev,
                       category: e.target.value,
                     }))
                   }
-                  placeholder="Enter category"
+                        placeholder="Enter category"
                 />{" "}
-              </div>
-              <div>
+                    </div>
+                    <div>
                 {" "}
                 <label className="text-sm font-medium">Status</label>{" "}
                 <Select
@@ -707,11 +669,11 @@ export default function Posts() {
                   }
                 >
                   {" "}
-                  <SelectTrigger>
+                        <SelectTrigger>
                     {" "}
                     <SelectValue />{" "}
                   </SelectTrigger>{" "}
-                  <SelectContent>
+                        <SelectContent>
                     {" "}
                     <SelectItem value="DRAFT">Draft</SelectItem>{" "}
                     <SelectItem value="PUBLISHED">Published</SelectItem>{" "}
@@ -719,15 +681,15 @@ export default function Posts() {
                     <SelectItem value="ARCHIVED">Archived</SelectItem>{" "}
                   </SelectContent>{" "}
                 </Select>{" "}
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
                 {" "}
                 <label className="text-sm font-medium">Publish Date</label>{" "}
-                <Input
-                  type="date"
-                  value={newPost.publishDate}
+                      <Input
+                        type="date"
+                        value={newPost.publishDate}
                   onChange={(e) =>
                     setNewPost((prev) => ({
                       ...prev,
@@ -735,40 +697,53 @@ export default function Posts() {
                     }))
                   }
                 />{" "}
-              </div>
-              <div>
+                    </div>
+                    <div>
                 {" "}
                 <label className="text-sm font-medium">
                   Read Time (minutes)
                 </label>{" "}
-                <Input
-                  type="number"
-                  value={newPost.readTime}
+                      <Input
+                        type="number"
+                        value={newPost.readTime}
                   onChange={(e) =>
                     setNewPost((prev) => ({
                       ...prev,
                       readTime: parseInt(e.target.value) || 5,
                     }))
                   }
-                  placeholder="5"
+                        placeholder="5"
                 />{" "}
-              </div>
-            </div>
-            <div>
+                    </div>
+                  </div>
+                  <div>
               {" "}
-              <label className="text-sm font-medium">Featured Image</label>{" "}
-              <Input
+              <label className="text-sm font-medium">Featured Image</label>
+              {newImageFile && (
+                <div className="mb-2">
+                  <img 
+                    src={URL.createObjectURL(newImageFile)} 
+                    alt="Preview" 
+                    className="w-32 h-32 object-cover rounded-md border"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Image Preview</p>
+                </div>
+              )}
+                    <Input
                 type="file"
                 accept="image/*"
                 onChange={(e) => setNewImageFile(e.target.files?.[0] || null)}
-              />{" "}
-            </div>
-            <div>
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Upload a featured image for the post
+              </p>
+                  </div>
+                  <div>
               {" "}
               <label className="text-sm font-medium">
                 Tags (comma separated)
               </label>{" "}
-              <Input
+                    <Input
                 value={newPost.tags?.join(", ")}
                 onChange={(e) =>
                   setNewPost((prev) => ({
@@ -776,51 +751,51 @@ export default function Posts() {
                     tags: e.target.value.split(",").map((tag) => tag.trim()),
                   }))
                 }
-                placeholder="Enter tags separated by commas"
+                      placeholder="Enter tags separated by commas"
               />{" "}
-            </div>
-            <div>
+                  </div>
+                  <div>
               {" "}
               <label className="text-sm font-medium">SEO Title</label>{" "}
-              <Input
-                value={newPost.seoTitle}
+                    <Input
+                      value={newPost.seoTitle}
                 onChange={(e) =>
                   setNewPost((prev) => ({ ...prev, seoTitle: e.target.value }))
                 }
-                placeholder="Enter SEO title"
+                      placeholder="Enter SEO title"
               />{" "}
-            </div>
-            <div>
+                  </div>
+                  <div>
               {" "}
               <label className="text-sm font-medium">
                 SEO Description
               </label>{" "}
-              <textarea
-                value={newPost.seoDescription}
+                    <textarea
+                      value={newPost.seoDescription}
                 onChange={(e) =>
                   setNewPost((prev) => ({
                     ...prev,
                     seoDescription: e.target.value,
                   }))
                 }
-                placeholder="Enter SEO description"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                rows={3}
+                      placeholder="Enter SEO description"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      rows={3}
               />{" "}
-            </div>
-            <div>
+                  </div>
+                  <div>
               {" "}
               <label className="text-sm font-medium">Slug</label>{" "}
-              <Input
-                value={newPost.slug}
+                    <Input
+                      value={newPost.slug}
                 onChange={(e) =>
                   setNewPost((prev) => ({ ...prev, slug: e.target.value }))
                 }
-                placeholder="Enter URL slug"
+                      placeholder="Enter URL slug"
               />{" "}
-            </div>
-          </div>
-          <DialogFooter>
+                  </div>
+                </div>
+                <DialogFooter>
             {" "}
             <Button
               variant="outline"
@@ -836,31 +811,40 @@ export default function Posts() {
               {" "}
               Create Post{" "}
             </Button>{" "}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
       {selectedPost && (
         <>
           <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-            <DialogContent className="max-w-4xl">
-              <DialogHeader>
+                          <DialogContent className="max-w-4xl">
+                            <DialogHeader>
                 {" "}
                 <DialogTitle>{selectedPost.title}</DialogTitle>{" "}
-                <DialogDescription>
+                              <DialogDescription>
                   {selectedPost.excerpt}
                 </DialogDescription>{" "}
-              </DialogHeader>
+                            </DialogHeader>
               <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-6">
-                <div className="bg-gray-50 p-4 rounded-lg">
+                              {selectedPost.featuredImage && (
+                                <div className="relative w-full h-64 rounded-lg overflow-hidden">
+                                  <img 
+                                    src={selectedPost.featuredImage} 
+                                    alt={selectedPost.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              )}
+                              <div className="bg-gray-50 p-4 rounded-lg">
                   {" "}
                   <h3 className="font-semibold mb-2">Post Content:</h3>{" "}
                   <p className="text-gray-700 whitespace-pre-wrap">
                     {selectedPost.content}
                   </p>{" "}
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
                     {" "}
                     <label className="text-sm font-medium text-gray-500">
                       Author
@@ -868,8 +852,8 @@ export default function Posts() {
                     <p className="text-sm text-gray-900">
                       {selectedPost.author}
                     </p>{" "}
-                  </div>
-                  <div>
+                                </div>
+                                <div>
                     {" "}
                     <label className="text-sm font-medium text-gray-500">
                       Category
@@ -877,8 +861,8 @@ export default function Posts() {
                     <p className="text-sm text-gray-900">
                       {selectedPost.category}
                     </p>{" "}
-                  </div>
-                  <div>
+                                </div>
+                                <div>
                     {" "}
                     <label className="text-sm font-medium text-gray-500">
                       Status
@@ -886,8 +870,8 @@ export default function Posts() {
                     <Badge className={statusColors[selectedPost.status]}>
                       {selectedPost.status}
                     </Badge>{" "}
-                  </div>
-                  <div>
+                                </div>
+                                <div>
                     {" "}
                     <label className="text-sm font-medium text-gray-500">
                       Publish Date
@@ -895,8 +879,8 @@ export default function Posts() {
                     <p className="text-sm text-gray-900">
                       {new Date(selectedPost.publishDate).toLocaleDateString()}
                     </p>{" "}
-                  </div>
-                  <div>
+                                </div>
+                                <div>
                     {" "}
                     <label className="text-sm font-medium text-gray-500">
                       Read Time
@@ -904,8 +888,8 @@ export default function Posts() {
                     <p className="text-sm text-gray-900">
                       {selectedPost.readTime} minutes
                     </p>{" "}
-                  </div>
-                  <div>
+                                </div>
+                                <div>
                     {" "}
                     <label className="text-sm font-medium text-gray-500">
                       Slug
@@ -913,60 +897,61 @@ export default function Posts() {
                     <p className="text-sm text-gray-900">
                       {selectedPost.slug}
                     </p>{" "}
-                  </div>
-                </div>
+                                </div>
+                              </div>
                 {selectedPost.tags.length > 0 && (
-                  <div>
+                                <div>
                     {" "}
                     <label className="text-sm font-medium text-gray-500">
                       Tags
                     </label>{" "}
-                    <div className="flex flex-wrap gap-2 mt-2">
+                                  <div className="flex flex-wrap gap-2 mt-2">
                       {" "}
                       {selectedPost.tags.map((tag, i) => (
-                        <Badge key={i} variant="outline">
-                          {tag}
-                        </Badge>
+                                      <Badge key={i} variant="outline">
+                                        {tag}
+                                      </Badge>
                       ))}{" "}
                     </div>{" "}
-                  </div>
-                )}
-              </div>
-              <DialogFooter>
+                                </div>
+                              )}
+                            </div>
+                            <DialogFooter>
                 {" "}
                 <Button
                   variant="outline"
                   onClick={() => setIsViewModalOpen(false)}
                 >
-                  Close
+                                Close
                 </Button>{" "}
-                <Button
-                  onClick={() => {
-                    setIsViewModalOpen(false);
-                    setIsEditModalOpen(true);
-                  }}
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  Edit Post
+                              <Button 
+                                onClick={() => {
+                                  setEditImageFile(null);
+                                  setIsViewModalOpen(false);
+                                  setIsEditModalOpen(true);
+                                }}
+                                className="bg-primary hover:bg-primary/90"
+                              >
+                                Edit Post
                 </Button>{" "}
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
 
           <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
                 {" "}
                 <DialogTitle>Edit Post</DialogTitle>{" "}
-                <DialogDescription>
+                              <DialogDescription>
                   Update the details for {selectedPost.title}
                 </DialogDescription>{" "}
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
                   {" "}
                   <label className="text-sm font-medium">Title</label>{" "}
-                  <Input
+                                <Input
                     value={selectedPost.title}
                     onChange={(e) =>
                       setSelectedPost((prev) =>
@@ -975,11 +960,73 @@ export default function Posts() {
                     }
                   />{" "}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
+                <div>
+                  {" "}
+                  <label className="text-sm font-medium">Excerpt</label>{" "}
+                  <textarea
+                    value={selectedPost.excerpt}
+                    onChange={(e) =>
+                      setSelectedPost((prev) =>
+                        prev ? { ...prev, excerpt: e.target.value } : null
+                      )
+                    }
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    rows={2}
+                  />
+                </div>
+                <div>
+                  {" "}
+                  <label className="text-sm font-medium">Content</label>{" "}
+                  <textarea
+                    value={selectedPost.content}
+                    onChange={(e) =>
+                      setSelectedPost((prev) =>
+                        prev ? { ...prev, content: e.target.value } : null
+                      )
+                    }
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    rows={6}
+                  />
+                </div>
+                <div>
+                  {" "}
+                  <label className="text-sm font-medium">Featured Image</label>
+                  <div className="flex gap-4 mb-2">
+                    {selectedPost.featuredImage && (
+                      <div>
+                        <img 
+                          src={selectedPost.featuredImage} 
+                          alt="Current featured" 
+                          className="w-32 h-32 object-cover rounded-md border"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Current Image</p>
+                      </div>
+                    )}
+                    {editImageFile && (
+                      <div>
+                        <img 
+                          src={URL.createObjectURL(editImageFile)} 
+                          alt="New preview" 
+                          className="w-32 h-32 object-cover rounded-md border border-green-500"
+                        />
+                        <p className="text-xs text-green-600 mt-1">New Image Preview</p>
+                      </div>
+                    )}
+                  </div>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setEditImageFile(e.target.files?.[0] || null)}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Upload a new image to replace the current one
+                  </p>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
                     {" "}
                     <label className="text-sm font-medium">Status</label>{" "}
-                    <Select
+                                  <Select 
                       value={selectedPost.status}
                       onValueChange={(value) =>
                         setSelectedPost((prev) =>
@@ -990,11 +1037,11 @@ export default function Posts() {
                       }
                     >
                       {" "}
-                      <SelectTrigger>
+                                    <SelectTrigger>
                         {" "}
                         <SelectValue />{" "}
                       </SelectTrigger>{" "}
-                      <SelectContent>
+                                    <SelectContent>
                         {" "}
                         <SelectItem value="DRAFT">Draft</SelectItem>{" "}
                         <SelectItem value="PUBLISHED">Published</SelectItem>{" "}
@@ -1002,11 +1049,11 @@ export default function Posts() {
                         <SelectItem value="ARCHIVED">Archived</SelectItem>{" "}
                       </SelectContent>{" "}
                     </Select>{" "}
-                  </div>
-                  <div>
+                                </div>
+                                <div>
                     {" "}
                     <label className="text-sm font-medium">Category</label>{" "}
-                    <Input
+                                  <Input
                       value={selectedPost.category}
                       onChange={(e) =>
                         setSelectedPost((prev) =>
@@ -1014,60 +1061,122 @@ export default function Posts() {
                         )
                       }
                     />{" "}
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium">Author</label>
+                                  <Input
+                                    value={selectedPost.author}
+                                    onChange={(e) =>
+                                      setSelectedPost((prev) =>
+                                        prev ? { ...prev, author: e.target.value } : null
+                                      )
+                                    }
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium">Read Time (min)</label>
+                                  <Input
+                                    type="number"
+                                    value={selectedPost.readTime}
+                                    onChange={(e) =>
+                                      setSelectedPost((prev) =>
+                                        prev ? { ...prev, readTime: parseInt(e.target.value) || 5 } : null
+                                      )
+                                    }
+                                  />
+                                </div>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Publish Date</label>
+                                <Input
+                                  type="date"
+                                  value={selectedPost.publishDate ? selectedPost.publishDate.split('T')[0] : ''}
+                                  onChange={(e) =>
+                                    setSelectedPost((prev) =>
+                                      prev ? { ...prev, publishDate: e.target.value } : null
+                                    )
+                                  }
+                                />
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Tags (comma separated)</label>
+                                <Input
+                                  value={selectedPost.tags?.join(', ')}
+                                  onChange={(e) =>
+                                    setSelectedPost((prev) =>
+                                      prev ? { ...prev, tags: e.target.value.split(',').map(t => t.trim()) } : null
+                                    )
+                                  }
+                                />
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Slug</label>
+                                <Input
+                                  value={selectedPost.slug}
+                                  onChange={(e) =>
+                                    setSelectedPost((prev) =>
+                                      prev ? { ...prev, slug: e.target.value } : null
+                                    )
+                                  }
+                                  placeholder="post-url-slug"
+                                />
+                              </div>
+                            </div>
+                            <DialogFooter>
                 <Button
                   variant="outline"
                   onClick={() => setIsEditModalOpen(false)}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => {
-                    setPosts((prev) =>
-                      prev.map((p) =>
-                        p.id === selectedPost.id ? selectedPost : p
-                      )
-                    );
-                    setIsEditModalOpen(false);
+                                Cancel
+                              </Button>
+                              <Button 
+                  onClick={async () => {
+                    if (!selectedPost._id) return;
+                    try {
+                      await dispatch(updatePost(selectedPost._id, selectedPost, editImageFile));
+                      setEditImageFile(null);
+                      setIsEditModalOpen(false);
+                    } catch (err) {
+                      console.error('Failed to update post:', err);
+                    }
                   }}
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  Update Post
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+                                className="bg-primary hover:bg-primary/90"
+                              >
+                                Update Post
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
 
           <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-            <DialogContent>
-              <DialogHeader>
+                          <DialogContent>
+                            <DialogHeader>
                 {" "}
                 <DialogTitle>Delete Post</DialogTitle>{" "}
-                <DialogDescription>
+                              <DialogDescription>
                   Are you sure you want to delete &quot;{selectedPost.title}
                   &quot;? This action cannot be undone.
                 </DialogDescription>{" "}
-              </DialogHeader>
-              <DialogFooter>
+                            </DialogHeader>
+                            <DialogFooter>
                 {" "}
                 <Button
                   variant="outline"
                   onClick={() => setIsDeleteModalOpen(false)}
                 >
-                  Cancel
+                                Cancel
                 </Button>{" "}
-                <Button
-                  variant="destructive"
-                  onClick={() => handleDeletePost(selectedPost.id)}
-                >
-                  Delete Post
+                              <Button 
+                                variant="destructive" 
+                  onClick={() => handleDeletePost(selectedPost._id)}
+                              >
+                                Delete Post
                 </Button>{" "}
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
         </>
       )}
     </div>
