@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import {
   Search,
   Edit,
@@ -158,14 +159,57 @@ export default function Gallery() {
     (sum, item) => sum + (item.likes || 0),
     0
   );
-  const totalSize = (galleryItems || []).reduce(
-    (sum, item) => sum + (item.size || 0),
-    0
-  );
+  
+  // Calculate total size - normalize to bytes first
+  const totalSizeInBytes = (galleryItems || []).reduce((sum, item) => {
+    const size = item.size || 0;
+    // If size > 1000, it's likely already in bytes
+    // If size < 1000, it's likely in MB, convert to bytes
+    const sizeInBytes = size > 1000 ? size : size * 1024 * 1024;
+    return sum + sizeInBytes;
+  }, 0);
+  
+  // Format total size
+  const formatTotalSize = () => {
+    const kb = totalSizeInBytes / 1024;
+    const mb = kb / 1024;
+    const gb = mb / 1024;
+    
+    if (gb >= 1) return `${gb.toFixed(2)} GB`;
+    if (mb >= 1) return `${mb.toFixed(2)} MB`;
+    if (kb >= 1) return `${kb.toFixed(2)} KB`;
+    return `${totalSizeInBytes.toFixed(0)} B`;
+  };
 
   const formatFileSize = (size: number) => {
+    if (!size || size === 0) return '0 KB';
+    
+    // If size is very large (> 1000), assume it's in bytes
+    if (size > 1000) {
+      const kb = size / 1024;
+      const mb = kb / 1024;
+      const gb = mb / 1024;
+      
+      if (gb >= 1) return `${gb.toFixed(2)} GB`;
+      if (mb >= 1) return `${mb.toFixed(2)} MB`;
+      return `${kb.toFixed(2)} KB`;
+    }
+    
+    // If size is small (< 1000), assume it's already in MB
     if (size < 1) return `${(size * 1024).toFixed(1)} KB`;
     return `${size.toFixed(1)} MB`;
+  };
+
+  // Format date to readable format
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    };
+    return date.toLocaleDateString('en-IN', options);
   };
 
   // Add handler
@@ -269,7 +313,7 @@ export default function Gallery() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
           {[
             {
               label: 'Total Items',
@@ -280,7 +324,7 @@ export default function Gallery() {
             {
               label: 'Photos',
               count: getTypeCount('photo'),
-              color: 'bg-blue-500',
+              color: 'bg-indigo-500',
               icon: ImageIcon,
             },
             {
@@ -291,19 +335,19 @@ export default function Gallery() {
             },
             {
               label: 'Total Views',
-              count: totalViews,
+              count: totalViews.toLocaleString(),
               color: 'bg-green-500',
               icon: Eye,
             },
             {
               label: 'Total Likes',
-              count: totalLikes,
+              count: totalLikes.toLocaleString(),
               color: 'bg-red-500',
               icon: Heart,
             },
             {
               label: 'Total Size',
-              count: formatFileSize(totalSize),
+              count: formatTotalSize(),
               color: 'bg-orange-500',
               icon: BarChart3,
             },
@@ -312,22 +356,24 @@ export default function Gallery() {
               key={index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 p-4"
+              transition={{ delay: index * 0.05 }}
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow"
             >
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div
+                    className={`w-10 h-10 rounded-lg ${stat.color} flex items-center justify-center`}
+                  >
+                    <stat.icon className="w-5 h-5 text-white" />
+                  </div>
+                </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
                     {stat.label}
                   </p>
                   <p className="text-2xl font-bold text-gray-900">
                     {stat.count}
                   </p>
-                </div>
-                <div
-                  className={`w-8 h-8 rounded-full ${stat.color} opacity-20 flex items-center justify-center`}
-                >
-                  <stat.icon className="w-4 h-4 text-white" />
                 </div>
               </div>
             </motion.div>
@@ -725,14 +771,39 @@ export default function Gallery() {
                   className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all border border-gray-200"
                 >
                   {/* Media Preview */}
-                  <div className="relative h-48 bg-gray-100">
+                  <div className="relative h-48 bg-gray-100 overflow-hidden">
                     {item.type === 'photo' ? (
-                      <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                        <ImageIcon className="w-12 h-12 text-blue-500" />
-                      </div>
+                      <Image
+                        src={item.thumbnail || item.url || '/images/placeholder.jpg'}
+                        alt={item.title}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
-                        <Video className="w-12 h-12 text-purple-500" />
+                      <div className="relative w-full h-full">
+                        {item.thumbnail ? (
+                          <>
+                            <Image
+                              src={item.thumbnail}
+                              alt={item.title}
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                              <div className="w-16 h-16 rounded-full bg-white bg-opacity-90 flex items-center justify-center">
+                                <svg className="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M8 5v14l11-7z"/>
+                                </svg>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+                            <Video className="w-12 h-12 text-purple-500" />
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -773,13 +844,11 @@ export default function Gallery() {
                         <span>{formatFileSize(item.size)}</span>
                       </div>
                       <div className="flex items-center justify-between text-xs text-gray-500">
-                        <span>Views: {item.views}</span>
-                        <span>Likes: {item.likes}</span>
+                        <span>👁️ {(item.views || 0).toLocaleString()} views</span>
+                        <span>❤️ {(item.likes || 0).toLocaleString()}</span>
                       </div>
                       <div className="text-xs text-gray-500">
-                        {item.uploadDate
-                          ? new Date(item.uploadDate).toLocaleDateString()
-                          : ''}
+                        📅 {formatDate(item.uploadDate)}
                       </div>
                     </div>
 
@@ -831,15 +900,24 @@ export default function Gallery() {
                           </DialogHeader>
                           <div className="space-y-6">
                             {/* Media Display */}
-                            <div className="relative h-96 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <div className="relative h-96 bg-gray-100 rounded-lg overflow-hidden">
                               {item.type === 'photo' ? (
-                                <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                                  <ImageIcon className="w-24 h-24 text-blue-500" />
-                                </div>
+                                <Image
+                                  src={item.url || item.thumbnail || '/images/placeholder.jpg'}
+                                  alt={item.title}
+                                  fill
+                                  className="object-contain"
+                                  unoptimized
+                                />
                               ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
-                                  <Video className="w-24 h-24 text-purple-500" />
-                                </div>
+                                <video
+                                  src={item.url}
+                                  controls
+                                  className="w-full h-full object-contain"
+                                  poster={item.thumbnail}
+                                >
+                                  Your browser does not support the video tag.
+                                </video>
                               )}
                             </div>
 
@@ -866,9 +944,7 @@ export default function Gallery() {
                                   Upload Date
                                 </label>
                                 <p className="text-sm text-gray-900">
-                                  {item.uploadDate
-                                    ? new Date(item.uploadDate).toLocaleDateString()
-                                    : ''}
+                                  {formatDate(item.uploadDate)}
                                 </p>
                               </div>
                               <div>

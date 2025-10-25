@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import {
   Search,
   Plus,
@@ -65,6 +66,20 @@ export default function JantaDarbarPage() {
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [editImageFiles, setEditImageFiles] = useState<File[]>([]);
   const [existingImagesToKeep, setExistingImagesToKeep] = useState<string[]>([]);
+
+  // Format date to readable format
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    };
+    return date.toLocaleString('en-IN', options);
+  };
 
   // For Add
   const [newJantaDarbar, setNewJantaDarbar] = useState<Partial<JantaDarbar>>({
@@ -462,11 +477,12 @@ export default function JantaDarbarPage() {
                     {newImageFiles.length > 0 && (
                       <div className="mt-3 grid grid-cols-5 gap-2">
                         {newImageFiles.map((file, index) => (
-                          <div key={index} className="relative group">
-                            <img
+                          <div key={index} className="relative group h-20">
+                            <Image
                               src={URL.createObjectURL(file)}
                               alt={`Preview ${index + 1}`}
-                              className="w-full h-20 object-cover rounded-md border-2 border-gray-200"
+                              fill
+                              className="object-cover rounded-md border-2 border-gray-200"
                             />
                             <button
                               type="button"
@@ -525,11 +541,15 @@ export default function JantaDarbarPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         {jd.mainImage ? (
-                          <img
-                            src={jd.mainImage}
-                            alt={jd.title}
-                            className="w-12 h-12 rounded-lg object-cover border border-gray-200"
-                          />
+                          <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-gray-200">
+                            <Image
+                              src={jd.mainImage}
+                              alt={jd.title}
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                          </div>
                         ) : (
                           <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                             <Calendar className="w-6 h-6 text-orange-600" />
@@ -549,7 +569,7 @@ export default function JantaDarbarPage() {
                       <div className="text-sm text-gray-900 max-w-xs truncate">{jd.agenda}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{jd.date}</div>
+                      <div className="text-sm text-gray-900">{formatDate(jd.date)}</div>
                       <div className="text-sm text-gray-500 flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {jd.location}
@@ -600,11 +620,13 @@ export default function JantaDarbarPage() {
                                   <label className="text-sm font-medium text-gray-500">Event Images</label>
                                   <div className="mt-2 grid grid-cols-4 gap-2">
                                     {jd.images.map((img, index) => (
-                                      <div key={index} className="relative">
-                                        <img
+                                      <div key={index} className="relative h-24">
+                                        <Image
                                           src={img}
                                           alt={`Event ${index + 1}`}
-                                          className="w-full h-24 object-cover rounded-md border-2 border-gray-200"
+                                          fill
+                                          className="object-cover rounded-md border-2 border-gray-200"
+                                          unoptimized
                                         />
                                         {img === jd.mainImage && (
                                           <span className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded">
@@ -630,7 +652,7 @@ export default function JantaDarbarPage() {
                                 </div>
                                 <div>
                                   <label className="text-sm font-medium text-gray-500">Date & Time</label>
-                                  <p className="text-sm text-gray-900">{jd.date}</p>
+                                  <p className="text-sm text-gray-900">{formatDate(jd.date)}</p>
                                 </div>
                                 <div>
                                   <label className="text-sm font-medium text-gray-500">Location</label>
@@ -796,11 +818,13 @@ export default function JantaDarbarPage() {
                                       {selectedJantaDarbar.images.map((img, index) => {
                                         const isKept = existingImagesToKeep.includes(img);
                                         return (
-                                          <div key={index} className={`relative group ${!isKept ? 'opacity-50' : ''}`}>
-                                            <img
+                                          <div key={index} className={`relative group h-20 ${!isKept ? 'opacity-50' : ''}`}>
+                                            <Image
                                               src={img}
                                               alt={`Current ${index + 1}`}
-                                              className={`w-full h-20 object-cover rounded-md border-2 ${isKept ? 'border-gray-200' : 'border-red-300'}`}
+                                              fill
+                                              className={`object-cover rounded-md border-2 ${isKept ? 'border-gray-200' : 'border-red-300'}`}
+                                              unoptimized
                                             />
                                             {isKept ? (
                                               <button
@@ -843,11 +867,12 @@ export default function JantaDarbarPage() {
                                     <p className="text-xs text-gray-500 mb-2">New Images to Upload:</p>
                                     <div className="grid grid-cols-5 gap-2">
                                       {editImageFiles.map((file, index) => (
-                                        <div key={index} className="relative group">
-                                          <img
+                                        <div key={index} className="relative group h-20">
+                                          <Image
                                             src={URL.createObjectURL(file)}
                                             alt={`Preview ${index + 1}`}
-                                            className="w-full h-20 object-cover rounded-md border-2 border-green-300"
+                                            fill
+                                            className="object-cover rounded-md border-2 border-green-300"
                                           />
                                           <button
                                             type="button"

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { 
   Calendar, 
   Users, 
@@ -62,6 +63,24 @@ export default function ChunaviRailayan() {
   const [existingImagesToKeep, setExistingImagesToKeep] = useState<string[]>([])
   const [newRailayan, setNewRailayan] = useState<Partial<ChunaviRailayan>>({})
   const [editRailayan, setEditRailayan] = useState<Partial<ChunaviRailayan>>({})
+
+  // Format date to readable format
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    };
+    return date.toLocaleDateString('en-IN', options);
+  };
+
+  // Format time
+  const formatTime = (timeString?: string) => {
+    if (!timeString) return '';
+    return timeString;
+  };
 
   // Handle multiple image selection for Add
   const handleNewImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -521,7 +540,7 @@ export default function ChunaviRailayan() {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-600">Date & Time / तारीख और समय</p>
-                        <p className="text-sm text-gray-900">{campaign.date} • {campaign.time}</p>
+                        <p className="text-sm text-gray-900">{formatDate(campaign.date)} • {formatTime(campaign.time)}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-600">Expected Crowd / अपेक्षित भीड़</p>
@@ -668,11 +687,13 @@ export default function ChunaviRailayan() {
                       {campaigns.find(c => c._id === editModal)!.images!.map((img, index) => {
                         const isKept = existingImagesToKeep.includes(img);
                         return (
-                          <div key={index} className={`relative group ${!isKept ? 'opacity-50' : ''}`}>
-                            <img
+                          <div key={index} className={`relative group h-20 ${!isKept ? 'opacity-50' : ''}`}>
+                            <Image
                               src={img}
                               alt={`Current ${index + 1}`}
-                              className={`w-full h-20 object-cover rounded-md border-2 ${isKept ? 'border-gray-200' : 'border-red-300'}`}
+                              fill
+                              className={`object-cover rounded-md border-2 ${isKept ? 'border-gray-200' : 'border-red-300'}`}
+                              unoptimized
                             />
                             {isKept ? (
                               <button
@@ -708,11 +729,12 @@ export default function ChunaviRailayan() {
                     <p className="text-xs text-gray-500 mb-2">New Images:</p>
                     <div className="grid grid-cols-5 gap-2">
                       {editImageFiles.map((file, index) => (
-                        <div key={index} className="relative group">
-                          <img
+                        <div key={index} className="relative group h-20">
+                          <Image
                             src={URL.createObjectURL(file)}
                             alt={`Preview ${index + 1}`}
-                            className="w-full h-20 object-cover rounded-md border-2 border-green-300"
+                            fill
+                            className="object-cover rounded-md border-2 border-green-300"
                           />
                           <button
                             type="button"
@@ -915,11 +937,12 @@ export default function ChunaviRailayan() {
               {newImageFiles.length > 0 && (
                 <div className="mt-3 grid grid-cols-5 gap-2">
                   {newImageFiles.map((file, index) => (
-                    <div key={index} className="relative group">
-                      <img
+                    <div key={index} className="relative group h-20">
+                      <Image
                         src={URL.createObjectURL(file)}
                         alt={`Preview ${index + 1}`}
-                        className="w-full h-20 object-cover rounded-md border-2 border-gray-200"
+                        fill
+                        className="object-cover rounded-md border-2 border-gray-200"
                       />
                       <button
                         type="button"

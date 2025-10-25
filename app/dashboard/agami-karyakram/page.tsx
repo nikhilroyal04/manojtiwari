@@ -62,6 +62,17 @@ export default function AgamiKaryakram() {
   const [editEvent, setEditEvent] = useState<Partial<Karyakram>>({});
   const [newImageFile, setNewImageFile] = useState<File | null>(null);
   const [editImageFile, setEditImageFile] = useState<File | null>(null);
+
+  // Format date to readable format
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    };
+    return date.toLocaleDateString('en-IN', options);
+  };
     const [newEvent, setNewEvent] = useState<Partial<Karyakram>>({
     title: '',
     description: '',
@@ -529,7 +540,7 @@ export default function AgamiKaryakram() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{new Date(event.date).toLocaleDateString()}</div>
+                      <div className="text-sm text-gray-900">{formatDate(event.date)}</div>
                       <div className="text-sm text-gray-500">{event.time}</div>
                     </td>
                     <td className="px-6 py-4">
@@ -599,7 +610,7 @@ export default function AgamiKaryakram() {
                                 </div>
                                 <div>
                                   <label className="text-sm font-medium text-gray-500">Date</label>
-                                  <p className="text-sm text-gray-900">{new Date(event.date).toLocaleDateString()}</p>
+                                  <p className="text-sm text-gray-900">{formatDate(event.date)}</p>
                                 </div>
                                 <div>
                                   <label className="text-sm font-medium text-gray-500">Time</label>

@@ -9,6 +9,7 @@
   --secondary: #138808;
   --accent: #000080;
   --light: #f8f8f8;
+  --destructive: #ff0000;
 }
 
 @theme inline {
@@ -22,6 +23,7 @@
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
   --color-light: var(--light);
+  --color-destructive: var(--destructive);
 }
 
 
